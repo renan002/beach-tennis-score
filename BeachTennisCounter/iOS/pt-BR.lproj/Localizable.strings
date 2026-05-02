@@ -1,0 +1,36 @@
+/* MatchListView */
+"Beach Tennis Score" = "Placar Beach Tennis";
+"Watch app not installed" = "Aplicativo do Watch não instalado";
+"No matches yet" = "Nenhuma partida ainda";
+"Open Beach Tennis Score on your Apple Watch to start a match" = "Abra o Placar Beach Tennis no seu Apple Watch para iniciar uma partida";
+
+/* MatchRowView */
+"Team %@ wins" = "Time %@ venceu";
+
+/* MatchDetailView */
+"Games" = "Games";
+"Game %lld" = "Set %lld";
+"Result" = "Resultado";
+"Details" = "Detalhes";
+"Score" = "Placar";
+"Winner" = "Vencedor";
+"Date" = "Data";
+"Duration" = "Duração";
+"Team %@" = "Time %@";
+"Match Details" = "Detalhes da Partida";
+
+/* SettingsView */
+"Team Colors" = "Cores das Equipes";
+"Team A" = "Time A (Nós)";
+"Team B" = "Time B (Eles)";
+"Appearance" = "Aparência";
+"Theme" = "Tema";
+"System" = "Sistema";
+"Light" = "Claro";
+"Dark" = "Escuro";
+"Settings" = "Configurações";
+"Done" = "Concluído";
+"Sport" = "Esporte";
+"Modality" = "Modalidade";
+"More modes coming soon" = "Mais modalidades em breve";
+"Multiple" = "Múltiplos";

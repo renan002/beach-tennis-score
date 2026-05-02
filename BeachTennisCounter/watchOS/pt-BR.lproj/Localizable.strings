@@ -1,0 +1,22 @@
+/* HomeView */
+"New Match" = "Nova Partida";
+
+/* ServeSelectionView */
+"Who serves first?" = "Quem saca primeiro?";
+"Team A" = "Time A (Nós)";
+"Team B" = "Time B (Eles)";
+
+/* ScoreView */
+"Sets" = "Sets";
+"Match Over!" = "Partida Encerrada!";
+"%@ wins" = "%@ venceu";
+"Done" = "Concluído";
+
+/* Cancel alert */
+"Cancel Match?" = "Cancelar Partida?";
+"End Match" = "Encerrar Partida";
+"Keep Playing" = "Continuar Jogando";
+
+/* MatchHistoryView */
+"History" = "Histórico";
+"Game %lld" = "Set %lld";

@@ -1,0 +1,42 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1024" y2="1024" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#FF9F50"/>
+      <stop offset="100%" stop-color="#C94A08"/>
+    </linearGradient>
+    <filter id="drop" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="12" stdDeviation="22" flood-color="#00000040"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+
+  <!-- Paddle — rotated -18deg, centred slightly left/down -->
+  <g transform="translate(480,580) rotate(-18)" filter="url(#drop)">
+    <!-- Head (rounded rect) -->
+    <rect x="-185" y="-290" width="370" height="320" rx="90" fill="white"/>
+    <!-- Holes: 3 cols × 3 rows -->
+    <circle cx="-105" cy="-210" r="26" fill="#D05010"/>
+    <circle cx="0"    cy="-210" r="26" fill="#D05010"/>
+    <circle cx="105"  cy="-210" r="26" fill="#D05010"/>
+    <circle cx="-105" cy="-115" r="26" fill="#D05010"/>
+    <circle cx="0"    cy="-115" r="26" fill="#D05010"/>
+    <circle cx="105"  cy="-115" r="26" fill="#D05010"/>
+    <circle cx="-105" cy="-20"  r="26" fill="#D05010"/>
+    <circle cx="0"    cy="-20"  r="26" fill="#D05010"/>
+    <circle cx="105"  cy="-20"  r="26" fill="#D05010"/>
+    <!-- Throat -->
+    <rect x="-52" y="30" width="104" height="44" rx="8" fill="white"/>
+    <!-- Handle -->
+    <rect x="-52" y="70" width="104" height="196" rx="52" fill="white"/>
+    <!-- Grip band -->
+    <rect x="-52" y="148" width="104" height="46" rx="6" fill="#FF9F50"/>
+  </g>
+
+  <!-- Ball — top-right -->
+  <circle cx="748" cy="234" r="100" fill="white" filter="url(#drop)"/>
+  <!-- Ball curve lines -->
+  <path d="M684,178 Q748,146 812,178" stroke="#FF9F50" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <path d="M672,258 Q748,292 824,258" stroke="#FF9F50" stroke-width="8" fill="none" stroke-linecap="round"/>
+</svg>
