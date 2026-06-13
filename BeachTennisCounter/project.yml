@@ -15,10 +15,22 @@ options:
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    MARKETING_VERSION: "0.1.1"
-    CURRENT_PROJECT_VERSION: "2"
+    MARKETING_VERSION: "0.1.2"
+    CURRENT_PROJECT_VERSION: "3"
 
 targets:
+  BeachTennisCounterTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Tests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.renan.beachtennis.tests
+    dependencies:
+      - target: BeachTennisCounter
+
   BeachTennisCounter:
     type: application
     platform: iOS
@@ -75,10 +87,13 @@ schemes:
       targets:
         BeachTennisCounter: all
         BeachTennisCounterWatch: all
+        BeachTennisCounterTests: [testing]
     run:
       config: Debug
     test:
       config: Debug
+      targets:
+        - BeachTennisCounterTests
     archive:
       config: Release
 
