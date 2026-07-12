@@ -8,6 +8,7 @@ final class WatchSessionManager: NSObject, ObservableObject {
 
     @Published var teamAColor: Color = .red
     @Published var teamBColor: Color = .blue
+    @Published var sportSetting: String = "beachTennis"
 
     private override init() {
         super.init()
@@ -24,10 +25,14 @@ final class WatchSessionManager: NSObject, ObservableObject {
         let payload = MatchResultPayload(
             setScoreA: state.setScoreA,
             setScoreB: state.setScoreB,
+            setsWonA: state.setsWonA,
+            setsWonB: state.setsWonB,
             winner: winner,
             duration: duration,
             date: Date(),
-            gameHistory: state.gameHistory
+            gameHistory: state.gameHistory,
+            setHistory: state.setHistory,
+            matchType: state.matchType
         )
         let dict = payload.toDictionary()
         if WCSession.default.isReachable {
@@ -39,9 +44,10 @@ final class WatchSessionManager: NSObject, ObservableObject {
         }
     }
 
-    private func applyColors(aHex: String?, bHex: String?) {
+    private func applyColors(aHex: String?, bHex: String?, sport: String?) {
         if let hex = aHex { teamAColor = Color(hex: hex) ?? .red }
         if let hex = bHex { teamBColor = Color(hex: hex) ?? .blue }
+        if let s = sport { sportSetting = s }
     }
 }
 
@@ -55,13 +61,15 @@ extension WatchSessionManager: WCSessionDelegate {
         guard !context.isEmpty else { return }
         let aHex = context[WatchMessageKey.teamAColor] as? String
         let bHex = context[WatchMessageKey.teamBColor] as? String
-        Task { @MainActor in applyColors(aHex: aHex, bHex: bHex) }
+        let sport = context[WatchMessageKey.sportSetting] as? String
+        Task { @MainActor in applyColors(aHex: aHex, bHex: bHex, sport: sport) }
     }
 
     nonisolated func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
         let aHex = applicationContext[WatchMessageKey.teamAColor] as? String
         let bHex = applicationContext[WatchMessageKey.teamBColor] as? String
-        Task { @MainActor in applyColors(aHex: aHex, bHex: bHex) }
+        let sport = applicationContext[WatchMessageKey.sportSetting] as? String
+        Task { @MainActor in applyColors(aHex: aHex, bHex: bHex, sport: sport) }
     }
 }
 

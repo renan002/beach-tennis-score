@@ -4,12 +4,17 @@ enum WatchMessageKey {
     static let type = "type"
     static let setScoreA = "setScoreA"
     static let setScoreB = "setScoreB"
+    static let setsWonA = "setsWonA"
+    static let setsWonB = "setsWonB"
     static let winner = "winner"
     static let duration = "duration"
     static let date = "date"
     static let teamAColor = "teamAColor"
     static let teamBColor = "teamBColor"
     static let gameHistory = "gameHistory"
+    static let setHistory = "setHistory"
+    static let matchType = "matchType"
+    static let sportSetting = "sportSetting"
 }
 
 enum WatchMessageType {
@@ -20,22 +25,32 @@ enum WatchMessageType {
 struct MatchResultPayload: Sendable {
     let setScoreA: Int
     let setScoreB: Int
+    let setsWonA: Int
+    let setsWonB: Int
     let winner: Team
     let duration: TimeInterval
     let date: Date
     let gameHistory: [GameRecord]
+    let setHistory: [SetRecord]
+    let matchType: MatchType
 
     func toDictionary() -> [String: Any] {
         var dict: [String: Any] = [
             WatchMessageKey.type: WatchMessageType.matchResult,
             WatchMessageKey.setScoreA: setScoreA,
             WatchMessageKey.setScoreB: setScoreB,
+            WatchMessageKey.setsWonA: setsWonA,
+            WatchMessageKey.setsWonB: setsWonB,
             WatchMessageKey.winner: winner.rawValue,
             WatchMessageKey.duration: duration,
-            WatchMessageKey.date: ISO8601DateFormatter().string(from: date)
+            WatchMessageKey.date: ISO8601DateFormatter().string(from: date),
+            WatchMessageKey.matchType: matchType.rawValue
         ]
         if let data = try? JSONEncoder().encode(gameHistory) {
             dict[WatchMessageKey.gameHistory] = data
+        }
+        if let data = try? JSONEncoder().encode(setHistory) {
+            dict[WatchMessageKey.setHistory] = data
         }
         return dict
     }
@@ -51,6 +66,12 @@ struct MatchResultPayload: Sendable {
             let date = ISO8601DateFormatter().date(from: dateStr)
         else { return nil }
 
+        let setsWonA = dict[WatchMessageKey.setsWonA] as? Int ?? 0
+        let setsWonB = dict[WatchMessageKey.setsWonB] as? Int ?? 0
+
+        let matchTypeRaw = dict[WatchMessageKey.matchType] as? String ?? "beachTennis"
+        let matchType = MatchType(rawValue: matchTypeRaw) ?? .beachTennis
+
         let gameHistory: [GameRecord]
         if let data = dict[WatchMessageKey.gameHistory] as? Data,
            let records = try? JSONDecoder().decode([GameRecord].self, from: data) {
@@ -59,7 +80,20 @@ struct MatchResultPayload: Sendable {
             gameHistory = []
         }
 
-        return MatchResultPayload(setScoreA: a, setScoreB: b, winner: winner,
-                                  duration: duration, date: date, gameHistory: gameHistory)
+        let setHistory: [SetRecord]
+        if let data = dict[WatchMessageKey.setHistory] as? Data,
+           let records = try? JSONDecoder().decode([SetRecord].self, from: data) {
+            setHistory = records
+        } else {
+            setHistory = []
+        }
+
+        return MatchResultPayload(
+            setScoreA: a, setScoreB: b,
+            setsWonA: setsWonA, setsWonB: setsWonB,
+            winner: winner, duration: duration, date: date,
+            gameHistory: gameHistory, setHistory: setHistory,
+            matchType: matchType
+        )
     }
 }

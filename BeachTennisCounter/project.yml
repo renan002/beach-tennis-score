@@ -1,8 +1,8 @@
 name: BeachTennisCounter
 options:
   deploymentTarget:
-    iOS: "18.0"
-    watchOS: "11.0"
+    iOS: "26.0"
+    watchOS: "26.0"
   bundleIdPrefix: com.renan.beachtennis
   createIntermediateGroups: true
   groupSortPosition: top
@@ -15,14 +15,26 @@ options:
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    MARKETING_VERSION: "0.1.1"
-    CURRENT_PROJECT_VERSION: "2"
+    MARKETING_VERSION: "0.1.2"
+    CURRENT_PROJECT_VERSION: "3"
 
 targets:
+  BeachTennisCounterTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: Tests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.renan.beachtennis.tests
+    dependencies:
+      - target: BeachTennisCounter
+
   BeachTennisCounter:
     type: application
     platform: iOS
-    deploymentTarget: "17.0"
+    deploymentTarget: "26.0"
     sources:
       - path: iOS
       - path: Shared
@@ -52,7 +64,7 @@ targets:
   BeachTennisCounterWatch:
     type: application
     platform: watchOS
-    deploymentTarget: "10.0"
+    deploymentTarget: "26.0"
     sources:
       - path: watchOS
       - path: Shared
@@ -75,10 +87,13 @@ schemes:
       targets:
         BeachTennisCounter: all
         BeachTennisCounterWatch: all
+        BeachTennisCounterTests: [testing]
     run:
       config: Debug
     test:
       config: Debug
+      targets:
+        - BeachTennisCounterTests
     archive:
       config: Release
 

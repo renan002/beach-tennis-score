@@ -11,6 +11,25 @@ enum Team: String, Codable, Sendable {
     }
 }
 
+enum MatchType: String, Codable, Sendable, CaseIterable {
+    case beachTennis = "beachTennis"
+    case tennis = "tennis"
+
+    var displayName: String {
+        switch self {
+        case .beachTennis: return "Beach Tennis"
+        case .tennis: return "Tennis"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .beachTennis: return "beach.umbrella"
+        case .tennis: return "tennis.racket"
+        }
+    }
+}
+
 enum PointScore: Int, Codable, Sendable, CaseIterable {
     case zero, fifteen, thirty, forty
 
@@ -39,17 +58,40 @@ struct GameRecord: Codable, Sendable {
     let setScoreB: Int
     let winner: Team
     let isTiebreak: Bool
-    var gameScoreDisplay: String?  // nil on records saved before this field was added
+    var gameScoreDisplay: String?
+}
+
+struct SetRecord: Codable, Sendable {
+    let setNumber: Int
+    let gamesA: Int
+    let gamesB: Int
+    let winner: Team
+    let isTiebreak: Bool
 }
 
 struct MatchState: Codable, Sendable {
+    var matchType: MatchType = .beachTennis
+
+    // Current set / beach tennis games
     var setScoreA: Int = 0
     var setScoreB: Int = 0
 
+    // Tennis: sets won
+    var setsWonA: Int = 0
+    var setsWonB: Int = 0
+    var setHistory: [SetRecord] = []
+
+    // Current game points
     var pointA: PointScore = .zero
     var pointB: PointScore = .zero
+
+    // Beach Tennis: golden point at deuce
     var isGoldenPoint: Bool = false
 
+    // Tennis: advantage at deuce (nil = deuce, .a/.b = has advantage)
+    var advantageTeam: Team? = nil
+
+    // Tiebreak
     var isTiebreak: Bool = false
     var tiebreakA: Int = 0
     var tiebreakB: Int = 0
@@ -67,6 +109,10 @@ struct MatchState: Codable, Sendable {
 
     func setScore(for team: Team) -> Int {
         team == .a ? setScoreA : setScoreB
+    }
+
+    func setsWon(for team: Team) -> Int {
+        team == .a ? setsWonA : setsWonB
     }
 
     func point(for team: Team) -> PointScore {

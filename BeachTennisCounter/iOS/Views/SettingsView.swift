@@ -8,46 +8,29 @@ private let colorOptions: [(name: String, hex: String, color: Color)] = [
     ("Purple", "9B59B6", Color(hex: "9B59B6")),
 ]
 
-private let sportSingles = ["Beach Tennis", "Tennis", "Padel"]
-
 struct SettingsView: View {
     @EnvironmentObject private var phoneSession: PhoneSessionManager
     @AppStorage("appTheme") private var appTheme: String = "system"
-    @AppStorage("selectedSport") private var selectedSport: String = "Beach Tennis"
+    @AppStorage("sportSetting") private var sportSetting: String = "beachTennis"
     @Environment(\.dismiss) private var dismiss
     @State private var originalColorA = ""
     @State private var originalColorB = ""
+    @State private var originalSport = ""
 
     var body: some View {
         NavigationStack {
             Form {
                 Section {
-                    Menu {
-                        Button { selectedSport = "Multiple" } label: {
-                            Label("Multiple", systemImage: selectedSport == "Multiple" ? "checkmark" : "")
-                        }
-                        Divider()
-                        ForEach(sportSingles, id: \.self) { sport in
-                            Button { selectedSport = sport } label: {
-                                Label(sport, systemImage: selectedSport == sport ? "checkmark" : "")
-                            }
-                        }
-                    } label: {
-                        HStack {
-                            Text("Modality")
-                            Spacer()
-                            Text(selectedSport)
-                                .foregroundStyle(.secondary)
-                        }
-                        .contentShape(Rectangle())
+                    Picker("Modality", selection: $sportSetting) {
+                        Text("Beach Tennis").tag("beachTennis")
+                        Text("Tennis").tag("tennis")
+                        Text("Multiple").tag("multiple")
                     }
-                    .foregroundStyle(.primary)
-                    .buttonStyle(.plain)
-                    .disabled(true)
+                    .pickerStyle(.menu)
                 } header: {
                     Text("Sport")
                 } footer: {
-                    Text("More modes coming soon")
+                    Text(sportSettingFooter)
                 }
 
                 Section("Team Colors") {
@@ -69,8 +52,12 @@ struct SettingsView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {
-                        if phoneSession.teamAColorHex != originalColorA || phoneSession.teamBColorHex != originalColorB {
-                            phoneSession.pushColorsToWatch()
+                        let colorsChanged = phoneSession.teamAColorHex != originalColorA
+                            || phoneSession.teamBColorHex != originalColorB
+                        let sportChanged = sportSetting != originalSport
+                        if colorsChanged || sportChanged {
+                            phoneSession.sportSetting = sportSetting
+                            phoneSession.pushSettingsToWatch()
                         }
                         dismiss()
                     }
@@ -80,6 +67,7 @@ struct SettingsView: View {
             .onAppear {
                 originalColorA = phoneSession.teamAColorHex
                 originalColorB = phoneSession.teamBColorHex
+                originalSport = sportSetting
             }
             .safeAreaInset(edge: .bottom) {
                 Text("Version \(appVersion)")
@@ -88,6 +76,14 @@ struct SettingsView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.bottom, 8)
             }
+        }
+    }
+
+    private var sportSettingFooter: String {
+        switch sportSetting {
+        case "tennis":    return "The Watch will always start a Tennis match."
+        case "multiple":  return "The Watch will ask which sport before each match."
+        default:          return "The Watch will always start a Beach Tennis match."
         }
     }
 

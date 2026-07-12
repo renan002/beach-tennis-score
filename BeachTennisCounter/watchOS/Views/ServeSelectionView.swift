@@ -3,6 +3,7 @@ import SwiftUI
 struct ServeSelectionView: View {
     @EnvironmentObject private var sessionManager: WatchSessionManager
     @Binding var isActive: Bool
+    let matchType: MatchType
     @State private var navigateToScore = false
     @State private var selectedServer: Team = .a
 
@@ -35,7 +36,7 @@ struct ServeSelectionView: View {
         }
         .navigationBarHidden(true)
         .navigationDestination(isPresented: $navigateToScore) {
-            ScoreView(initialServer: selectedServer, isActive: $isActive)
+            ScoreView(initialServer: selectedServer, matchType: matchType, isActive: $isActive)
         }
     }
 

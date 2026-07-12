@@ -9,6 +9,7 @@ final class PhoneSessionManager: NSObject, ObservableObject {
 
     @AppStorage("teamAColorHex") var teamAColorHex: String = "E74C3C"
     @AppStorage("teamBColorHex") var teamBColorHex: String = "5B8DEF"
+    @AppStorage("sportSetting") var sportSetting: String = "beachTennis"
 
     /// nil = session not yet activated (unknown); true/false = known state
     @Published private(set) var isWatchAppInstalled: Bool? = nil
@@ -32,7 +33,18 @@ final class PhoneSessionManager: NSObject, ObservableObject {
               WCSession.default.isWatchAppInstalled else { return }
         try? WCSession.default.updateApplicationContext([
             WatchMessageKey.teamAColor: teamAColorHex,
-            WatchMessageKey.teamBColor: teamBColorHex
+            WatchMessageKey.teamBColor: teamBColorHex,
+            WatchMessageKey.sportSetting: sportSetting
+        ])
+    }
+
+    func pushSettingsToWatch() {
+        guard WCSession.default.activationState == .activated,
+              WCSession.default.isWatchAppInstalled else { return }
+        try? WCSession.default.updateApplicationContext([
+            WatchMessageKey.teamAColor: teamAColorHex,
+            WatchMessageKey.teamBColor: teamBColorHex,
+            WatchMessageKey.sportSetting: sportSetting
         ])
     }
 }
@@ -71,14 +83,19 @@ extension PhoneSessionManager: WCSessionDelegate {
 
         Task { @MainActor in
             guard let context = modelContext else { return }
-            let historyData = (try? JSONEncoder().encode(payload.gameHistory)) ?? Data()
+            let gameData = (try? JSONEncoder().encode(payload.gameHistory)) ?? Data()
+            let setData = (try? JSONEncoder().encode(payload.setHistory)) ?? Data()
             let match = StoredMatch(
                 date: payload.date,
                 setScoreA: payload.setScoreA,
                 setScoreB: payload.setScoreB,
+                setsWonA: payload.setsWonA,
+                setsWonB: payload.setsWonB,
                 winner: payload.winner.rawValue,
                 duration: payload.duration,
-                gameHistoryData: historyData
+                gameHistoryData: gameData,
+                setHistoryData: setData,
+                matchTypeRaw: payload.matchType.rawValue
             )
             context.insert(match)
             try? context.save()

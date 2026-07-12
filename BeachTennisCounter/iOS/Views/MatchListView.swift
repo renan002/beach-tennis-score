@@ -3,8 +3,17 @@ import SwiftData
 
 struct MatchListView: View {
     @EnvironmentObject private var phoneSession: PhoneSessionManager
-    @Query(sort: \StoredMatch.date, order: .reverse) private var matches: [StoredMatch]
+    @Query(sort: \StoredMatch.date, order: .reverse) private var allMatches: [StoredMatch]
     @State private var showSettings = false
+    @State private var filter: String = "all"
+
+    private var matches: [StoredMatch] {
+        switch filter {
+        case "beachTennis": return allMatches.filter { $0.matchTypeRaw == "beachTennis" }
+        case "tennis":      return allMatches.filter { $0.matchTypeRaw == "tennis" }
+        default:            return allMatches
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -21,8 +30,11 @@ struct MatchListView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .navigationTitle("Beach Tennis Score")
+            .navigationTitle("Score Counter")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    filterPicker
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showSettings = true
@@ -35,6 +47,35 @@ struct MatchListView: View {
                 SettingsView()
                     .environmentObject(phoneSession)
             }
+        }
+    }
+
+    private var filterPicker: some View {
+        Menu {
+            Button { filter = "all" } label: {
+                Label("All", systemImage: filter == "all" ? "checkmark" : "")
+            }
+            Divider()
+            Button { filter = "beachTennis" } label: {
+                Label("Beach Tennis", systemImage: filter == "beachTennis" ? "checkmark" : "")
+            }
+            Button { filter = "tennis" } label: {
+                Label("Tennis", systemImage: filter == "tennis" ? "checkmark" : "")
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: "line.3.horizontal.decrease.circle")
+                Text(filterLabel)
+                    .font(.subheadline)
+            }
+        }
+    }
+
+    private var filterLabel: String {
+        switch filter {
+        case "beachTennis": return "Beach Tennis"
+        case "tennis":      return "Tennis"
+        default:            return "All"
         }
     }
 
@@ -66,7 +107,7 @@ struct MatchListView: View {
             Text("No matches yet")
                 .font(.title3)
                 .foregroundColor(.secondary)
-            Text("Open Beach Tennis Score on your Apple Watch to start a match")
+            Text("Open the app on your Apple Watch to start a match")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -90,9 +131,12 @@ struct MatchRowView: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text(match.date.formatted(date: .abbreviated, time: .shortened))
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                HStack(spacing: 6) {
+                    sportBadge
+                    Text(match.date.formatted(date: .abbreviated, time: .shortened))
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
                 Text("A \(match.scoreDisplay) B")
                     .font(.headline)
             }
@@ -102,6 +146,19 @@ struct MatchRowView: View {
             winnerBadge
         }
         .padding(.vertical, 4)
+    }
+
+    private var sportBadge: some View {
+        Text(match.matchType == .tennis ? "Tennis" : "Beach")
+            .font(.caption2.bold())
+            .foregroundColor(match.matchType == .tennis ? .green : .orange)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(
+                Capsule().fill(
+                    (match.matchType == .tennis ? Color.green : Color.orange).opacity(0.15)
+                )
+            )
     }
 
     private var winnerBadge: some View {
