@@ -7,27 +7,51 @@ final class StoredMatch {
     var date: Date
     var setScoreA: Int
     var setScoreB: Int
+    var setsWonA: Int
+    var setsWonB: Int
     var winner: String
     var duration: TimeInterval
     var gameHistoryData: Data = Data()
+    var setHistoryData: Data = Data()
+    var matchTypeRaw: String = "beachTennis"
 
-    init(id: UUID = UUID(), date: Date, setScoreA: Int, setScoreB: Int, winner: String, duration: TimeInterval, gameHistoryData: Data = Data()) {
+    init(
+        id: UUID = UUID(),
+        date: Date,
+        setScoreA: Int,
+        setScoreB: Int,
+        setsWonA: Int = 0,
+        setsWonB: Int = 0,
+        winner: String,
+        duration: TimeInterval,
+        gameHistoryData: Data = Data(),
+        setHistoryData: Data = Data(),
+        matchTypeRaw: String = "beachTennis"
+    ) {
         self.id = id
         self.date = date
         self.setScoreA = setScoreA
         self.setScoreB = setScoreB
+        self.setsWonA = setsWonA
+        self.setsWonB = setsWonB
         self.winner = winner
         self.duration = duration
         self.gameHistoryData = gameHistoryData
+        self.setHistoryData = setHistoryData
+        self.matchTypeRaw = matchTypeRaw
     }
 
-    var gameHistory: [GameRecord] {
-        (try? JSONDecoder().decode([GameRecord].self, from: gameHistoryData)) ?? []
-    }
-
+    var matchType: MatchType { MatchType(rawValue: matchTypeRaw) ?? .beachTennis }
+    var gameHistory: [GameRecord] { (try? JSONDecoder().decode([GameRecord].self, from: gameHistoryData)) ?? [] }
+    var setHistory: [SetRecord] { (try? JSONDecoder().decode([SetRecord].self, from: setHistoryData)) ?? [] }
     var winnerTeam: Team? { Team(rawValue: winner) }
 
-    var scoreDisplay: String { "\(setScoreA) – \(setScoreB)" }
+    var scoreDisplay: String {
+        if matchType == .tennis && (setsWonA > 0 || setsWonB > 0) {
+            return "\(setsWonA) – \(setsWonB)"
+        }
+        return "\(setScoreA) – \(setScoreB)"
+    }
 
     var durationDisplay: String {
         let minutes = Int(duration) / 60

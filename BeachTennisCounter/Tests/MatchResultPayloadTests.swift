@@ -5,13 +5,18 @@ final class MatchResultPayloadTests: XCTestCase {
 
     private func makePayload(
         setScoreA: Int = 6, setScoreB: Int = 3,
+        setsWonA: Int = 0, setsWonB: Int = 0,
         winner: Team = .a, duration: TimeInterval = 3600,
         date: Date = Date(timeIntervalSince1970: 1_000_000),
-        gameHistory: [GameRecord] = []
+        gameHistory: [GameRecord] = [],
+        setHistory: [SetRecord] = [],
+        matchType: MatchType = .beachTennis
     ) -> MatchResultPayload {
         MatchResultPayload(setScoreA: setScoreA, setScoreB: setScoreB,
+                           setsWonA: setsWonA, setsWonB: setsWonB,
                            winner: winner, duration: duration,
-                           date: date, gameHistory: gameHistory)
+                           date: date, gameHistory: gameHistory,
+                           setHistory: setHistory, matchType: matchType)
     }
 
     // MARK: - Round-trip

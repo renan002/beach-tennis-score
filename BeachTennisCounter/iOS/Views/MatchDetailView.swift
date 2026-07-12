@@ -7,6 +7,14 @@ struct MatchDetailView: View {
         List {
             Section("Result") {
                 HStack {
+                    Text("Sport")
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text(match.matchType.displayName)
+                        .font(.headline)
+                        .foregroundColor(match.matchType == .tennis ? .green : .orange)
+                }
+                HStack {
                     Text("Score")
                         .foregroundColor(.secondary)
                     Spacer()
@@ -38,6 +46,15 @@ struct MatchDetailView: View {
                 }
             }
 
+            let sets = match.setHistory
+            if !sets.isEmpty {
+                Section("Sets") {
+                    ForEach(sets, id: \.setNumber) { record in
+                        SetRecordRow(record: record)
+                    }
+                }
+            }
+
             let history = match.gameHistory
             if !history.isEmpty {
                 Section("Games") {
@@ -49,6 +66,37 @@ struct MatchDetailView: View {
         }
         .navigationTitle("Match Details")
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+private struct SetRecordRow: View {
+    let record: SetRecord
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Set \(record.setNumber)")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                if record.isTiebreak {
+                    Text("Tiebreak")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                }
+            }
+
+            Spacer()
+
+            Text("\(record.gamesA) – \(record.gamesB)")
+                .font(.subheadline.bold())
+                .monospacedDigit()
+
+            Text(record.winner == .a ? "A" : "B")
+                .font(.caption.bold())
+                .foregroundStyle(.white)
+                .frame(width: 22, height: 22)
+                .background(Circle().fill(record.winner == .a ? Color(hex: "E74C3C") : Color(hex: "5B8DEF")))
+        }
     }
 }
 

@@ -1,8 +1,8 @@
 name: BeachTennisCounter
 options:
   deploymentTarget:
-    iOS: "18.0"
-    watchOS: "11.0"
+    iOS: "26.0"
+    watchOS: "26.0"
   bundleIdPrefix: com.renan.beachtennis
   createIntermediateGroups: true
   groupSortPosition: top
@@ -22,7 +22,7 @@ targets:
   BeachTennisCounterTests:
     type: bundle.unit-test
     platform: iOS
-    deploymentTarget: "17.0"
+    deploymentTarget: "26.0"
     sources:
       - path: Tests
     settings:
@@ -34,7 +34,7 @@ targets:
   BeachTennisCounter:
     type: application
     platform: iOS
-    deploymentTarget: "17.0"
+    deploymentTarget: "26.0"
     sources:
       - path: iOS
       - path: Shared
@@ -64,7 +64,7 @@ targets:
   BeachTennisCounterWatch:
     type: application
     platform: watchOS
-    deploymentTarget: "10.0"
+    deploymentTarget: "26.0"
     sources:
       - path: watchOS
       - path: Shared
