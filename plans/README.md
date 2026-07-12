@@ -12,7 +12,7 @@ update your row when done.
 
 | Plan | Title | Priority | Effort | Depends on | Issue | Status |
 |------|-------|----------|--------|------------|-------|--------|
-| 001 | Establish a CI + local test verification baseline | P1 | S | — | [#2](https://github.com/renan002/beach-tennis-score/issues/2) | TODO |
+| 001 | Establish a CI + local test verification baseline | P1 | S | — | [#2](https://github.com/renan002/beach-tennis-score/issues/2) | DONE |
 | 002 | Add full unit-test coverage for Tennis-mode scoring | P1 | M | 001 | [#3](https://github.com/renan002/beach-tennis-score/issues/3) | TODO |
 | 003 | Deduplicate match results with an idempotency key | P2 | M | 001 | [#4](https://github.com/renan002/beach-tennis-score/issues/4) | TODO |
 | 004 | Stop silently dropping match results when the session isn't activated | P2 | S | 003 | [#4](https://github.com/renan002/beach-tennis-score/issues/4) | TODO |

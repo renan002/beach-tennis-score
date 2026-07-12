@@ -13,8 +13,14 @@ cd BeachTennisCounter && xcodegen generate
 
 **Build watchOS target from CLI:**
 ```bash
-xcodebuild -target BeachTennisCounterWatch -sdk watchsimulator26.4
+xcodebuild -target BeachTennisCounterWatch -sdk watchsimulator
 ```
+
+**Run unit tests from CLI:**
+```bash
+xcodebuild test -project BeachTennisCounter.xcodeproj -scheme BeachTennisCounter -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO
+```
+Substitute any available device from `xcrun simctl list devices available` if `iPhone 17` is absent. The same tests run in CI on every push/PR (`.github/workflows/ci.yml`), which is the authoritative gate.
 
 **Combined iOS + watchOS build:** Use Xcode.app. CLI combined builds are blocked by a CoreSimulator version mismatch (1051.49 vs 1051.50) in this environment.
 

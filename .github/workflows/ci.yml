@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_26.app || sudo xcode-select -s "$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)"
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          xcrun simctl list devices available | grep -i iphone | head -5
+
+      - name: Build watchOS target
+        working-directory: BeachTennisCounter
+        run: |
+          xcodebuild -target BeachTennisCounterWatch -sdk watchsimulator build \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Run unit tests
+        working-directory: BeachTennisCounter
+        run: |
+          DEVICE=$(xcrun simctl list devices available | grep -oE 'iPhone [^(]+' | head -1 | xargs)
+          xcodebuild test -project BeachTennisCounter.xcodeproj \
+            -scheme BeachTennisCounter \
+            -destination "platform=iOS Simulator,name=${DEVICE}" \
+            CODE_SIGNING_ALLOWED=NO

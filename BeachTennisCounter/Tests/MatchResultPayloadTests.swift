@@ -33,7 +33,8 @@ final class MatchResultPayloadTests: XCTestCase {
     func test_roundtrip_duration() {
         let payload = makePayload(duration: 4567.89)
         let decoded = MatchResultPayload.from(payload.toDictionary())
-        XCTAssertEqual(decoded?.duration, 4567.89, accuracy: 0.001)
+        XCTAssertNotNil(decoded)
+        XCTAssertEqual(decoded!.duration, 4567.89, accuracy: 0.001)
     }
 
     func test_roundtrip_date() {
