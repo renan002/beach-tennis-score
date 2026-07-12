@@ -72,6 +72,26 @@ iOS/             ← iPhone companion (history + settings)
 - **iOS only:** `Color.toHex()` uses `UIColor` — lives in `PhoneSessionManager.swift`.
 - **watchOS only:** `Color(hex:)` decode-only — lives in `WatchSessionManager.swift`. No `toHex()` on watch.
 
+## Git workflow
+
+### Branches
+
+- New feature branches are always cut from `develop`, never from `main` or another feature branch.
+- Create the branch before writing any code for that feature — don't develop first and branch later.
+- Name branches `<type>/<short-description>`, e.g. `feat/serve-rotation-fix`, `bug/watch-sync-crash`, matching the commit `<type>` below.
+
+### Commits
+
+Use Conventional Commits: `<type>(<optional scope>): <description>`.
+
+Types: `feat` (new feature), `fix` (bug fix), `chore` (tooling/maintenance, no source behavior change), `docs` (documentation only), `refactor` (code change that neither fixes a bug nor adds a feature), `test` (adding/correcting tests), `ci` (CI/CD config).
+
+### Pull requests
+
+- PRs target `develop`, not `main`.
+- PR title matches the title of the GitHub issue the PR resolves.
+- PR body follows `.github/PULL_REQUEST_TEMPLATE.md`.
+
 ## Agent skills
 
 ### Issue tracker
