@@ -28,16 +28,6 @@ final class PhoneSessionManager: NSObject, ObservableObject {
         }
     }
 
-    func pushColorsToWatch() {
-        guard WCSession.default.activationState == .activated,
-              WCSession.default.isWatchAppInstalled else { return }
-        try? WCSession.default.updateApplicationContext([
-            WatchMessageKey.teamAColor: teamAColorHex,
-            WatchMessageKey.teamBColor: teamBColorHex,
-            WatchMessageKey.sportSetting: sportSetting
-        ])
-    }
-
     func pushSettingsToWatch() {
         guard WCSession.default.activationState == .activated,
               WCSession.default.isWatchAppInstalled else { return }

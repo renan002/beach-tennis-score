@@ -16,7 +16,7 @@ update your row when done.
 | 002 | Add full unit-test coverage for Tennis-mode scoring | P1 | M | 001 | [#3](https://github.com/renan002/beach-tennis-score/issues/3) | DONE |
 | 003 | Deduplicate match results with an idempotency key | P2 | M | 001 | [#4](https://github.com/renan002/beach-tennis-score/issues/4) | DONE |
 | 004 | Stop silently dropping match results when the session isn't activated | P2 | S | 003 | [#4](https://github.com/renan002/beach-tennis-score/issues/4) | DONE |
-| 005 | Sync settings to the watch on any dismissal; remove dead `pushColorsToWatch` | P2 | S | — (soft: 001) | [#5](https://github.com/renan002/beach-tennis-score/issues/5) | TODO |
+| 005 | Sync settings to the watch on any dismissal; remove dead `pushColorsToWatch` | P2 | S | — (soft: 001) | [#5](https://github.com/renan002/beach-tennis-score/issues/5) | DONE |
 | 006 | Make the beach tennis super tiebreak win-by-2 | P3 | S | 001, 002 | [#6](https://github.com/renan002/beach-tennis-score/issues/6) | TODO |
 | 007 | Back up the SwiftData store on recovery instead of deleting it | P2 | S | — (soft: 001) | [#7](https://github.com/renan002/beach-tennis-score/issues/7) | TODO |
 | 008 | Make history/detail views use the configured team colors | P3 | S | — (soft: 001) | [#8](https://github.com/renan002/beach-tennis-score/issues/8) | TODO |

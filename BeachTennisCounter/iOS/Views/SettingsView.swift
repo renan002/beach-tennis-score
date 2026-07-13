@@ -52,13 +52,7 @@ struct SettingsView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {
-                        let colorsChanged = phoneSession.teamAColorHex != originalColorA
-                            || phoneSession.teamBColorHex != originalColorB
-                        let sportChanged = sportSetting != originalSport
-                        if colorsChanged || sportChanged {
-                            phoneSession.sportSetting = sportSetting
-                            phoneSession.pushSettingsToWatch()
-                        }
+                        syncToWatchIfChanged()
                         dismiss()
                     }
                 }
@@ -68,6 +62,9 @@ struct SettingsView: View {
                 originalColorA = phoneSession.teamAColorHex
                 originalColorB = phoneSession.teamBColorHex
                 originalSport = sportSetting
+            }
+            .onDisappear {
+                syncToWatchIfChanged()
             }
             .safeAreaInset(edge: .bottom) {
                 Text("Version \(appVersion)")
@@ -124,5 +121,17 @@ struct SettingsView: View {
             }
         }
         .padding(.vertical, 4)
+    }
+
+    private func syncToWatchIfChanged() {
+        let colorsChanged = phoneSession.teamAColorHex != originalColorA
+            || phoneSession.teamBColorHex != originalColorB
+        let sportChanged = sportSetting != originalSport
+        guard colorsChanged || sportChanged else { return }
+        phoneSession.pushSettingsToWatch()
+        // Refresh baselines so a later onDisappear doesn't double-push.
+        originalColorA = phoneSession.teamAColorHex
+        originalColorB = phoneSession.teamBColorHex
+        originalSport = sportSetting
     }
 }

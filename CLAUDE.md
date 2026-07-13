@@ -52,7 +52,7 @@ iOS/             ← iPhone companion (history + settings)
 
 - **Scoring:** `ScoreView` holds `MatchState` + a `[MatchState]` undo stack. Every tap calls `ScoreEngine.awardPoint(to:state:)` — no mutation outside `ScoreEngine`.
 - **Watch → iPhone:** At match end `WatchSessionManager.sendMatchResult(_:duration:)` calls `WCSession.transferUserInfo`. `PhoneSessionManager.session(_:didReceiveUserInfo:)` decodes via `MatchResultPayload.from(_:)` and inserts a `StoredMatch` into SwiftData.
-- **iPhone → Watch (colors):** `PhoneSessionManager.pushColorsToWatch()` calls `WCSession.updateApplicationContext` with hex strings. `WatchSessionManager.session(_:didReceiveApplicationContext:)` reads them on the watch (extracts `String?` values *before* any `Task { @MainActor in }` to satisfy Swift 6 `Sendable` rules).
+- **iPhone → Watch (colors):** `PhoneSessionManager.pushSettingsToWatch()` calls `WCSession.updateApplicationContext` with hex strings. `WatchSessionManager.session(_:didReceiveApplicationContext:)` reads them on the watch (extracts `String?` values *before* any `Task { @MainActor in }` to satisfy Swift 6 `Sendable` rules).
 
 ### Beach Tennis scoring rules (encoded in ScoreEngine)
 
