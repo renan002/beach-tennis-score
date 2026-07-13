@@ -8,6 +8,9 @@ final class WatchSessionManager: NSObject, ObservableObject {
 
     @Published var teamAColor: Color = .red
     @Published var teamBColor: Color = .blue
+    @Published var sportSetting: String = "beachTennis"
+
+    private nonisolated static let pendingResultKey = "pendingMatchResult"
 
     private override init() {
         super.init()
@@ -18,17 +21,32 @@ final class WatchSessionManager: NSObject, ObservableObject {
     }
 
     func sendMatchResult(_ state: MatchState, duration: TimeInterval) {
-        guard WCSession.default.activationState == .activated,
-              let winner = state.winner else { return }
+        guard let winner = state.winner else { return }
 
         let payload = MatchResultPayload(
+            matchId: UUID(),
             setScoreA: state.setScoreA,
             setScoreB: state.setScoreB,
+            setsWonA: state.setsWonA,
+            setsWonB: state.setsWonB,
             winner: winner,
             duration: duration,
             date: Date(),
-            gameHistory: state.gameHistory
+            gameHistory: state.gameHistory,
+            setHistory: state.setHistory,
+            matchType: state.matchType
         )
+
+        guard WCSession.default.activationState == .activated else {
+            if let data = try? JSONEncoder().encode(payload) {
+                UserDefaults.standard.set(data, forKey: Self.pendingResultKey)
+            }
+            return
+        }
+        deliver(payload)
+    }
+
+    private func deliver(_ payload: MatchResultPayload) {
         let dict = payload.toDictionary()
         if WCSession.default.isReachable {
             WCSession.default.sendMessage(dict, replyHandler: nil) { _ in
@@ -39,9 +57,10 @@ final class WatchSessionManager: NSObject, ObservableObject {
         }
     }
 
-    private func applyColors(aHex: String?, bHex: String?) {
+    private func applyColors(aHex: String?, bHex: String?, sport: String?) {
         if let hex = aHex { teamAColor = Color(hex: hex) ?? .red }
         if let hex = bHex { teamBColor = Color(hex: hex) ?? .blue }
+        if let s = sport { sportSetting = s }
     }
 }
 
@@ -51,17 +70,26 @@ extension WatchSessionManager: WCSessionDelegate {
         activationDidCompleteWith activationState: WCSessionActivationState,
         error: (any Error)?
     ) {
+        if activationState == .activated,
+           let data = UserDefaults.standard.data(forKey: Self.pendingResultKey),
+           let payload = try? JSONDecoder().decode(MatchResultPayload.self, from: data) {
+            UserDefaults.standard.removeObject(forKey: Self.pendingResultKey)
+            WCSession.default.transferUserInfo(payload.toDictionary())
+        }
+
         let context = session.receivedApplicationContext
         guard !context.isEmpty else { return }
         let aHex = context[WatchMessageKey.teamAColor] as? String
         let bHex = context[WatchMessageKey.teamBColor] as? String
-        Task { @MainActor in applyColors(aHex: aHex, bHex: bHex) }
+        let sport = context[WatchMessageKey.sportSetting] as? String
+        Task { @MainActor in applyColors(aHex: aHex, bHex: bHex, sport: sport) }
     }
 
     nonisolated func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
         let aHex = applicationContext[WatchMessageKey.teamAColor] as? String
         let bHex = applicationContext[WatchMessageKey.teamBColor] as? String
-        Task { @MainActor in applyColors(aHex: aHex, bHex: bHex) }
+        let sport = applicationContext[WatchMessageKey.sportSetting] as? String
+        Task { @MainActor in applyColors(aHex: aHex, bHex: bHex, sport: sport) }
     }
 }
 

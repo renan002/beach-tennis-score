@@ -19,9 +19,12 @@ struct BeachTennisApp: App {
         do {
             return try ModelContainer(for: StoredMatch.self)
         } catch {
-            // Store is unreadable (e.g. schema migration failed). Delete it and start fresh.
-            let url = URL.applicationSupportDirectory.appending(path: "default.store")
-            try? FileManager.default.removeItem(at: url)
+            // Store is unreadable (e.g. schema migration failed). Delete all SQLite files and start fresh.
+            let base = URL.applicationSupportDirectory.appending(path: "default.store")
+            for suffix in ["", "-shm", "-wal"] {
+                let url = base.deletingLastPathComponent().appending(path: "default.store\(suffix)")
+                try? FileManager.default.removeItem(at: url)
+            }
             do {
                 return try ModelContainer(for: StoredMatch.self)
             } catch {
