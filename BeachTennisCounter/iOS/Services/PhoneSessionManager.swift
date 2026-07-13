@@ -73,9 +73,15 @@ extension PhoneSessionManager: WCSessionDelegate {
 
         Task { @MainActor in
             guard let context = modelContext else { return }
+            let matchId = payload.matchId
+            let existing = FetchDescriptor<StoredMatch>(
+                predicate: #Predicate { $0.id == matchId }
+            )
+            if let count = try? context.fetchCount(existing), count > 0 { return }
             let gameData = (try? JSONEncoder().encode(payload.gameHistory)) ?? Data()
             let setData = (try? JSONEncoder().encode(payload.setHistory)) ?? Data()
             let match = StoredMatch(
+                id: payload.matchId,
                 date: payload.date,
                 setScoreA: payload.setScoreA,
                 setScoreB: payload.setScoreB,
