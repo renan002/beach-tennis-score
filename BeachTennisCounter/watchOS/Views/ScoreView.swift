@@ -15,17 +15,21 @@ struct ScoreView: View {
     @State private var showHistory = false
     @State private var showCancelAlert = false
 
-    init(initialServer: Team, matchType: MatchType, isActive: Binding<Bool>) {
+    init(initialServer: Team, matchType: MatchType, restoredState: MatchState? = nil, isActive: Binding<Bool>) {
         self.initialServer = initialServer
-        self.matchType = matchType
+        self.matchType = restoredState?.matchType ?? matchType
         self._isActive = isActive
-        var s = MatchState()
-        s.matchType = matchType
-        s.servingTeam = initialServer
-        s.initialServer = initialServer
-        s.tiebreakFirstServer = initialServer
-        s.matchStartDate = Date()
-        _state = State(initialValue: s)
+        if let restored = restoredState {
+            _state = State(initialValue: restored)
+        } else {
+            var s = MatchState()
+            s.matchType = matchType
+            s.servingTeam = initialServer
+            s.initialServer = initialServer
+            s.tiebreakFirstServer = initialServer
+            s.matchStartDate = Date()
+            _state = State(initialValue: s)
+        }
     }
 
     var body: some View {
@@ -39,6 +43,9 @@ struct ScoreView: View {
             }
         }
         .navigationBarHidden(true)
+        .onAppear {
+            MatchPersistence.save(state)
+        }
         .onChange(of: state.isMatchOver) { _, isOver in
             guard isOver else { return }
             showMatchOver = true
@@ -49,7 +56,10 @@ struct ScoreView: View {
                 .environmentObject(sessionManager)
         }
         .alert("Cancel Match?", isPresented: $showCancelAlert) {
-            Button("End Match", role: .destructive) { isActive = false }
+            Button("End Match", role: .destructive) {
+                MatchPersistence.clear()
+                isActive = false
+            }
             Button("Keep Playing", role: .cancel) {}
         }
     }
@@ -257,12 +267,14 @@ struct ScoreView: View {
     private func awardPoint(to team: Team) {
         history.append(state)
         ScoreEngine.awardPoint(to: team, state: &state)
+        MatchPersistence.save(state)
         WKInterfaceDevice.current().play(.click)
     }
 
     private func undoLast() {
         guard let previous = history.popLast() else { return }
         state = previous
+        MatchPersistence.save(state)
         WKInterfaceDevice.current().play(.click)
     }
 }
