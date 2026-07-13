@@ -99,7 +99,7 @@ enum ScoreEngine {
         if team == .a { state.tiebreakA += 1 } else { state.tiebreakB += 1 }
         state.tiebreakPointsPlayed += 1
 
-        if state.tiebreakA >= 7 {
+        if state.tiebreakA >= 7 && (state.tiebreakA - state.tiebreakB) >= 2 {
             let display = "\(state.tiebreakA)–\(state.tiebreakB)"
             state.setScoreA += 1
             state.gameHistory.append(GameRecord(
@@ -113,7 +113,7 @@ enum ScoreEngine {
             endMatch(winner: .a, state: &state)
             return
         }
-        if state.tiebreakB >= 7 {
+        if state.tiebreakB >= 7 && (state.tiebreakB - state.tiebreakA) >= 2 {
             let display = "\(state.tiebreakA)–\(state.tiebreakB)"
             state.setScoreB += 1
             state.gameHistory.append(GameRecord(

@@ -59,7 +59,7 @@ iOS/             ← iPhone companion (history + settings)
 - Match = first to 6 games (the UI calls them "sets")
 - Points per game: 0 → 15 → 30 → 40 → win; at 40-40 → golden point (sudden death)
 - At 5-5 games: first to 7 wins (no tiebreak, normal scoring continues)
-- At 6-6 games: super tiebreak to 7 points; serve rotation `block = (pointsPlayed-1)/2; block%2==0 → other team serves`
+- At 6-6 games: super tiebreak to 7 points, win by 2; serve rotation `block = (pointsPlayed-1)/2; block%2==0 → other team serves`
 
 ### Swift 6 concurrency notes
 
