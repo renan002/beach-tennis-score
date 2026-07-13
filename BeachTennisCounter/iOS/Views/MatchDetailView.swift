@@ -70,6 +70,7 @@ struct MatchDetailView: View {
 }
 
 private struct SetRecordRow: View {
+    @EnvironmentObject private var phoneSession: PhoneSessionManager
     let record: SetRecord
 
     var body: some View {
@@ -95,12 +96,15 @@ private struct SetRecordRow: View {
                 .font(.caption.bold())
                 .foregroundStyle(.white)
                 .frame(width: 22, height: 22)
-                .background(Circle().fill(record.winner == .a ? Color(hex: "E74C3C") : Color(hex: "5B8DEF")))
+                .background(Circle().fill(record.winner == .a
+                    ? Color(hex: phoneSession.teamAColorHex)
+                    : Color(hex: phoneSession.teamBColorHex)))
         }
     }
 }
 
 private struct GameRecordRow: View {
+    @EnvironmentObject private var phoneSession: PhoneSessionManager
     let record: GameRecord
 
     var body: some View {
@@ -134,7 +138,9 @@ private struct GameRecordRow: View {
                     .font(.caption.bold())
                     .foregroundStyle(.white)
                     .frame(width: 22, height: 22)
-                    .background(Circle().fill(record.winner == .a ? Color(hex: "E74C3C") : Color(hex: "5B8DEF")))
+                    .background(Circle().fill(record.winner == .a
+                        ? Color(hex: phoneSession.teamAColorHex)
+                        : Color(hex: phoneSession.teamBColorHex)))
             }
         }
     }
