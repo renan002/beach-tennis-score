@@ -8,14 +8,17 @@
 
 /* Begin PBXBuildFile section */
 		01AC3D4C05C7004B7F076D9D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 559DA79145365F0EA4383EE1 /* InfoPlist.strings */; };
+		054EB5716E374A09AF656986 /* MatchPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038CBBD1CA1760963EFF6BE3 /* MatchPersistenceTests.swift */; };
 		1244A696FA2200BBC7DA5CBE /* ScoreEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67E5FFD85FDB63F1E4B704B7 /* ScoreEngine.swift */; };
 		1A8E705F463BAAC8D7B8BD49 /* WatchMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F815CA932C3F29E53938D4B /* WatchMessage.swift */; };
 		1C3E9BB2ECB15A30CA626AA3 /* ScoreEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29D3F1B882D2930CBA69F677 /* ScoreEngineTests.swift */; };
+		1ED46F5135D057D59564554E /* MatchPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21275F20964C30E0BE57431F /* MatchPersistence.swift */; };
 		220DD4BF5CD96FEF418D738C /* WatchMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F815CA932C3F29E53938D4B /* WatchMessage.swift */; };
 		29591432F72CE1EB4A9B60E3 /* WatchSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 737E5C4A27BD85CA551EB4C9 /* WatchSessionManager.swift */; };
 		2AF488F33CB68A4526B38325 /* PhoneSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2365A03997E1963FAE2FAFF3 /* PhoneSessionManager.swift */; };
 		2C908B4320388ACDAA67CAE4 /* MatchResultPayloadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADC3734F1362AB35FC860532 /* MatchResultPayloadTests.swift */; };
 		2F9C0112E5C196546694D0B8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 02192104EF03F8618E7F05D8 /* PrivacyInfo.xcprivacy */; };
+		338E5A754083D3F8C446DAC5 /* MatchPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21275F20964C30E0BE57431F /* MatchPersistence.swift */; };
 		35241BE0AF00D8DEF3997A7A /* MatchState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F51DDD9F7DDD920BA32478B6 /* MatchState.swift */; };
 		4947961FE0BFB634D9083982 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F607F579215BBD1758D83877 /* Assets.xcassets */; };
 		4C2319FAD9E54883D0B2A29D /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 01524542216A4D00FBAE3460 /* Localizable.strings */; };
@@ -75,10 +78,12 @@
 /* Begin PBXFileReference section */
 		01524542216A4D00FBAE3460 /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = "pt-BR.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		02192104EF03F8618E7F05D8 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		038CBBD1CA1760963EFF6BE3 /* MatchPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchPersistenceTests.swift; sourceTree = "<group>"; };
 		0973F4D84A6A7F8646D3F5D2 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		0C4F5BF1EE5C2D60E7F3EFD5 /* PointScoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointScoreTests.swift; sourceTree = "<group>"; };
 		1D2079D2D2B1621F0A22237B /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		1E6352B0F7598004C63192B3 /* BeachTennisCounter.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BeachTennisCounter.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		21275F20964C30E0BE57431F /* MatchPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchPersistence.swift; sourceTree = "<group>"; };
 		2365A03997E1963FAE2FAFF3 /* PhoneSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneSessionManager.swift; sourceTree = "<group>"; };
 		29D3F1B882D2930CBA69F677 /* ScoreEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreEngineTests.swift; sourceTree = "<group>"; };
 		559DA79145365F0EA4383EE1 /* InfoPlist.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = InfoPlist.strings; path = "pt-BR.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
@@ -160,6 +165,7 @@
 		50360E0C5A0705F9D8AF3D73 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				21275F20964C30E0BE57431F /* MatchPersistence.swift */,
 				F51DDD9F7DDD920BA32478B6 /* MatchState.swift */,
 				67E5FFD85FDB63F1E4B704B7 /* ScoreEngine.swift */,
 				9F815CA932C3F29E53938D4B /* WatchMessage.swift */,
@@ -170,6 +176,7 @@
 		5F957C97237297C37F2E6C16 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				038CBBD1CA1760963EFF6BE3 /* MatchPersistenceTests.swift */,
 				ADC3734F1362AB35FC860532 /* MatchResultPayloadTests.swift */,
 				0C4F5BF1EE5C2D60E7F3EFD5 /* PointScoreTests.swift */,
 				29D3F1B882D2930CBA69F677 /* ScoreEngineTests.swift */,
@@ -355,6 +362,7 @@
 				ACC0EB8738F873C95817CDCE /* BeachTennisWatchApp.swift in Sources */,
 				78CD36AAB531F9C8D9FE8DD4 /* HomeView.swift in Sources */,
 				93E5597DE2C32F79C230BBB7 /* MatchHistoryView.swift in Sources */,
+				338E5A754083D3F8C446DAC5 /* MatchPersistence.swift in Sources */,
 				35241BE0AF00D8DEF3997A7A /* MatchState.swift in Sources */,
 				78C92880128A099B24A7CD48 /* MatchTypeSelectionView.swift in Sources */,
 				1244A696FA2200BBC7DA5CBE /* ScoreEngine.swift in Sources */,
@@ -372,6 +380,7 @@
 				E780DAF383027DBE5F3111EF /* BeachTennisApp.swift in Sources */,
 				A36E17FF54692A7E34AF41AE /* MatchDetailView.swift in Sources */,
 				F457D0ECDD2D6D57DF573518 /* MatchListView.swift in Sources */,
+				1ED46F5135D057D59564554E /* MatchPersistence.swift in Sources */,
 				989396E3CA7A30F5747C2840 /* MatchState.swift in Sources */,
 				2AF488F33CB68A4526B38325 /* PhoneSessionManager.swift in Sources */,
 				7B9000E3AD16732A147CB65B /* ScoreEngine.swift in Sources */,
@@ -385,6 +394,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				054EB5716E374A09AF656986 /* MatchPersistenceTests.swift in Sources */,
 				2C908B4320388ACDAA67CAE4 /* MatchResultPayloadTests.swift in Sources */,
 				77AE42A898482A62ECC20CA6 /* PointScoreTests.swift in Sources */,
 				1C3E9BB2ECB15A30CA626AA3 /* ScoreEngineTests.swift in Sources */,
