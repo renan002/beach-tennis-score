@@ -44,31 +44,14 @@ jobs:
       GH_TOKEN: ${{ secrets.RELEASE_PAT }}
       VERSION: ${{ github.event.pull_request.head.ref }}
     steps:
-      - name: Checkout main
-        uses: actions/checkout@v7
-        with:
-          ref: main
-          fetch-depth: 0
-          token: ${{ secrets.RELEASE_PAT }}
-
       - name: Strip release/ prefix from version
         run: echo "VERSION=${VERSION#release/}" >> "$GITHUB_ENV"
 
-      - name: Configure git identity
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Create merge-back branch
-        run: |
-          git checkout -b "merge-back/$VERSION"
-          git push origin "merge-back/$VERSION"
-
-      - name: Open merge-back PR
+      - name: Open main to develop merge-back PR
         run: |
           gh pr create \
             --repo "$GITHUB_REPOSITORY" \
             --base develop \
-            --head "merge-back/$VERSION" \
+            --head main \
             --title "chore(release): merge $VERSION back into develop" \
             --body "Auto-generated after release $VERSION shipped to main. Syncs the version bump back into develop."
