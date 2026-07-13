@@ -43,6 +43,8 @@ targets:
       properties:
         CFBundleName: BeachTennisCounter
         CFBundleDisplayName: Beach Tennis Score
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         UILaunchScreen:
           UIColorName: ""
         UISupportedInterfaceOrientations:
@@ -73,6 +75,8 @@ targets:
       properties:
         CFBundleName: BeachTennisWatch
         CFBundleDisplayName: Beach Tennis Score
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         WKCompanionAppBundleIdentifier: com.renan.beachtennis
         WKApplication: true
     settings:
