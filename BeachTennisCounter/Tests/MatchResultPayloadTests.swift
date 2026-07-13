@@ -4,6 +4,7 @@ import XCTest
 final class MatchResultPayloadTests: XCTestCase {
 
     private func makePayload(
+        matchId: UUID = UUID(),
         setScoreA: Int = 6, setScoreB: Int = 3,
         setsWonA: Int = 0, setsWonB: Int = 0,
         winner: Team = .a, duration: TimeInterval = 3600,
@@ -12,7 +13,8 @@ final class MatchResultPayloadTests: XCTestCase {
         setHistory: [SetRecord] = [],
         matchType: MatchType = .beachTennis
     ) -> MatchResultPayload {
-        MatchResultPayload(setScoreA: setScoreA, setScoreB: setScoreB,
+        MatchResultPayload(matchId: matchId,
+                           setScoreA: setScoreA, setScoreB: setScoreB,
                            setsWonA: setsWonA, setsWonB: setsWonB,
                            winner: winner, duration: duration,
                            date: date, gameHistory: gameHistory,
@@ -69,6 +71,37 @@ final class MatchResultPayloadTests: XCTestCase {
         let payload = makePayload(gameHistory: [])
         let decoded = MatchResultPayload.from(payload.toDictionary())
         XCTAssertEqual(decoded?.gameHistory.count, 0)
+    }
+
+    func test_roundtrip_matchId() {
+        let payload = makePayload()
+        let decoded = MatchResultPayload.from(payload.toDictionary())
+        XCTAssertEqual(decoded?.matchId, payload.matchId)
+    }
+
+    func test_from_missingMatchIdStillDecodes() {
+        var dict = makePayload().toDictionary()
+        dict.removeValue(forKey: WatchMessageKey.matchId)
+        XCTAssertNotNil(MatchResultPayload.from(dict))
+    }
+
+    func test_from_invalidMatchIdStillDecodes() {
+        var dict = makePayload().toDictionary()
+        dict[WatchMessageKey.matchId] = "not-a-uuid"
+        XCTAssertNotNil(MatchResultPayload.from(dict))
+    }
+
+    // MARK: - Codable round-trip (local persistence)
+
+    func test_codableRoundtrip_preservesFields() {
+        let payload = makePayload(setScoreA: 7, setScoreB: 6, winner: .b, duration: 1234)
+        let data = try! JSONEncoder().encode(payload)
+        let decoded = try! JSONDecoder().decode(MatchResultPayload.self, from: data)
+        XCTAssertEqual(decoded.matchId, payload.matchId)
+        XCTAssertEqual(decoded.setScoreA, 7)
+        XCTAssertEqual(decoded.setScoreB, 6)
+        XCTAssertEqual(decoded.winner, .b)
+        XCTAssertEqual(decoded.duration, 1234, accuracy: 0.001)
     }
 
     // MARK: - Missing fields
