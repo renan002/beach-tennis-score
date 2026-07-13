@@ -247,6 +247,39 @@ final class ScoreEngineTests: XCTestCase {
         XCTAssertEqual(state.tiebreakA, tiebreakA)
     }
 
+    func test_tiebreak_sevenSixDoesNotWin() {
+        var state = stateAt6_6()
+        for _ in 0..<6 { ScoreEngine.awardPoint(to: .a, state: &state) }
+        for _ in 0..<6 { ScoreEngine.awardPoint(to: .b, state: &state) }
+        ScoreEngine.awardPoint(to: .a, state: &state) // 7-6
+        XCTAssertFalse(state.isMatchOver)
+        XCTAssertTrue(state.isTiebreak)
+        XCTAssertEqual(state.tiebreakA, 7)
+        XCTAssertEqual(state.tiebreakB, 6)
+    }
+
+    func test_tiebreak_eightSixWins() {
+        var state = stateAt6_6()
+        for _ in 0..<6 { ScoreEngine.awardPoint(to: .a, state: &state) }
+        for _ in 0..<6 { ScoreEngine.awardPoint(to: .b, state: &state) }
+        ScoreEngine.awardPoint(to: .a, state: &state) // 7-6
+        ScoreEngine.awardPoint(to: .a, state: &state) // 8-6
+        XCTAssertTrue(state.isMatchOver)
+        XCTAssertEqual(state.winner, .a)
+        XCTAssertEqual(state.gameHistory.last?.gameScoreDisplay, "8–6")
+    }
+
+    func test_tiebreak_winByTwoSymmetricForB() {
+        var state = stateAt6_6()
+        for _ in 0..<6 { ScoreEngine.awardPoint(to: .b, state: &state) }
+        for _ in 0..<6 { ScoreEngine.awardPoint(to: .a, state: &state) }
+        ScoreEngine.awardPoint(to: .b, state: &state) // 6-7
+        XCTAssertFalse(state.isMatchOver)
+        ScoreEngine.awardPoint(to: .b, state: &state) // 6-8
+        XCTAssertTrue(state.isMatchOver)
+        XCTAssertEqual(state.winner, .b)
+    }
+
     // MARK: - Match over guard
 
     func test_matchOver_noFurtherScoringAllowed() {
