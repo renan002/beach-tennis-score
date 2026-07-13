@@ -10,6 +10,8 @@ final class WatchSessionManager: NSObject, ObservableObject {
     @Published var teamBColor: Color = .blue
     @Published var sportSetting: String = "beachTennis"
 
+    private nonisolated static let pendingResultKey = "pendingMatchResult"
+
     private override init() {
         super.init()
         if WCSession.isSupported() {
@@ -19,10 +21,10 @@ final class WatchSessionManager: NSObject, ObservableObject {
     }
 
     func sendMatchResult(_ state: MatchState, duration: TimeInterval) {
-        guard WCSession.default.activationState == .activated,
-              let winner = state.winner else { return }
+        guard let winner = state.winner else { return }
 
         let payload = MatchResultPayload(
+            matchId: UUID(),
             setScoreA: state.setScoreA,
             setScoreB: state.setScoreB,
             setsWonA: state.setsWonA,
@@ -34,6 +36,17 @@ final class WatchSessionManager: NSObject, ObservableObject {
             setHistory: state.setHistory,
             matchType: state.matchType
         )
+
+        guard WCSession.default.activationState == .activated else {
+            if let data = try? JSONEncoder().encode(payload) {
+                UserDefaults.standard.set(data, forKey: Self.pendingResultKey)
+            }
+            return
+        }
+        deliver(payload)
+    }
+
+    private func deliver(_ payload: MatchResultPayload) {
         let dict = payload.toDictionary()
         if WCSession.default.isReachable {
             WCSession.default.sendMessage(dict, replyHandler: nil) { _ in
@@ -57,6 +70,13 @@ extension WatchSessionManager: WCSessionDelegate {
         activationDidCompleteWith activationState: WCSessionActivationState,
         error: (any Error)?
     ) {
+        if activationState == .activated,
+           let data = UserDefaults.standard.data(forKey: Self.pendingResultKey),
+           let payload = try? JSONDecoder().decode(MatchResultPayload.self, from: data) {
+            UserDefaults.standard.removeObject(forKey: Self.pendingResultKey)
+            WCSession.default.transferUserInfo(payload.toDictionary())
+        }
+
         let context = session.receivedApplicationContext
         guard !context.isEmpty else { return }
         let aHex = context[WatchMessageKey.teamAColor] as? String

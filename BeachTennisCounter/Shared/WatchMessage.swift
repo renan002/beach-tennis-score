@@ -2,6 +2,7 @@ import Foundation
 
 enum WatchMessageKey {
     static let type = "type"
+    static let matchId = "matchId"
     static let setScoreA = "setScoreA"
     static let setScoreB = "setScoreB"
     static let setsWonA = "setsWonA"
@@ -22,7 +23,8 @@ enum WatchMessageType {
     static let colorUpdate = "colorUpdate"
 }
 
-struct MatchResultPayload: Sendable {
+struct MatchResultPayload: Codable, Sendable {
+    let matchId: UUID
     let setScoreA: Int
     let setScoreB: Int
     let setsWonA: Int
@@ -37,6 +39,7 @@ struct MatchResultPayload: Sendable {
     func toDictionary() -> [String: Any] {
         var dict: [String: Any] = [
             WatchMessageKey.type: WatchMessageType.matchResult,
+            WatchMessageKey.matchId: matchId.uuidString,
             WatchMessageKey.setScoreA: setScoreA,
             WatchMessageKey.setScoreB: setScoreB,
             WatchMessageKey.setsWonA: setsWonA,
@@ -66,6 +69,8 @@ struct MatchResultPayload: Sendable {
             let date = ISO8601DateFormatter().date(from: dateStr)
         else { return nil }
 
+        let matchId = (dict[WatchMessageKey.matchId] as? String).flatMap(UUID.init(uuidString:)) ?? UUID()
+
         let setsWonA = dict[WatchMessageKey.setsWonA] as? Int ?? 0
         let setsWonB = dict[WatchMessageKey.setsWonB] as? Int ?? 0
 
@@ -89,6 +94,7 @@ struct MatchResultPayload: Sendable {
         }
 
         return MatchResultPayload(
+            matchId: matchId,
             setScoreA: a, setScoreB: b,
             setsWonA: setsWonA, setsWonB: setsWonB,
             winner: winner, duration: duration, date: date,
