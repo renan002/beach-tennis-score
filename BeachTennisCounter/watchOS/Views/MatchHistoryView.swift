@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct MatchHistoryView: View {
+    @EnvironmentObject private var sessionManager: WatchSessionManager
     let history: [GameRecord]
 
     var body: some View {
@@ -24,7 +25,7 @@ struct MatchHistoryView: View {
                     } else {
                         Text(record.winner == .a ? "A" : "B")
                             .font(.caption2.bold())
-                            .foregroundColor(record.winner == .a ? Color(hex: "E74C3C") : Color(hex: "5B8DEF"))
+                            .foregroundColor(record.winner == .a ? sessionManager.teamAColor : sessionManager.teamBColor)
                     }
                 }
             }

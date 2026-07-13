@@ -46,6 +46,7 @@ struct ScoreView: View {
         }
         .sheet(isPresented: $showHistory) {
             MatchHistoryView(history: state.gameHistory)
+                .environmentObject(sessionManager)
         }
         .alert("Cancel Match?", isPresented: $showCancelAlert) {
             Button("End Match", role: .destructive) { isActive = false }
