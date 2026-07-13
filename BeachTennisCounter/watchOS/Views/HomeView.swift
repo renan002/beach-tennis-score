@@ -5,6 +5,8 @@ struct HomeView: View {
     @State private var navigateToSetup = false
     @State private var navigateToTypeSelection = false
     @State private var selectedMatchType: MatchType = .beachTennis
+    @State private var resumableMatch: MatchState? = nil
+    @State private var navigateToResume = false
 
     var body: some View {
         NavigationStack {
@@ -33,9 +35,24 @@ struct HomeView: View {
                     Text("New Match")
                         .font(.headline)
                         .foregroundStyle(.white)
+
+                    if resumableMatch != nil {
+                        Button {
+                            navigateToResume = true
+                        } label: {
+                            Label("Resume Match", systemImage: "arrow.uturn.forward.circle")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(.orange)
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(.orange)
+                    }
                 }
             }
             .navigationBarHidden(true)
+            .onAppear {
+                resumableMatch = MatchPersistence.load()
+            }
             // Multiple mode: goes through type selection, which handles the rest
             .navigationDestination(isPresented: $navigateToTypeSelection) {
                 MatchTypeSelectionView(isActive: $navigateToTypeSelection)
@@ -43,6 +60,16 @@ struct HomeView: View {
             // Single-sport mode: goes directly to serve selection
             .navigationDestination(isPresented: $navigateToSetup) {
                 ServeSelectionView(isActive: $navigateToSetup, matchType: selectedMatchType)
+            }
+            .navigationDestination(isPresented: $navigateToResume) {
+                if let match = resumableMatch {
+                    ScoreView(
+                        initialServer: match.servingTeam,
+                        matchType: match.matchType,
+                        restoredState: match,
+                        isActive: $navigateToResume
+                    )
+                }
             }
         }
     }
