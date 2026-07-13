@@ -3,6 +3,7 @@ import SwiftData
 
 struct MatchListView: View {
     @EnvironmentObject private var phoneSession: PhoneSessionManager
+    @Environment(\.modelContext) private var modelContext
     @Query(sort: \StoredMatch.date, order: .reverse) private var allMatches: [StoredMatch]
     @State private var showSettings = false
     @State private var filter: String = "all"
@@ -116,12 +117,22 @@ struct MatchListView: View {
     }
 
     private var matchList: some View {
-        List(matches) { match in
-            NavigationLink(destination: MatchDetailView(match: match)) {
-                MatchRowView(match: match)
+        List {
+            ForEach(matches) { match in
+                NavigationLink(destination: MatchDetailView(match: match)) {
+                    MatchRowView(match: match)
+                }
             }
+            .onDelete(perform: deleteMatches)
         }
         .listStyle(.insetGrouped)
+    }
+
+    private func deleteMatches(at offsets: IndexSet) {
+        for index in offsets {
+            modelContext.delete(matches[index])
+        }
+        try? modelContext.save()
     }
 }
 
