@@ -7,6 +7,7 @@ struct MatchListView: View {
     @Query(sort: \StoredMatch.date, order: .reverse) private var allMatches: [StoredMatch]
     @State private var showSettings = false
     @State private var filter: String = "all"
+    @State private var quarantines: [QuarantinedStore] = []
 
     private var matches: [StoredMatch] {
         switch filter {
@@ -21,6 +22,9 @@ struct MatchListView: View {
             VStack(spacing: 0) {
                 if phoneSession.isWatchAppInstalled == false {
                     watchNotInstalledBanner
+                }
+                if restorableMatchesExist {
+                    restoreNotice
                 }
                 Group {
                     if matches.isEmpty {
@@ -44,11 +48,56 @@ struct MatchListView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showSettings) {
+            .sheet(isPresented: $showSettings, onDismiss: reloadQuarantines) {
                 SettingsView()
                     .environmentObject(phoneSession)
             }
+            .task { reloadQuarantines() }
         }
+    }
+
+    /// True while any Quarantined Store still holds matches missing from the
+    /// live Match History — the notice disappears once nothing restorable
+    /// remains.
+    private var restorableMatchesExist: Bool {
+        let liveIDs = Set(allMatches.map(\.id))
+        return quarantines.contains { store in
+            guard case .readable(let matchIDs) = store.contents else { return false }
+            return !matchIDs.subtracting(liveIDs).isEmpty
+        }
+    }
+
+    private func reloadQuarantines() {
+        quarantines = StoreRecovery.listQuarantinedStores(in: .applicationSupportDirectory)
+    }
+
+    private var restoreNotice: some View {
+        Button {
+            showSettings = true
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "clock.arrow.circlepath")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(width: 40, height: 40)
+                    .background(RoundedRectangle(cornerRadius: 10).fill(Color.blue))
+
+                Text("Old matches can be restored")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.primary)
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
+            .padding(14)
+            .background(RoundedRectangle(cornerRadius: 14).fill(Color(.secondarySystemBackground)))
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+        }
+        .buttonStyle(.plain)
     }
 
     private var filterPicker: some View {

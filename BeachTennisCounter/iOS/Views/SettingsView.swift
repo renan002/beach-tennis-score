@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 private let colorOptions: [(name: String, hex: String, color: Color)] = [
     ("Red",    "E74C3C", Color(hex: "E74C3C")),
@@ -13,7 +14,10 @@ struct SettingsView: View {
     @AppStorage("appTheme") private var appTheme: String = "system"
     @AppStorage("sportSetting") private var sportSetting: String = "beachTennis"
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @State private var syncedSettings: WatchSettings?
+    @State private var quarantines: [QuarantinedStore] = []
+    @State private var liveMatchIDs: Set<UUID> = []
 
     var body: some View {
         NavigationStack {
@@ -36,6 +40,14 @@ struct SettingsView: View {
                     colorPicker(label: "Team B", hexBinding: $phoneSession.teamBColorHex)
                 }
 
+                if !quarantines.isEmpty {
+                    QuarantinedStoresSection(
+                        quarantines: quarantines,
+                        liveMatchIDs: liveMatchIDs,
+                        reload: reloadQuarantines
+                    )
+                }
+
                 Section("Appearance") {
                     Picker("Theme", selection: $appTheme) {
                         Text("System").tag("system")
@@ -56,6 +68,7 @@ struct SettingsView: View {
                 }
             }
             .preferredColorScheme(colorScheme)
+            .task { reloadQuarantines() }
             .onAppear {
                 syncedSettings = phoneSession.watchSettings
             }
@@ -70,6 +83,12 @@ struct SettingsView: View {
                     .padding(.bottom, 8)
             }
         }
+    }
+
+    private func reloadQuarantines() {
+        quarantines = StoreRecovery.listQuarantinedStores(in: .applicationSupportDirectory)
+        let ids = (try? modelContext.fetch(FetchDescriptor<StoredMatch>()))?.map(\.id) ?? []
+        liveMatchIDs = Set(ids)
     }
 
     private var sportSettingFooter: String {
