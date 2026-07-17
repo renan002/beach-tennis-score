@@ -69,5 +69,12 @@ empty one. Never destroys the store.
 **Restore**:
 To bring the matches from a Quarantined Store back into the live Match History,
 keeping any matches played since the quarantine. A match already present is
-never duplicated and never overwritten.
+never duplicated and never overwritten. Restoring never deletes the
+Quarantined Store — only Discard or the automatic cap do that.
 _Avoid_: recover, import, merge (as a user-facing word)
+
+**Discard**:
+To permanently delete a Quarantined Store at the player's explicit request.
+The only user-facing delete in store recovery; everything else that removes a
+Quarantined Store is the automatic newest-three cap.
+_Avoid_: delete, remove, clear
