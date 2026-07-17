@@ -35,6 +35,7 @@ Shared/          ← compiled into both targets
   MatchState.swift    — all data models (Team, PointScore, GameRecord, MatchState)
   ScoreEngine.swift   — pure scoring logic, no UI imports
   WatchMessage.swift  — WatchConnectivity payload constants and MatchResultPayload
+  Localizable.xcstrings — pt-BR String Catalog; the only strings table in the project
 
 watchOS/         ← Apple Watch app (primary runtime UI)
   BeachTennisWatchApp.swift
@@ -71,6 +72,23 @@ iOS/             ← iPhone companion (history + settings)
 
 - **iOS only:** `Color.toHex()` uses `UIColor` — lives in `PhoneSessionManager.swift`.
 - **watchOS only:** `Color(hex:)` decode-only — lives in `WatchSessionManager.swift`. No `toHex()` on watch.
+
+## Localization
+
+`Shared/Localizable.xcstrings` is the single strings table for both targets (pt-BR;
+English is the source language, so it needs no entries). Per-target `.lproj/Localizable.strings`
+files must not come back — a String Catalog cannot co-exist with a same-named `.strings`
+table and the build fails outright. `InfoPlist.strings` is separate and still per-target.
+
+- Keys are the English source strings. Reword UI copy and you must re-key the catalog in
+  the same commit, or the entry silently falls back to the new English.
+- A missing entry is never a crash — it renders the key. So universal tennis vocabulary
+  (`Sets`, `Games`, `TB`, `Ad`, `Beach Tennis`, `Beach`) deliberately has no entries.
+- `Game %lld` maps to `Set %lld` on purpose: the beach UI calls games "Sets".
+- `Text("…")`/`Button("…")` localize automatically via `LocalizedStringKey`. Plain `String`
+  does not — computed vars and ternaries of string literals need `String(localized:)`.
+- Never translate `Picker` tag values or `UserDefaults`-persisted strings
+  (`beachTennis`, `tennis`, `multiple`) — they are storage keys, not display text.
 
 ## Git workflow
 

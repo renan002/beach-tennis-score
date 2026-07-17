@@ -23,7 +23,7 @@ update your row when done.
 | 009 | Wire MARKETING_VERSION into both Info.plists | P3 | S | — | [#9](https://github.com/renan002/beach-tennis-score/issues/9) | DONE |
 | 010 | Swipe-to-delete matches in the iOS history list | P3 | S | — (soft: 001) | [#10](https://github.com/renan002/beach-tennis-score/issues/10) | DONE |
 | 011 | Persist the in-progress match on the watch and offer resume | P2 | M | — (soft: 001; serial with 008) | [#11](https://github.com/renan002/beach-tennis-score/issues/11) | DONE |
-| 012 | Localize the apps to Brazilian Portuguese via a String Catalog | P3 | M | — (soft: 001; land after 005, 008, 010, 011) | [#12](https://github.com/renan002/beach-tennis-score/issues/12) | TODO |
+| 012 | Localize the apps to Brazilian Portuguese via a String Catalog | P3 | M | — (soft: 001; land after 005, 008, 010, 011) | [#12](https://github.com/renan002/beach-tennis-score/issues/12) | DONE (re-scoped: migration, not greenfield — see plan note) |
 
 GitHub issue ↔ plan mapping is 1:1 except **#4, which covers both plans 003 and 004** (closing #4 means both rows go DONE). Issue blocking edges are native GitHub dependencies mirroring the notes below; agents should work the frontier (issues with no open blockers): currently #2, #5, #9.
 

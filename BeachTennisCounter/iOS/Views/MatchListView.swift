@@ -74,9 +74,9 @@ struct MatchListView: View {
 
     private var filterLabel: String {
         switch filter {
-        case "beachTennis": return "Beach Tennis"
-        case "tennis":      return "Tennis"
-        default:            return "All"
+        case "beachTennis": return String(localized: "Beach Tennis")
+        case "tennis":      return String(localized: "Tennis")
+        default:            return String(localized: "All")
         }
     }
 
@@ -160,7 +160,7 @@ struct MatchRowView: View {
     }
 
     private var sportBadge: some View {
-        Text(match.matchType == .tennis ? "Tennis" : "Beach")
+        Text(match.matchType == .tennis ? String(localized: "Tennis") : "Beach")
             .font(.caption2.bold())
             .foregroundColor(match.matchType == .tennis ? .green : .orange)
             .padding(.horizontal, 6)

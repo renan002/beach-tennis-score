@@ -1,0 +1,309 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%@ wins" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "%@ venceu" }
+        }
+      }
+    },
+    "All" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Todos" }
+        }
+      }
+    },
+    "Appearance" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Aparência" }
+        }
+      }
+    },
+    "Cancel Match?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Cancelar Partida?" }
+        }
+      }
+    },
+    "Dark" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Escuro" }
+        }
+      }
+    },
+    "Date" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Data" }
+        }
+      }
+    },
+    "Details" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Detalhes" }
+        }
+      }
+    },
+    "Done" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Concluído" }
+        }
+      }
+    },
+    "Duration" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Duração" }
+        }
+      }
+    },
+    "End Match" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Encerrar Partida" }
+        }
+      }
+    },
+    "Game %lld" : {
+      "comment" : "The beach tennis UI deliberately calls games \"Sets\" in pt-BR — see CLAUDE.md.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Set %lld" }
+        }
+      }
+    },
+    "History" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Histórico" }
+        }
+      }
+    },
+    "Keep Playing" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Continuar Jogando" }
+        }
+      }
+    },
+    "Light" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Claro" }
+        }
+      }
+    },
+    "Match Details" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Detalhes da Partida" }
+        }
+      }
+    },
+    "Match Over!" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Fim de Jogo!" }
+        }
+      }
+    },
+    "Modality" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Modalidade" }
+        }
+      }
+    },
+    "Multiple" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Vários" }
+        }
+      }
+    },
+    "New Match" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Nova Partida" }
+        }
+      }
+    },
+    "No matches yet" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Nenhuma partida ainda" }
+        }
+      }
+    },
+    "Open the app on your Apple Watch to start a match" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Abra o app no seu Apple Watch para começar uma partida" }
+        }
+      }
+    },
+    "Result" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Resultado" }
+        }
+      }
+    },
+    "Resume Match" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Retomar Partida" }
+        }
+      }
+    },
+    "Score" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Placar" }
+        }
+      }
+    },
+    "Score Counter" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Placar" }
+        }
+      }
+    },
+    "Select Sport" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Escolha o Esporte" }
+        }
+      }
+    },
+    "Settings" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Ajustes" }
+        }
+      }
+    },
+    "Sport" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Esporte" }
+        }
+      }
+    },
+    "System" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Sistema" }
+        }
+      }
+    },
+    "Team %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Time %@" }
+        }
+      }
+    },
+    "Team %@ wins" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Time %@ venceu" }
+        }
+      }
+    },
+    "Team A" : {
+      "comment" : "The (Nós)/(Eles) framing is intentional — the watch's owner is Team A.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Time A (Nós)" }
+        }
+      }
+    },
+    "Team B" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Time B (Eles)" }
+        }
+      }
+    },
+    "Team Colors" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Cores dos Times" }
+        }
+      }
+    },
+    "Tennis" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Tênis" }
+        }
+      }
+    },
+    "The Watch will always start a Beach Tennis match." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "O Watch sempre iniciará uma partida de Beach Tennis." }
+        }
+      }
+    },
+    "The Watch will always start a Tennis match." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "O Watch sempre iniciará uma partida de Tênis." }
+        }
+      }
+    },
+    "The Watch will ask which sport before each match." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "O Watch perguntará qual esporte antes de cada partida." }
+        }
+      }
+    },
+    "Theme" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Tema" }
+        }
+      }
+    },
+    "Version %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Versão %@" }
+        }
+      }
+    },
+    "Watch app not installed" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "App do Watch não instalado" }
+        }
+      }
+    },
+    "Who serves first?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Quem saca primeiro?" }
+        }
+      }
+    },
+    "Winner" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Vencedor" }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

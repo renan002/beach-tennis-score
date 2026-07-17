@@ -1,5 +1,23 @@
 # Plan 012: Localize the apps to Brazilian Portuguese via a String Catalog
 
+> **Correction (applied at execution, 2026-07-16)**: this plan's premise —
+> "no strings files exist anywhere, so every user sees English" — was **false**.
+> `iOS/pt-BR.lproj/Localizable.strings` and `watchOS/pt-BR.lproj/Localizable.strings`
+> shipped from the initial commit (`a9c8eae`), wired into both targets' Resources
+> phases. The work was therefore a **migration**, not a greenfield creation:
+> a String Catalog cannot co-exist with a same-named `.strings` table (the watch
+> build fails outright), so the legacy files were deleted and the catalog was
+> seeded from **their** wording, then reconciled against the table below with the
+> maintainer deciding each divergence. Adopted from this plan: `Ajustes`,
+> `Fim de Jogo!`, `Vários`, `Cores dos Times`, `App do Watch não instalado`.
+> Kept from the shipped strings instead: `Done` = `Concluído`, and
+> `Team A`/`Team B` = `Time A (Nós)`/`Time B (Eles)` — the us/them framing is
+> deliberate (the watch's owner is Team A), which this plan's table would have
+> silently dropped. Also kept: `Game %lld` = `Set %lld`, the mapping the beach UI
+> depends on (see `CLAUDE.md`) — this plan wrongly called it a no-op needing no
+> entry. Entry count is 43, not 42. Treat the table below as historical;
+> `Shared/Localizable.xcstrings` is the truth.
+
 > **Executor instructions**: Follow this plan step by step. Run every
 > verification command and confirm the expected result before moving to the
 > next step. If anything in the "STOP conditions" section occurs, stop and
