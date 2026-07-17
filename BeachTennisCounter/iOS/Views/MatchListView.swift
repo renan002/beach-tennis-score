@@ -61,10 +61,7 @@ struct MatchListView: View {
     /// remains.
     private var restorableMatchesExist: Bool {
         let liveIDs = Set(allMatches.map(\.id))
-        return quarantines.contains { store in
-            guard case .readable(let matchIDs) = store.contents else { return false }
-            return !matchIDs.subtracting(liveIDs).isEmpty
-        }
+        return quarantines.contains { !$0.missingMatchIDs(from: liveIDs).isEmpty }
     }
 
     private func reloadQuarantines() {

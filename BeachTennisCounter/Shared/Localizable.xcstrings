@@ -141,6 +141,16 @@
         }
       }
     },
+    "All of its matches are already in your Match History." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todas as suas partidas já estão no seu Histórico de Partidas."
+          }
+        }
+      }
+    },
     "Appearance" : {
       "localizations" : {
         "pt-BR" : {
@@ -248,6 +258,16 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Discard failed" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Falha ao descartar"
           }
         }
       }
@@ -668,6 +688,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tênis"
+          }
+        }
+      }
+    },
+    "The Quarantined Store was not removed." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O armazenamento em quarentena não foi removido."
           }
         }
       }

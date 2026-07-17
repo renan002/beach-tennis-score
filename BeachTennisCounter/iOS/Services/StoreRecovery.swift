@@ -29,6 +29,13 @@ struct QuarantinedStore: Identifiable, Sendable, Equatable {
     let contents: Contents
 
     var id: URL { directory }
+
+    /// The match ids a Restore would actually add, given the live store's
+    /// ids. Empty for an unreadable store — nothing knowably restorable.
+    func missingMatchIDs(from liveMatchIDs: Set<UUID>) -> Set<UUID> {
+        guard case .readable(let matchIDs) = contents else { return [] }
+        return matchIDs.subtracting(liveMatchIDs)
+    }
 }
 
 /// Moves an unreadable SwiftData store aside so the app can start fresh
@@ -238,11 +245,8 @@ enum StoreRecovery {
 
         let quarantined = try withScratchCopy(
             of: quarantineDir, manifest: manifest, fileManager: fileManager
-        ) { storeURL -> [StoredMatch] in
-            let context = ModelContext(try ModelContainer(
-                for: StoredMatch.self,
-                configurations: ModelConfiguration(url: storeURL)))
-            return try context.fetch(FetchDescriptor<StoredMatch>())
+        ) { storeURL in
+            try context(forStoreAt: storeURL).fetch(FetchDescriptor<StoredMatch>())
         }
 
         let liveContext = ModelContext(liveContainer)
@@ -251,19 +255,7 @@ enum StoreRecovery {
         guard !missing.isEmpty else { return 0 }
 
         for match in missing {
-            liveContext.insert(StoredMatch(
-                id: match.id,
-                date: match.date,
-                setScoreA: match.setScoreA,
-                setScoreB: match.setScoreB,
-                setsWonA: match.setsWonA,
-                setsWonB: match.setsWonB,
-                winner: match.winner,
-                duration: match.duration,
-                gameHistoryData: match.gameHistoryData,
-                setHistoryData: match.setHistoryData,
-                matchTypeRaw: match.matchTypeRaw
-            ))
+            liveContext.insert(StoredMatch(copying: match))
         }
         do {
             try liveContext.save()
@@ -331,9 +323,12 @@ enum StoreRecovery {
     /// Opening the store doubles as the readability probe: a store this build's
     /// schema cannot interpret throws here and lists as unreadable.
     private static func matchIDs(inStoreAt url: URL) throws -> Set<UUID> {
-        let context = ModelContext(try ModelContainer(
+        Set(try context(forStoreAt: url).fetch(FetchDescriptor<StoredMatch>()).map(\.id))
+    }
+
+    private static func context(forStoreAt url: URL) throws -> ModelContext {
+        ModelContext(try ModelContainer(
             for: StoredMatch.self,
             configurations: ModelConfiguration(url: url)))
-        return Set(try context.fetch(FetchDescriptor<StoredMatch>()).map(\.id))
     }
 }

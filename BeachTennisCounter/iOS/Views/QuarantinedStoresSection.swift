@@ -14,6 +14,7 @@ struct QuarantinedStoresSection: View {
     @Environment(\.modelContext) private var modelContext
 
     @State private var discardTarget: QuarantinedStore?
+    @State private var showDiscardFailed = false
     @State private var showRestoreResult = false
     /// nil while `showRestoreResult` means the restore failed.
     @State private var restoredCount: Int?
@@ -38,12 +39,19 @@ struct QuarantinedStoresSection: View {
         ) {
             Button("Discard", role: .destructive) {
                 if let target = discardTarget {
-                    try? StoreRecovery.discard(target.directory)
+                    do {
+                        try StoreRecovery.discard(target.directory)
+                    } catch {
+                        showDiscardFailed = true
+                    }
                     reload()
                 }
             }
         } message: {
             discardMessage
+        }
+        .alert(Text("Discard failed"), isPresented: $showDiscardFailed) {} message: {
+            Text("The Quarantined Store was not removed.")
         }
         .alert(
             restoredCount == nil ? Text("Restore failed") : Text("Restore complete"),
@@ -67,7 +75,7 @@ struct QuarantinedStoresSection: View {
 
             switch store.contents {
             case .readable(let matchIDs):
-                let missing = matchIDs.subtracting(liveMatchIDs)
+                let missing = store.missingMatchIDs(from: liveMatchIDs)
                 HStack(spacing: 6) {
                     Text("\(matchIDs.count) matches")
                     if missing.isEmpty {
@@ -105,17 +113,25 @@ struct QuarantinedStoresSection: View {
 
     // MARK: - Discard dialog copy
 
+    /// What a Discard would actually cost the player: only the matches not
+    /// yet in the live Match History. Empty means nothing would be lost —
+    /// either the store is fully restored, or it is unreadable and the loss
+    /// is unknowable.
+    private var discardWouldLose: Set<UUID> {
+        discardTarget?.missingMatchIDs(from: liveMatchIDs) ?? []
+    }
+
     private var discardTitle: Text {
-        switch discardTarget?.contents {
-        case .readable(let matchIDs):
-            return Text("Discard \(matchIDs.count) matches?")
-        default:
+        if discardWouldLose.isEmpty {
             return Text("Discard this Quarantined Store?")
         }
+        return Text("Discard \(discardWouldLose.count) matches?")
     }
 
     private var discardMessage: Text {
         switch discardTarget?.contents {
+        case .readable where discardWouldLose.isEmpty:
+            return Text("All of its matches are already in your Match History.")
         case .readable:
             return Text("They will be permanently deleted.")
         default:
