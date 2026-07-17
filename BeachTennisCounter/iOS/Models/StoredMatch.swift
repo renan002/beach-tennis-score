@@ -7,8 +7,12 @@ final class StoredMatch {
     var date: Date
     var setScoreA: Int
     var setScoreB: Int
-    var setsWonA: Int
-    var setsWonB: Int
+    // Property-level defaults (not just init defaults): SwiftData lightweight
+    // migration only accepts an added non-optional attribute when it is
+    // declared with a default here. Without these, a 1.1.x store fails to
+    // migrate (CocoaError 134110). See #47.
+    var setsWonA: Int = 0
+    var setsWonB: Int = 0
     var winner: String
     var duration: TimeInterval
     var gameHistoryData: Data = Data()
