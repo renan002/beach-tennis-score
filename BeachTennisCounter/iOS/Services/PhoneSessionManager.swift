@@ -28,14 +28,17 @@ final class PhoneSessionManager: NSObject, ObservableObject {
         }
     }
 
+    /// The settings the watch consumes, as currently stored on the phone.
+    var watchSettings: WatchSettings {
+        WatchSettings(teamAColorHex: teamAColorHex,
+                      teamBColorHex: teamBColorHex,
+                      sportSetting: sportSetting)
+    }
+
     func pushSettingsToWatch() {
         guard WCSession.default.activationState == .activated,
               WCSession.default.isWatchAppInstalled else { return }
-        try? WCSession.default.updateApplicationContext([
-            WatchMessageKey.teamAColor: teamAColorHex,
-            WatchMessageKey.teamBColor: teamBColorHex,
-            WatchMessageKey.sportSetting: sportSetting
-        ])
+        try? WCSession.default.updateApplicationContext(watchSettings.toApplicationContext())
     }
 }
 

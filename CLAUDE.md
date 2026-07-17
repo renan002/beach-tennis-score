@@ -35,6 +35,7 @@ Shared/          ← compiled into both targets
   MatchState.swift    — all data models (Team, PointScore, GameRecord, MatchState)
   ScoreEngine.swift   — pure scoring logic, no UI imports
   WatchMessage.swift  — WatchConnectivity payload constants and MatchResultPayload
+  WatchSettings.swift — WatchSettings: the settings payload (team colors + sport) sent phone → watch
 
 watchOS/         ← Apple Watch app (primary runtime UI)
   BeachTennisWatchApp.swift
@@ -52,7 +53,7 @@ iOS/             ← iPhone companion (history + settings)
 
 - **Scoring:** `ScoreView` holds `MatchState` + a `[MatchState]` undo stack. Every tap calls `ScoreEngine.awardPoint(to:state:)` — no mutation outside `ScoreEngine`.
 - **Watch → iPhone:** At match end `WatchSessionManager.sendMatchResult(_:duration:)` calls `WCSession.transferUserInfo`. `PhoneSessionManager.session(_:didReceiveUserInfo:)` decodes via `MatchResultPayload.from(_:)` and inserts a `StoredMatch` into SwiftData.
-- **iPhone → Watch (colors):** `PhoneSessionManager.pushSettingsToWatch()` calls `WCSession.updateApplicationContext` with hex strings. `WatchSessionManager.session(_:didReceiveApplicationContext:)` reads them on the watch (extracts `String?` values *before* any `Task { @MainActor in }` to satisfy Swift 6 `Sendable` rules).
+- **iPhone → Watch (settings):** `PhoneSessionManager.pushSettingsToWatch()` builds a `WatchSettings` and calls `WCSession.updateApplicationContext(settings.toApplicationContext())`. Both watch receive paths (`activationDidCompleteWith` reading `receivedApplicationContext`, and `didReceiveApplicationContext`) decode via `WatchSettings.from(_:)` and apply the value. `WatchSettings` is the settings-path counterpart to `MatchResultPayload`: it owns the dictionary encode/decode, so a new watch-consumed setting is added in one place. The context is a full replacement — a missing key decodes to the type's default rather than leaving a stale value applied. Decode the `Sendable` `WatchSettings` in the `nonisolated` callback *before* any `Task { @MainActor in }`, per the Swift 6 `Sendable` rules.
 
 ### Beach Tennis scoring rules (encoded in ScoreEngine)
 
