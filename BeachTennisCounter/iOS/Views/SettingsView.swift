@@ -74,9 +74,9 @@ struct SettingsView: View {
 
     private var sportSettingFooter: String {
         switch sportSetting {
-        case "tennis":    return "The Watch will always start a Tennis match."
-        case "multiple":  return "The Watch will ask which sport before each match."
-        default:          return "The Watch will always start a Beach Tennis match."
+        case "tennis":    return String(localized: "The Watch will always start a Tennis match.")
+        case "multiple":  return String(localized: "The Watch will ask which sport before each match.")
+        default:          return String(localized: "The Watch will always start a Beach Tennis match.")
         }
     }
 

@@ -17,8 +17,8 @@ enum MatchType: String, Codable, Sendable, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .beachTennis: return "Beach Tennis"
-        case .tennis: return "Tennis"
+        case .beachTennis: return String(localized: "Beach Tennis")
+        case .tennis: return String(localized: "Tennis")
         }
     }
 
