@@ -29,6 +29,18 @@ jobs:
       - name: Strip release/ prefix from version
         run: echo "VERSION=${VERSION#release/}" >> "$GITHUB_ENV"
 
+      # ADR-0001: the release PR must land as a merge commit (two parents) so
+      # the merge-back preserves ancestry. Warn — don't fail — if it was
+      # squash/rebase-merged: the release already shipped, but the operator
+      # needs to know the next merge-back may conflict spuriously.
+      - name: Warn if release was not merged with a merge commit
+        run: |
+          set -euo pipefail
+          parents=$(git rev-list --parents -n1 "$MERGE_SHA" | wc -w)
+          if [[ "$parents" -lt 3 ]]; then
+            echo "::warning::Release $VERSION was NOT merged with a merge commit ($MERGE_SHA has $((parents - 1)) parent). The main→develop merge-back may surface spurious conflicts — see ADR-0001."
+          fi
+
       - name: Tag merge commit
         run: |
           git tag "$VERSION" "$MERGE_SHA"
@@ -44,14 +56,49 @@ jobs:
       GH_TOKEN: ${{ secrets.RELEASE_PAT }}
       VERSION: ${{ github.event.pull_request.head.ref }}
     steps:
+      - name: Checkout main
+        uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_PAT }}
+
       - name: Strip release/ prefix from version
         run: echo "VERSION=${VERSION#release/}" >> "$GITHUB_ENV"
 
-      - name: Open main to develop merge-back PR
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      # A dedicated disposable branch, NOT main itself, is the PR head. main is
+      # protected (changes only via PR), so a merge-back opened with head=main
+      # has nowhere to push conflict-resolution commits — the PR is then
+      # unmergeable. A throwaway branch off main's tip has no such protection.
+      # See ADR-0001.
+      - name: Create disposable sync branch from main tip
+        run: |
+          set -euo pipefail
+          SYNC_BRANCH="chore/sync-release-$VERSION-into-develop"
+          git checkout -b "$SYNC_BRANCH"
+          # --force so a stale branch left by a re-cut of the same version is
+          # cleanly overwritten; it always derives from main's tip, so there is
+          # nothing to protect with a lease.
+          git push --force origin "$SYNC_BRANCH"
+          echo "SYNC_BRANCH=$SYNC_BRANCH" >> "$GITHUB_ENV"
+
+      - name: Open sync branch to develop merge-back PR
         run: |
           gh pr create \
             --repo "$GITHUB_REPOSITORY" \
             --base develop \
-            --head main \
+            --head "$SYNC_BRANCH" \
             --title "chore(release): merge $VERSION back into develop" \
-            --body "Auto-generated after release $VERSION shipped to main. Syncs the version bump back into develop."
+            --body "Auto-generated after release $VERSION shipped to main. Syncs the version bump back into develop.
+
+          > [!IMPORTANT]
+          > Merge this PR with a **merge commit** (\`gh pr merge --merge\`), never squash or rebase,
+          > so the two-parent link between \`main\` and \`develop\` is preserved. If it shows conflicts,
+          > push resolution commits to the \`$SYNC_BRANCH\` head branch (not \`main\`). See ADR-0001.
+
+          Delete \`$SYNC_BRANCH\` after this merges."
