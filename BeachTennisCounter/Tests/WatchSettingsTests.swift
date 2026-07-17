@@ -18,15 +18,14 @@ final class WatchSettingsTests: XCTestCase {
     func test_roundtrip_teamColors() {
         let settings = makeSettings(teamAColorHex: "2ECC71", teamBColorHex: "9B59B6")
         let decoded = WatchSettings.from(settings.toApplicationContext())
-        XCTAssertNotNil(decoded)
-        XCTAssertEqual(decoded?.teamAColorHex, "2ECC71")
-        XCTAssertEqual(decoded?.teamBColorHex, "9B59B6")
+        XCTAssertEqual(decoded.teamAColorHex, "2ECC71")
+        XCTAssertEqual(decoded.teamBColorHex, "9B59B6")
     }
 
     func test_roundtrip_sportSetting() {
         let settings = makeSettings(sportSetting: "tennis")
         let decoded = WatchSettings.from(settings.toApplicationContext())
-        XCTAssertEqual(decoded?.sportSetting, "tennis")
+        XCTAssertEqual(decoded.sportSetting, "tennis")
     }
 
     func test_roundtrip_preservesWholeValue() {
@@ -56,15 +55,15 @@ final class WatchSettingsTests: XCTestCase {
             WatchMessageKey.teamAColor: "2ECC71",
             WatchMessageKey.teamBColor: "9B59B6"
         ])
-        XCTAssertEqual(decoded?.sportSetting, "beachTennis")
-        XCTAssertEqual(decoded?.teamAColorHex, "2ECC71")
+        XCTAssertEqual(decoded.sportSetting, "beachTennis")
+        XCTAssertEqual(decoded.teamAColorHex, "2ECC71")
     }
 
     func test_from_missingColors_usesDefaultColors() {
         let decoded = WatchSettings.from([WatchMessageKey.sportSetting: "tennis"])
-        XCTAssertEqual(decoded?.teamAColorHex, "E74C3C")
-        XCTAssertEqual(decoded?.teamBColorHex, "5B8DEF")
-        XCTAssertEqual(decoded?.sportSetting, "tennis")
+        XCTAssertEqual(decoded.teamAColorHex, "E74C3C")
+        XCTAssertEqual(decoded.teamBColorHex, "5B8DEF")
+        XCTAssertEqual(decoded.sportSetting, "tennis")
     }
 
     func test_from_wrongValueType_usesDefault() {
@@ -73,8 +72,8 @@ final class WatchSettingsTests: XCTestCase {
             WatchMessageKey.teamBColor: "9B59B6",
             WatchMessageKey.sportSetting: "tennis"
         ])
-        XCTAssertEqual(decoded?.teamAColorHex, "E74C3C")
-        XCTAssertEqual(decoded?.teamBColorHex, "9B59B6")
+        XCTAssertEqual(decoded.teamAColorHex, "E74C3C")
+        XCTAssertEqual(decoded.teamBColorHex, "9B59B6")
     }
 
     func test_from_emptyDict_usesAllDefaults() {

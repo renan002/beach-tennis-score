@@ -34,7 +34,7 @@ The project has two targets sharing a `Shared/` layer:
 Shared/          ← compiled into both targets
   MatchState.swift    — all data models (Team, PointScore, GameRecord, MatchState)
   ScoreEngine.swift   — pure scoring logic, no UI imports
-  WatchMessage.swift  — WatchConnectivity payload constants and MatchResultPayload
+  WatchMessage.swift  — WatchConnectivity payload constants (WatchMessageKey) and MatchResultPayload; the settings counterpart is WatchSettings
   WatchSettings.swift — WatchSettings: the settings payload (team colors + sport) sent phone → watch
 
 watchOS/         ← Apple Watch app (primary runtime UI)

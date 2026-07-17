@@ -7,9 +7,9 @@ import SwiftData
 final class PhoneSessionManager: NSObject, ObservableObject {
     static let shared = PhoneSessionManager()
 
-    @AppStorage("teamAColorHex") var teamAColorHex: String = "E74C3C"
-    @AppStorage("teamBColorHex") var teamBColorHex: String = "5B8DEF"
-    @AppStorage("sportSetting") var sportSetting: String = "beachTennis"
+    @AppStorage("teamAColorHex") var teamAColorHex: String = WatchSettings.defaultTeamAColorHex
+    @AppStorage("teamBColorHex") var teamBColorHex: String = WatchSettings.defaultTeamBColorHex
+    @AppStorage("sportSetting") var sportSetting: String = WatchSettings.defaultSportSetting
 
     /// nil = session not yet activated (unknown); true/false = known state
     @Published private(set) var isWatchAppInstalled: Bool? = nil

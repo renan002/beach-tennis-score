@@ -78,12 +78,14 @@ extension WatchSessionManager: WCSessionDelegate {
         }
 
         let context = session.receivedApplicationContext
-        guard !context.isEmpty, let settings = WatchSettings.from(context) else { return }
+        guard !context.isEmpty else { return }
+        let settings = WatchSettings.from(context)
         Task { @MainActor in apply(settings) }
     }
 
     nonisolated func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
-        guard let settings = WatchSettings.from(applicationContext) else { return }
+        guard !applicationContext.isEmpty else { return }
+        let settings = WatchSettings.from(applicationContext)
         Task { @MainActor in apply(settings) }
     }
 }

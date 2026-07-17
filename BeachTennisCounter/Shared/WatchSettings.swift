@@ -23,7 +23,10 @@ struct WatchSettings: Sendable, Equatable {
         ]
     }
 
-    static func from(_ dict: [String: Any]) -> WatchSettings? {
+    /// Decodes a settings context. Always succeeds: a missing or garbled key falls
+    /// back to the default above. Callers decide whether a context is worth applying
+    /// at all — an empty context means "no settings received", not "reset to defaults".
+    static func from(_ dict: [String: Any]) -> WatchSettings {
         WatchSettings(
             teamAColorHex: dict[WatchMessageKey.teamAColor] as? String ?? defaultTeamAColorHex,
             teamBColorHex: dict[WatchMessageKey.teamBColor] as? String ?? defaultTeamBColorHex,
