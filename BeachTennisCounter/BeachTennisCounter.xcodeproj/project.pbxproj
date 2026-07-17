@@ -33,9 +33,11 @@
 		8D64CD3793ED5673BAD2D401 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8D254AB1FB6C6A1DA0C6D529 /* InfoPlist.strings */; };
 		93E5597DE2C32F79C230BBB7 /* MatchHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F54B8E19A416BAD074ED1CE9 /* MatchHistoryView.swift */; };
 		989396E3CA7A30F5747C2840 /* MatchState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F51DDD9F7DDD920BA32478B6 /* MatchState.swift */; };
+		A2D8CF0A8FF48649ED4C2E31 /* WatchSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83FAA734BDAE85A11D34EBC2 /* WatchSettingsTests.swift */; };
 		A36E17FF54692A7E34AF41AE /* MatchDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6384C90BFE76A48416288478 /* MatchDetailView.swift */; };
 		AC4A4BCF92EEDE5F78A5D2A3 /* StoredMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA22216A62AA57F8538633B /* StoredMatch.swift */; };
 		ACC0EB8738F873C95817CDCE /* BeachTennisWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA27D8171AED929B5165A216 /* BeachTennisWatchApp.swift */; };
+		ADE596C62E51D48A4B98A776 /* WatchSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E310D764A0970D265C75E09 /* WatchSettings.swift */; };
 		AE18F8DC2EB0E0ADFE13E7BE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AEC4ADE5E101A4C6B8C59E3A /* Assets.xcassets */; };
 		B86F503C681CF82BFC87BB9E /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D2079D2D2B1621F0A22237B /* SettingsView.swift */; };
 		C556C77808433DF5CD0F1D8A /* TennisScoreEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A331F1E9E5ED0040839215BA /* TennisScoreEngineTests.swift */; };
@@ -83,6 +85,7 @@
 		038CBBD1CA1760963EFF6BE3 /* MatchPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchPersistenceTests.swift; sourceTree = "<group>"; };
 		0973F4D84A6A7F8646D3F5D2 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		0C4F5BF1EE5C2D60E7F3EFD5 /* PointScoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointScoreTests.swift; sourceTree = "<group>"; };
+		0E310D764A0970D265C75E09 /* WatchSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSettings.swift; sourceTree = "<group>"; };
 		1D2079D2D2B1621F0A22237B /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		1E6352B0F7598004C63192B3 /* BeachTennisCounter.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BeachTennisCounter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		21275F20964C30E0BE57431F /* MatchPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchPersistence.swift; sourceTree = "<group>"; };
@@ -95,6 +98,7 @@
 		67E5FFD85FDB63F1E4B704B7 /* ScoreEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreEngine.swift; sourceTree = "<group>"; };
 		737E5C4A27BD85CA551EB4C9 /* WatchSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSessionManager.swift; sourceTree = "<group>"; };
 		7886749CB1C2F7EA01C9F517 /* BeachTennisCounterTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = BeachTennisCounterTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		83FAA734BDAE85A11D34EBC2 /* WatchSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSettingsTests.swift; sourceTree = "<group>"; };
 		8D254AB1FB6C6A1DA0C6D529 /* InfoPlist.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = InfoPlist.strings; path = "pt-BR.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		9BA22216A62AA57F8538633B /* StoredMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredMatch.swift; sourceTree = "<group>"; };
 		9D28EC16CCCEA10A4E7D8BA1 /* BeachTennisApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeachTennisApp.swift; sourceTree = "<group>"; };
@@ -174,6 +178,7 @@
 				F51DDD9F7DDD920BA32478B6 /* MatchState.swift */,
 				67E5FFD85FDB63F1E4B704B7 /* ScoreEngine.swift */,
 				9F815CA932C3F29E53938D4B /* WatchMessage.swift */,
+				0E310D764A0970D265C75E09 /* WatchSettings.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -187,6 +192,7 @@
 				29D3F1B882D2930CBA69F677 /* ScoreEngineTests.swift */,
 				26496E4FEA0A7EC058601837 /* StoreRecoveryTests.swift */,
 				A331F1E9E5ED0040839215BA /* TennisScoreEngineTests.swift */,
+				83FAA734BDAE85A11D34EBC2 /* WatchSettingsTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -376,6 +382,7 @@
 				C6DD6BBA15414E669DE7FE1E /* ServeSelectionView.swift in Sources */,
 				220DD4BF5CD96FEF418D738C /* WatchMessage.swift in Sources */,
 				29591432F72CE1EB4A9B60E3 /* WatchSessionManager.swift in Sources */,
+				67103C2A175B4DA92518633A /* WatchSettings.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -394,6 +401,7 @@
 				564FFB929783F14E683261CB /* StoreRecovery.swift in Sources */,
 				AC4A4BCF92EEDE5F78A5D2A3 /* StoredMatch.swift in Sources */,
 				1A8E705F463BAAC8D7B8BD49 /* WatchMessage.swift in Sources */,
+				ADE596C62E51D48A4B98A776 /* WatchSettings.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -407,6 +415,7 @@
 				1C3E9BB2ECB15A30CA626AA3 /* ScoreEngineTests.swift in Sources */,
 				07A1FB876AC0C9E772BC2127 /* StoreRecoveryTests.swift in Sources */,
 				C556C77808433DF5CD0F1D8A /* TennisScoreEngineTests.swift in Sources */,
+				A2D8CF0A8FF48649ED4C2E31 /* WatchSettingsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

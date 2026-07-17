@@ -7,9 +7,9 @@ import SwiftData
 final class PhoneSessionManager: NSObject, ObservableObject {
     static let shared = PhoneSessionManager()
 
-    @AppStorage("teamAColorHex") var teamAColorHex: String = "E74C3C"
-    @AppStorage("teamBColorHex") var teamBColorHex: String = "5B8DEF"
-    @AppStorage("sportSetting") var sportSetting: String = "beachTennis"
+    @AppStorage("teamAColorHex") var teamAColorHex: String = WatchSettings.defaultTeamAColorHex
+    @AppStorage("teamBColorHex") var teamBColorHex: String = WatchSettings.defaultTeamBColorHex
+    @AppStorage("sportSetting") var sportSetting: String = WatchSettings.defaultSportSetting
 
     /// nil = session not yet activated (unknown); true/false = known state
     @Published private(set) var isWatchAppInstalled: Bool? = nil
@@ -28,14 +28,17 @@ final class PhoneSessionManager: NSObject, ObservableObject {
         }
     }
 
+    /// The settings the watch consumes, as currently stored on the phone.
+    var watchSettings: WatchSettings {
+        WatchSettings(teamAColorHex: teamAColorHex,
+                      teamBColorHex: teamBColorHex,
+                      sportSetting: sportSetting)
+    }
+
     func pushSettingsToWatch() {
         guard WCSession.default.activationState == .activated,
               WCSession.default.isWatchAppInstalled else { return }
-        try? WCSession.default.updateApplicationContext([
-            WatchMessageKey.teamAColor: teamAColorHex,
-            WatchMessageKey.teamBColor: teamBColorHex,
-            WatchMessageKey.sportSetting: sportSetting
-        ])
+        try? WCSession.default.updateApplicationContext(watchSettings.toApplicationContext())
     }
 }
 
