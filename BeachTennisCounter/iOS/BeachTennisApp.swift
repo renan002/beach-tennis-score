@@ -19,9 +19,12 @@ struct BeachTennisApp: App {
         do {
             return try ModelContainer(for: StoredMatch.self)
         } catch {
-            // Store is unreadable (e.g. schema migration failed). Move the SQLite
-            // files aside as a recoverable backup and start fresh.
-            StoreRecovery.moveStoreAside(in: .applicationSupportDirectory)
+            // Store is unreadable (e.g. schema migration failed). Quarantine
+            // the SQLite files intact and start fresh.
+            StoreRecovery.quarantine(
+                in: .applicationSupportDirectory,
+                reason: String(describing: error)
+            )
             do {
                 return try ModelContainer(for: StoredMatch.self)
             } catch {
