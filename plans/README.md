@@ -18,7 +18,7 @@ update your row when done.
 | 004 | Stop silently dropping match results when the session isn't activated | P2 | S | 003 | [#4](https://github.com/renan002/beach-tennis-score/issues/4) | DONE |
 | 005 | Sync settings to the watch on any dismissal; remove dead `pushColorsToWatch` | P2 | S | — (soft: 001) | [#5](https://github.com/renan002/beach-tennis-score/issues/5) | DONE |
 | 006 | Make the beach tennis super tiebreak win-by-2 | P3 | S | 001, 002 | [#6](https://github.com/renan002/beach-tennis-score/issues/6) | DONE |
-| 007 | Back up the SwiftData store on recovery instead of deleting it | P2 | S | — (soft: 001) | [#7](https://github.com/renan002/beach-tennis-score/issues/7) | TODO |
+| 007 | Back up the SwiftData store on recovery instead of deleting it | P2 | S | — (soft: 001) | [#7](https://github.com/renan002/beach-tennis-score/issues/7) | DONE |
 | 008 | Make history/detail views use the configured team colors | P3 | S | — (soft: 001) | [#8](https://github.com/renan002/beach-tennis-score/issues/8) | DONE |
 | 009 | Wire MARKETING_VERSION into both Info.plists | P3 | S | — | [#9](https://github.com/renan002/beach-tennis-score/issues/9) | DONE |
 | 010 | Swipe-to-delete matches in the iOS history list | P3 | S | — (soft: 001) | [#10](https://github.com/renan002/beach-tennis-score/issues/10) | DONE |
