@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 private let colorOptions: [(name: String, hex: String, color: Color)] = [
     ("Red",    "E74C3C", Color(hex: "E74C3C")),
@@ -13,9 +14,10 @@ struct SettingsView: View {
     @AppStorage("appTheme") private var appTheme: String = "system"
     @AppStorage("sportSetting") private var sportSetting: String = "beachTennis"
     @Environment(\.dismiss) private var dismiss
-    @State private var originalColorA = ""
-    @State private var originalColorB = ""
-    @State private var originalSport = ""
+    @Environment(\.modelContext) private var modelContext
+    @State private var syncedSettings: WatchSettings?
+    @State private var quarantines: [QuarantinedStore] = []
+    @State private var liveMatchIDs: Set<UUID> = []
 
     var body: some View {
         NavigationStack {
@@ -38,6 +40,14 @@ struct SettingsView: View {
                     colorPicker(label: "Team B", hexBinding: $phoneSession.teamBColorHex)
                 }
 
+                if !quarantines.isEmpty {
+                    QuarantinedStoresSection(
+                        quarantines: quarantines,
+                        liveMatchIDs: liveMatchIDs,
+                        reload: reloadQuarantines
+                    )
+                }
+
                 Section("Appearance") {
                     Picker("Theme", selection: $appTheme) {
                         Text("System").tag("system")
@@ -58,10 +68,9 @@ struct SettingsView: View {
                 }
             }
             .preferredColorScheme(colorScheme)
+            .task { reloadQuarantines() }
             .onAppear {
-                originalColorA = phoneSession.teamAColorHex
-                originalColorB = phoneSession.teamBColorHex
-                originalSport = sportSetting
+                syncedSettings = phoneSession.watchSettings
             }
             .onDisappear {
                 syncToWatchIfChanged()
@@ -76,11 +85,17 @@ struct SettingsView: View {
         }
     }
 
+    private func reloadQuarantines() {
+        quarantines = StoreRecovery.listQuarantinedStores(in: LiveStore.directory)
+        let ids = (try? modelContext.fetch(FetchDescriptor<StoredMatch>()))?.map(\.id) ?? []
+        liveMatchIDs = Set(ids)
+    }
+
     private var sportSettingFooter: String {
         switch sportSetting {
-        case "tennis":    return "The Watch will always start a Tennis match."
-        case "multiple":  return "The Watch will ask which sport before each match."
-        default:          return "The Watch will always start a Beach Tennis match."
+        case "tennis":    return String(localized: "The Watch will always start a Tennis match.")
+        case "multiple":  return String(localized: "The Watch will ask which sport before each match.")
+        default:          return String(localized: "The Watch will always start a Beach Tennis match.")
         }
     }
 
@@ -124,14 +139,10 @@ struct SettingsView: View {
     }
 
     private func syncToWatchIfChanged() {
-        let colorsChanged = phoneSession.teamAColorHex != originalColorA
-            || phoneSession.teamBColorHex != originalColorB
-        let sportChanged = sportSetting != originalSport
-        guard colorsChanged || sportChanged else { return }
+        let current = phoneSession.watchSettings
+        guard current != syncedSettings else { return }
         phoneSession.pushSettingsToWatch()
-        // Refresh baselines so a later onDisappear doesn't double-push.
-        originalColorA = phoneSession.teamAColorHex
-        originalColorB = phoneSession.teamBColorHex
-        originalSport = sportSetting
+        // Refresh the baseline so a later onDisappear doesn't double-push.
+        syncedSettings = current
     }
 }

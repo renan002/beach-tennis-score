@@ -7,8 +7,12 @@ final class StoredMatch {
     var date: Date
     var setScoreA: Int
     var setScoreB: Int
-    var setsWonA: Int
-    var setsWonB: Int
+    // Property-level defaults (not just init defaults): SwiftData lightweight
+    // migration only accepts an added non-optional attribute when it is
+    // declared with a default here. Without these, a 1.1.x store fails to
+    // migrate (CocoaError 134110). See #47.
+    var setsWonA: Int = 0
+    var setsWonB: Int = 0
     var winner: String
     var duration: TimeInterval
     var gameHistoryData: Data = Data()
@@ -39,6 +43,25 @@ final class StoredMatch {
         self.gameHistoryData = gameHistoryData
         self.setHistoryData = setHistoryData
         self.matchTypeRaw = matchTypeRaw
+    }
+
+    /// A detached copy for inserting into another context. Copies every
+    /// persisted property — a match restored from a Quarantined Store must
+    /// round-trip whole, so a new field belongs here too.
+    convenience init(copying other: StoredMatch) {
+        self.init(
+            id: other.id,
+            date: other.date,
+            setScoreA: other.setScoreA,
+            setScoreB: other.setScoreB,
+            setsWonA: other.setsWonA,
+            setsWonB: other.setsWonB,
+            winner: other.winner,
+            duration: other.duration,
+            gameHistoryData: other.gameHistoryData,
+            setHistoryData: other.setHistoryData,
+            matchTypeRaw: other.matchTypeRaw
+        )
     }
 
     var matchType: MatchType { MatchType(rawValue: matchTypeRaw) ?? .beachTennis }

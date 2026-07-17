@@ -3,12 +3,13 @@ import SwiftUI
 struct MatchHistoryView: View {
     @EnvironmentObject private var sessionManager: WatchSessionManager
     let history: [GameRecord]
+    let matchType: MatchType
 
     var body: some View {
         List {
             ForEach(history, id: \.gameNumber) { record in
                 HStack {
-                    Text("Game \(record.gameNumber)")
+                    Text(matchType.gameLabel(record.gameNumber))
                         .font(.caption2)
                         .foregroundColor(.secondary)
 

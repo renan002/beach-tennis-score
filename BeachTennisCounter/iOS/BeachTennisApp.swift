@@ -8,29 +8,11 @@ struct BeachTennisApp: App {
     @AppStorage("appTheme") private var appTheme: String = "system"
 
     init() {
-        let c = Self.makeContainer()
+        let c = LiveStore.open(in: LiveStore.directory)
         container = c
         let session = PhoneSessionManager.shared
         session.setModelContainer(c)
         _phoneSession = StateObject(wrappedValue: session)
-    }
-
-    private static func makeContainer() -> ModelContainer {
-        do {
-            return try ModelContainer(for: StoredMatch.self)
-        } catch {
-            // Store is unreadable (e.g. schema migration failed). Delete all SQLite files and start fresh.
-            let base = URL.applicationSupportDirectory.appending(path: "default.store")
-            for suffix in ["", "-shm", "-wal"] {
-                let url = base.deletingLastPathComponent().appending(path: "default.store\(suffix)")
-                try? FileManager.default.removeItem(at: url)
-            }
-            do {
-                return try ModelContainer(for: StoredMatch.self)
-            } catch {
-                fatalError("ModelContainer unrecoverable: \(error)")
-            }
-        }
     }
 
     var body: some Scene {
