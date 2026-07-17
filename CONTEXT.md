@@ -29,6 +29,23 @@ The earlier states of the match currently being scored, kept only so a player
 can take back a point they entered by mistake. Discarded when the match ends.
 _Avoid_: history
 
+### Scoring units
+
+**Game**:
+The unit of scoring won by taking points (0 → 15 → 30 → 40). Internally always
+called a game, in both sports (`GameRecord`, Game Log).
+
+**Set**:
+In tennis, a real set — a collection of games. In beach tennis there are no
+sets; the match is a single sequence of games, but the UI displays each beach
+game as a "Set". This is the established Brazilian beach-tennis convention and
+applies in every language, not just pt-BR.
+
+> Display rule: the Game/Set label is a function of the sport, never of the
+> locale. Beach tennis game-level labels read "Set N" in all languages; tennis
+> reads "Game N" for games and "Set N" for sets in all languages ("game" and
+> "set" are loanwords in pt-BR tennis).
+
 ### Store recovery
 
 **Store**:
