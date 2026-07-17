@@ -25,6 +25,7 @@
 		4C2319FAD9E54883D0B2A29D /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 01524542216A4D00FBAE3460 /* Localizable.strings */; };
 		4CFF37933BBA096F45B9EF4E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = A25238A822F6D0E5A38AA7E5 /* Localizable.strings */; };
 		564FFB929783F14E683261CB /* StoreRecovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC40D6416C38F7B65B653DD8 /* StoreRecovery.swift */; };
+		67103C2A175B4DA92518633A /* WatchSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E310D764A0970D265C75E09 /* WatchSettings.swift */; };
 		71D24E07EBDC009124B556AE /* ScoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0997213C193AD77CEACD376 /* ScoreView.swift */; };
 		77AE42A898482A62ECC20CA6 /* PointScoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C4F5BF1EE5C2D60E7F3EFD5 /* PointScoreTests.swift */; };
 		78C92880128A099B24A7CD48 /* MatchTypeSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1E89B8A918542FFB3F0389D /* MatchTypeSelectionView.swift */; };
