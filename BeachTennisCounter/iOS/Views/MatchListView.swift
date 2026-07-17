@@ -65,7 +65,7 @@ struct MatchListView: View {
     }
 
     private func reloadQuarantines() {
-        quarantines = StoreRecovery.listQuarantinedStores(in: .applicationSupportDirectory)
+        quarantines = StoreRecovery.listQuarantinedStores(in: LiveStore.directory)
     }
 
     private var restoreNotice: some View {

@@ -86,7 +86,7 @@ struct SettingsView: View {
     }
 
     private func reloadQuarantines() {
-        quarantines = StoreRecovery.listQuarantinedStores(in: .applicationSupportDirectory)
+        quarantines = StoreRecovery.listQuarantinedStores(in: LiveStore.directory)
         let ids = (try? modelContext.fetch(FetchDescriptor<StoredMatch>()))?.map(\.id) ?? []
         liveMatchIDs = Set(ids)
     }
