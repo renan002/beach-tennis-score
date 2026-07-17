@@ -57,9 +57,9 @@ struct MatchDetailView: View {
 
             let history = match.gameHistory
             if !history.isEmpty {
-                Section("Games") {
+                Section(match.matchType.gamesSectionTitle) {
                     ForEach(history, id: \.gameNumber) { record in
-                        GameRecordRow(record: record)
+                        GameRecordRow(record: record, matchType: match.matchType)
                     }
                 }
             }
@@ -106,11 +106,12 @@ private struct SetRecordRow: View {
 private struct GameRecordRow: View {
     @EnvironmentObject private var phoneSession: PhoneSessionManager
     let record: GameRecord
+    let matchType: MatchType
 
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Game \(record.gameNumber)")
+                Text(matchType.gameLabel(record.gameNumber))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 if let score = record.gameScoreDisplay {

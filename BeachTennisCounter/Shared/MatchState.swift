@@ -28,6 +28,22 @@ enum MatchType: String, Codable, Sendable, CaseIterable {
         case .tennis: return "tennis.racket"
         }
     }
+
+    // Beach tennis displays each game as a "Set" in every language, never by
+    // locale — see CONTEXT.md "Scoring units".
+    func gameLabel(_ number: Int) -> String {
+        switch self {
+        case .beachTennis: return String(localized: "Set \(number)")
+        case .tennis: return String(localized: "Game \(number)")
+        }
+    }
+
+    var gamesSectionTitle: String {
+        switch self {
+        case .beachTennis: return String(localized: "Sets")
+        case .tennis: return String(localized: "Games")
+        }
+    }
 }
 
 enum PointScore: Int, Codable, Sendable, CaseIterable {

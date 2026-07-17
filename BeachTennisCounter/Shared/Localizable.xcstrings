@@ -72,10 +72,18 @@
       }
     },
     "Game %lld" : {
-      "comment" : "The beach tennis UI deliberately calls games \"Sets\" in pt-BR — see CLAUDE.md.",
+      "comment" : "Tennis game rows only; \"game\" is a loanword in pt-BR tennis, keep untranslated. Beach games use the \"Set %lld\" key instead, chosen by MatchType.gameLabel — see CONTEXT.md \"Scoring units\".",
       "localizations" : {
         "pt-BR" : {
-          "stringUnit" : { "state" : "translated", "value" : "Set %lld" }
+          "stringUnit" : { "state" : "translated", "value" : "Game %lld" }
+        }
+      }
+    },
+    "Games" : {
+      "comment" : "Tennis-mode section header; loanword in pt-BR, keep untranslated — see CONTEXT.md \"Scoring units\".",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Games" }
         }
       }
     },
@@ -181,6 +189,22 @@
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : { "state" : "translated", "value" : "Escolha o Esporte" }
+        }
+      }
+    },
+    "Set %lld" : {
+      "comment" : "Tennis set rows AND beach-tennis game rows (beach displays games as \"Sets\" in every language); \"set\" is a loanword in pt-BR, keep untranslated — see CONTEXT.md \"Scoring units\".",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Set %lld" }
+        }
+      }
+    },
+    "Sets" : {
+      "comment" : "Section header / score-view label in both sports; loanword in pt-BR, keep untranslated — see CONTEXT.md \"Scoring units\".",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : { "state" : "translated", "value" : "Sets" }
         }
       }
     },
