@@ -79,6 +79,7 @@ targets:
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         WKCompanionAppBundleIdentifier: com.renan.beachtennis
         WKApplication: true
+        WKRunsIndependentlyOfCompanionApp: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.renan.beachtennis.watchkitapp
