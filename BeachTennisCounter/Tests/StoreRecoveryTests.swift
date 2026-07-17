@@ -156,4 +156,109 @@ final class StoreRecoveryTests: XCTestCase {
         XCTAssertFalse(manifest.appVersion.isEmpty)
         XCTAssertFalse(manifest.build.isEmpty)
     }
+
+    // MARK: - Cap and backup exclusion
+
+    /// Quarantines the store `count` times at one-hour intervals starting from
+    /// `start`, re-creating the store between calls (each quarantine moves it
+    /// away). Returns the created dirs oldest-first.
+    @discardableResult
+    private func quarantineRepeatedly(_ count: Int, from start: Date) throws -> [URL] {
+        var dirs: [URL] = []
+        for i in 0..<count {
+            try Data("x".utf8).write(to: tempDir.appending(path: "default.store"))
+            let dir = try XCTUnwrap(StoreRecovery.quarantine(
+                in: tempDir, reason: "test",
+                now: start.addingTimeInterval(Double(i) * 3600)))
+            dirs.append(dir)
+        }
+        return dirs
+    }
+
+    private func quarantineDirs() throws -> [URL] {
+        try FileManager.default.contentsOfDirectory(
+            at: tempDir, includingPropertiesForKeys: nil)
+            .filter { $0.lastPathComponent.hasPrefix(StoreRecovery.quarantineDirPrefix) }
+    }
+
+    /// Plants a pre-existing quarantine folder with a chosen name and manifest
+    /// timestamp — letting a test set folder-name order and manifest-recency
+    /// order independently.
+    private func plantQuarantine(named name: String, quarantinedAt: Date) throws {
+        let dir = tempDir.appending(path: name)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let manifest = QuarantineManifest(
+            appVersion: "1.0", build: "1", quarantinedAt: quarantinedAt,
+            reason: "planted", files: ["default.store"])
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        try encoder.encode(manifest).write(
+            to: dir.appending(path: StoreRecovery.manifestFileName))
+    }
+
+    func test_capsQuarantinesAtNewestThree() throws {
+        try quarantineRepeatedly(4, from: Date(timeIntervalSince1970: 0))
+
+        XCTAssertEqual(try quarantineDirs().count, StoreRecovery.maxQuarantineCount)
+    }
+
+    func test_underCap_keepsAllQuarantines() throws {
+        try quarantineRepeatedly(3, from: Date(timeIntervalSince1970: 0))
+
+        XCTAssertEqual(try quarantineDirs().count, 3)
+    }
+
+    /// The pruned folder is the oldest by manifest recency, and the newest three
+    /// survive — established through their manifest timestamps, not folder names.
+    func test_prunesOldestByRecency_keepingNewest() throws {
+        let start = Date(timeIntervalSince1970: 0)
+        try quarantineRepeatedly(4, from: start)
+
+        let survivingDates = try quarantineDirs().map { dir -> Date in
+            let data = try Data(contentsOf: dir.appending(path: StoreRecovery.manifestFileName))
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            return try decoder.decode(QuarantineManifest.self, from: data).quarantinedAt
+        }.sorted()
+
+        XCTAssertEqual(survivingDates, [
+            start.addingTimeInterval(3600),
+            start.addingTimeInterval(7200),
+            start.addingTimeInterval(10800),
+        ])
+    }
+
+    /// The AC that matters most: pruning follows manifest recency, not folder
+    /// name. Here the two orders are deliberately reversed — the lexically
+    /// *smallest* name holds the *newest* manifest — so a name-sort would prune
+    /// the wrong folder and this test would fail.
+    func test_prunesByManifestRecency_notByFolderName() throws {
+        // name order ascending: 2000 < 2001 < 2002 ; manifest recency reversed.
+        try plantQuarantine(named: "quarantined-store-2000-01-01T00-00-00Z",
+                            quarantinedAt: Date(timeIntervalSince1970: 4000)) // newest manifest, oldest name
+        try plantQuarantine(named: "quarantined-store-2001-01-01T00-00-00Z",
+                            quarantinedAt: Date(timeIntervalSince1970: 3000))
+        try plantQuarantine(named: "quarantined-store-2002-01-01T00-00-00Z",
+                            quarantinedAt: Date(timeIntervalSince1970: 2000)) // oldest manifest
+
+        // A fourth quarantine trips the cap and prunes exactly one folder.
+        try Data("x".utf8).write(to: tempDir.appending(path: "default.store"))
+        _ = try XCTUnwrap(StoreRecovery.quarantine(
+            in: tempDir, reason: "test", now: Date(timeIntervalSince1970: 2500)))
+
+        let names = Set(try quarantineDirs().map(\.lastPathComponent))
+        // Kept despite its oldest name — newest by manifest.
+        XCTAssertTrue(names.contains("quarantined-store-2000-01-01T00-00-00Z"))
+        // Pruned despite not being the oldest name — oldest by manifest.
+        XCTAssertFalse(names.contains("quarantined-store-2002-01-01T00-00-00Z"))
+    }
+
+    func test_quarantineDir_isExcludedFromBackup() throws {
+        try Data("x".utf8).write(to: tempDir.appending(path: "default.store"))
+
+        let quarantineDir = try XCTUnwrap(StoreRecovery.quarantine(in: tempDir, reason: "test"))
+
+        let values = try quarantineDir.resourceValues(forKeys: [.isExcludedFromBackupKey])
+        XCTAssertEqual(values.isExcludedFromBackup, true)
+    }
 }
