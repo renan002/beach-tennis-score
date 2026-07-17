@@ -45,6 +45,25 @@ final class StoredMatch {
         self.matchTypeRaw = matchTypeRaw
     }
 
+    /// A detached copy for inserting into another context. Copies every
+    /// persisted property — a match restored from a Quarantined Store must
+    /// round-trip whole, so a new field belongs here too.
+    convenience init(copying other: StoredMatch) {
+        self.init(
+            id: other.id,
+            date: other.date,
+            setScoreA: other.setScoreA,
+            setScoreB: other.setScoreB,
+            setsWonA: other.setsWonA,
+            setsWonB: other.setsWonB,
+            winner: other.winner,
+            duration: other.duration,
+            gameHistoryData: other.gameHistoryData,
+            setHistoryData: other.setHistoryData,
+            matchTypeRaw: other.matchTypeRaw
+        )
+    }
+
     var matchType: MatchType { MatchType(rawValue: matchTypeRaw) ?? .beachTennis }
     var gameHistory: [GameRecord] { (try? JSONDecoder().decode([GameRecord].self, from: gameHistoryData)) ?? [] }
     var setHistory: [SetRecord] { (try? JSONDecoder().decode([SetRecord].self, from: setHistoryData)) ?? [] }
