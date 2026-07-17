@@ -52,7 +52,7 @@ struct ScoreView: View {
             sessionManager.sendMatchResult(state, duration: Date().timeIntervalSince(state.matchStartDate))
         }
         .sheet(isPresented: $showHistory) {
-            MatchHistoryView(history: state.gameHistory)
+            MatchHistoryView(history: state.gameHistory, matchType: matchType)
                 .environmentObject(sessionManager)
         }
         .alert("Cancel Match?", isPresented: $showCancelAlert) {
@@ -85,7 +85,7 @@ struct ScoreView: View {
 
     private var topBar: some View {
         ZStack {
-            Text(matchType == .tennis ? "Sets" : "Sets")
+            Text("Sets")
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
