@@ -13,9 +13,7 @@ struct SettingsView: View {
     @AppStorage("appTheme") private var appTheme: String = "system"
     @AppStorage("sportSetting") private var sportSetting: String = "beachTennis"
     @Environment(\.dismiss) private var dismiss
-    @State private var originalColorA = ""
-    @State private var originalColorB = ""
-    @State private var originalSport = ""
+    @State private var syncedSettings: WatchSettings?
 
     var body: some View {
         NavigationStack {
@@ -59,9 +57,7 @@ struct SettingsView: View {
             }
             .preferredColorScheme(colorScheme)
             .onAppear {
-                originalColorA = phoneSession.teamAColorHex
-                originalColorB = phoneSession.teamBColorHex
-                originalSport = sportSetting
+                syncedSettings = phoneSession.watchSettings
             }
             .onDisappear {
                 syncToWatchIfChanged()
@@ -124,14 +120,10 @@ struct SettingsView: View {
     }
 
     private func syncToWatchIfChanged() {
-        let colorsChanged = phoneSession.teamAColorHex != originalColorA
-            || phoneSession.teamBColorHex != originalColorB
-        let sportChanged = sportSetting != originalSport
-        guard colorsChanged || sportChanged else { return }
+        let current = phoneSession.watchSettings
+        guard current != syncedSettings else { return }
         phoneSession.pushSettingsToWatch()
-        // Refresh baselines so a later onDisappear doesn't double-push.
-        originalColorA = phoneSession.teamAColorHex
-        originalColorB = phoneSession.teamBColorHex
-        originalSport = sportSetting
+        // Refresh the baseline so a later onDisappear doesn't double-push.
+        syncedSettings = current
     }
 }

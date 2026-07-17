@@ -57,10 +57,10 @@ final class WatchSessionManager: NSObject, ObservableObject {
         }
     }
 
-    private func applyColors(aHex: String?, bHex: String?, sport: String?) {
-        if let hex = aHex { teamAColor = Color(hex: hex) ?? .red }
-        if let hex = bHex { teamBColor = Color(hex: hex) ?? .blue }
-        if let s = sport { sportSetting = s }
+    private func apply(_ settings: WatchSettings) {
+        teamAColor = Color(hex: settings.teamAColorHex) ?? .red
+        teamBColor = Color(hex: settings.teamBColorHex) ?? .blue
+        sportSetting = settings.sportSetting
     }
 }
 
@@ -79,17 +79,14 @@ extension WatchSessionManager: WCSessionDelegate {
 
         let context = session.receivedApplicationContext
         guard !context.isEmpty else { return }
-        let aHex = context[WatchMessageKey.teamAColor] as? String
-        let bHex = context[WatchMessageKey.teamBColor] as? String
-        let sport = context[WatchMessageKey.sportSetting] as? String
-        Task { @MainActor in applyColors(aHex: aHex, bHex: bHex, sport: sport) }
+        let settings = WatchSettings.from(context)
+        Task { @MainActor in apply(settings) }
     }
 
     nonisolated func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
-        let aHex = applicationContext[WatchMessageKey.teamAColor] as? String
-        let bHex = applicationContext[WatchMessageKey.teamBColor] as? String
-        let sport = applicationContext[WatchMessageKey.sportSetting] as? String
-        Task { @MainActor in applyColors(aHex: aHex, bHex: bHex, sport: sport) }
+        guard !applicationContext.isEmpty else { return }
+        let settings = WatchSettings.from(applicationContext)
+        Task { @MainActor in apply(settings) }
     }
 }
 
