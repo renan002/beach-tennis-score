@@ -45,6 +45,7 @@ targets:
         CFBundleDisplayName: Beach Tennis Score
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        ITSAppUsesNonExemptEncryption: false
         UILaunchScreen:
           UIColorName: ""
         UISupportedInterfaceOrientations:
@@ -77,6 +78,7 @@ targets:
         CFBundleDisplayName: Beach Tennis Score
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        ITSAppUsesNonExemptEncryption: false
         WKCompanionAppBundleIdentifier: com.renan.beachtennis
         WKApplication: true
         WKRunsIndependentlyOfCompanionApp: true
