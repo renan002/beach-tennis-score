@@ -46,6 +46,34 @@ applies in every language, not just pt-BR.
 > reads "Game N" for games and "Set N" for sets in all languages ("game" and
 > "set" are loanwords in pt-BR tennis).
 
+### Monetization
+
+**Pro**:
+The one-time lifetime unlock, purchased on the iPhone. Pro gates Estatísticas,
+Vários, and removes the watermark from the Cartão de Resultado. Scoring is
+never gated: both sports are playable for free, and the watch app shows no
+purchase UI and no paywall — every Pro touchpoint lives on the phone.
+_Avoid_: premium, subscription, upgrade (as a noun)
+
+**Vários**:
+The sport-picker setting that makes the watch ask which sport before each
+match, instead of playing the one sport fixed in the iPhone settings. A Pro
+convenience: it gates comfort, never capability — a free player switches
+sports by changing the setting on the iPhone.
+_Avoid_: multiple mode, multi-sport (as user-facing copy)
+
+**Estatísticas**:
+Insights computed from the Match History (win rate, streaks, golden-point
+conversion, per-partner records). A Pro feature; lives where the Match History
+lives, on the phone.
+_Avoid_: insights, stats (in user-facing pt-BR copy)
+
+**Cartão de Resultado** (Result Card):
+A shareable image of a completed match's result, made to be posted to social
+media. Free for everyone, carrying a small app watermark; Pro removes the
+watermark. The watermark is the app's advertisement, not a defect.
+_Avoid_: screenshot, banner
+
 ### Store recovery
 
 **Store**:
