@@ -30,7 +30,7 @@ and update your row when done.
 | 012 | Localize the apps to Brazilian Portuguese via a String Catalog | P3 | M | — (soft: 001; land after 005, 008, 010, 011) | [#12](https://github.com/renan002/beach-tennis-score/issues/12) | DONE (re-scoped: migration, not greenfield — see plan note) |
 | 013 | Declare the File Timestamp required-reason API in the iOS privacy manifest | P2 | S | — | — | TODO |
 | 014 | Make the WatchConnectivity delivery guarantees unit-testable and test them | P2 | M | — | — | TODO |
-| 015 | Design named teams (spike — UX + migration) | P2 | M | — | — | TODO |
+| 015 | Design named teams (spike — UX + migration) | P2 | M | — | [#62](https://github.com/renan002/beach-tennis-score/issues/62) | DONE (GO — design at [015-player-team-names-design.md](015-player-team-names-design.md); spawns one M build plan) |
 | 016 | Design a HealthKit workout session on the watch (spike) | P2 | L | — | — | TODO |
 | 017 | Add a Match History summary/stats view to the iOS app | P3 | M | — (softer with 015) | — | TODO |
 | 018 | Share a match result from the iOS detail screen | P3 | S | — (softer with 015) | — | TODO |
