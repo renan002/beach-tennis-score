@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UIKit
 
 @main
 struct BeachTennisApp: App {
@@ -19,8 +20,33 @@ struct BeachTennisApp: App {
         WindowGroup {
             MatchListView()
                 .environmentObject(phoneSession)
-                .preferredColorScheme(appTheme == "light" ? .light : appTheme == "dark" ? .dark : nil)
+                .onAppear { applyTheme(appTheme) }
+                .onChange(of: appTheme) { _, theme in applyTheme(theme) }
         }
         .modelContainer(container)
+    }
+
+    /// Applies the theme by overriding the interface style on the window itself
+    /// rather than with `.preferredColorScheme`.
+    ///
+    /// `.preferredColorScheme(nil)` expresses *no preference* — it does not reset
+    /// a style that a previous non-nil value already latched onto a presentation
+    /// host. Selecting "system" after "light" or "dark" therefore left presented
+    /// sheets stuck on the old style. Writing `.unspecified` clears the override
+    /// explicitly, and because it is set on the window it cascades to sheets too.
+    @MainActor
+    private func applyTheme(_ theme: String) {
+        let style: UIUserInterfaceStyle
+        switch theme {
+        case "light": style = .light
+        case "dark":  style = .dark
+        default:      style = .unspecified
+        }
+        for scene in UIApplication.shared.connectedScenes {
+            guard let windowScene = scene as? UIWindowScene else { continue }
+            for window in windowScene.windows {
+                window.overrideUserInterfaceStyle = style
+            }
+        }
     }
 }

@@ -67,7 +67,6 @@ struct SettingsView: View {
                     }
                 }
             }
-            .preferredColorScheme(colorScheme)
             .task { reloadQuarantines() }
             .onAppear {
                 syncedSettings = phoneSession.watchSettings
@@ -101,14 +100,6 @@ struct SettingsView: View {
 
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
-    }
-
-    private var colorScheme: ColorScheme? {
-        switch appTheme {
-        case "light": return .light
-        case "dark":  return .dark
-        default:      return nil
-        }
     }
 
     @ViewBuilder
