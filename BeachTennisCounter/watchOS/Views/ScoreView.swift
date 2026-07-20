@@ -15,6 +15,10 @@ struct ScoreView: View {
     @State private var showHistory = false
     @State private var showCancelAlert = false
 
+    // PROTOTYPE (#93) — throwaway variant switching + stub workout stats
+    @State private var metricsVariant: MetricsPrototypeVariant = .invisible
+    @StateObject private var fakeStats = FakeWorkoutStats()
+
     init(initialServer: Team, matchType: MatchType, restoredState: MatchState? = nil, isActive: Binding<Bool>) {
         self.initialServer = initialServer
         self.matchType = restoredState?.matchType ?? matchType
@@ -78,8 +82,16 @@ struct ScoreView: View {
 
             squaresRow
 
+            if metricsVariant == .strip {
+                MetricsStrip(stats: fakeStats)
+            }
+
             bottomBar
                 .padding(.top, 4)
+        }
+        .overlay(alignment: .bottom) {
+            MetricsPrototypeSwitcher(variant: $metricsVariant)
+                .offset(y: 14)
         }
     }
 
@@ -100,6 +112,10 @@ struct ScoreView: View {
                 .disabled(history.isEmpty)
                 .padding(.leading, 6)
                 Spacer()
+                if metricsVariant == .topBar {
+                    MetricsTopBarReadout(stats: fakeStats)
+                        .padding(.trailing, 6)
+                }
             }
         }
     }
@@ -167,17 +183,32 @@ struct ScoreView: View {
 
     private var bottomBar: some View {
         ZStack {
-            Button {
-                showCancelAlert = true
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundStyle(.gray)
+            if metricsVariant == .bottomBar {
+                MetricsBottomBarCenter(stats: fakeStats)
+            } else {
+                Button {
+                    showCancelAlert = true
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(.gray)
+                }
+                .buttonStyle(.plain)
+                .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.plain)
-            .frame(maxWidth: .infinity)
 
             HStack {
+                if metricsVariant == .bottomBar {
+                    Button {
+                        showCancelAlert = true
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundStyle(.gray)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.leading, 6)
+                }
                 Spacer()
                 Button {
                     showHistory = true
