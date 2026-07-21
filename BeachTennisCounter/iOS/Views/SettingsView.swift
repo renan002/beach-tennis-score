@@ -11,7 +11,7 @@ private let colorOptions: [(name: String, hex: String, color: Color)] = [
 
 struct SettingsView: View {
     @EnvironmentObject private var phoneSession: PhoneSessionManager
-    @AppStorage("appTheme") private var appTheme: String = "system"
+    @AppStorage("appTheme") private var appTheme: AppTheme = .system
     @AppStorage("sportSetting") private var sportSetting: String = "beachTennis"
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -50,9 +50,9 @@ struct SettingsView: View {
 
                 Section("Appearance") {
                     Picker("Theme", selection: $appTheme) {
-                        Text("System").tag("system")
-                        Text("Light").tag("light")
-                        Text("Dark").tag("dark")
+                        Text("System").tag(AppTheme.system)
+                        Text("Light").tag(AppTheme.light)
+                        Text("Dark").tag(AppTheme.dark)
                     }
                     .pickerStyle(.segmented)
                 }
