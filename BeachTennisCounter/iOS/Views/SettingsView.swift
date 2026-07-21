@@ -18,6 +18,8 @@ struct SettingsView: View {
     @State private var syncedSettings: WatchSettings?
     @State private var quarantines: [QuarantinedStore] = []
     @State private var liveMatchIDs: Set<UUID> = []
+    /// PROTOTYPE (#102) — variant + faked watch auth status. Remove with the switch below.
+    @StateObject private var proto = HealthSectionPrototype()
 
     var body: some View {
         NavigationStack {
@@ -44,13 +46,19 @@ struct SettingsView: View {
                             hexBinding: $phoneSession.teamBColorHex)
                 }
 
-                Section {
-                    Toggle("Health Monitoring", isOn: healthMonitoringBinding)
-                        .disabled(isHealthDenied)
-                } header: {
-                    Text("Health")
-                } footer: {
-                    Text(healthFooter)
+                // PROTOTYPE (#102, branch prototype/102-health-toggle): the three
+                // Health-section variants replace the shipped section. Revert this
+                // hunk when the prototype is done.
+                switch proto.variant {
+                case .a:
+                    HealthSectionVariantA(isOn: $phoneSession.healthMonitoringEnabled,
+                                          denied: proto.fakedStatus == .denied)
+                case .b:
+                    HealthSectionVariantB(isOn: $phoneSession.healthMonitoringEnabled,
+                                          denied: proto.fakedStatus == .denied)
+                case .c:
+                    HealthSectionVariantC(isOn: $phoneSession.healthMonitoringEnabled,
+                                          status: proto.fakedStatus)
                 }
 
                 if !quarantines.isEmpty {
@@ -93,6 +101,11 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.bottom, 8)
+            }
+            // PROTOTYPE (#102) — floating variant switcher. Remove with the switch above.
+            .overlay(alignment: .bottom) {
+                HealthPrototypeBar(proto: proto)
+                    .padding(.bottom, 28)
             }
         }
     }
