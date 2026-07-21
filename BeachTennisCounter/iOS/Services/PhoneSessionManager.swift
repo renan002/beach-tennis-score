@@ -10,6 +10,16 @@ final class PhoneSessionManager: NSObject, ObservableObject {
     @AppStorage("teamAColorHex") var teamAColorHex: String = WatchSettings.defaultTeamAColorHex
     @AppStorage("teamBColorHex") var teamBColorHex: String = WatchSettings.defaultTeamBColorHex
     @AppStorage("sportSetting") var sportSetting: String = WatchSettings.defaultSportSetting
+    @AppStorage("healthMonitoringEnabled") var healthMonitoringEnabled: Bool = WatchSettings.defaultHealthMonitoringEnabled
+
+    /// Last-known HealthKit authorization status reported by the watch, persisted
+    /// raw. The phone can't query the watch's grant directly; the watch pushes it
+    /// on change. `.denied` drives the Settings toggle into its disabled override.
+    @AppStorage("watchHealthAuthStatus") var watchHealthAuthStatusRaw: String = HealthAuthStatus.undetermined.rawValue
+
+    var watchHealthAuthStatus: HealthAuthStatus {
+        HealthAuthStatus(rawValue: watchHealthAuthStatusRaw) ?? .undetermined
+    }
 
     /// nil = session not yet activated (unknown); true/false = known state
     @Published private(set) var isWatchAppInstalled: Bool? = nil
@@ -32,7 +42,8 @@ final class PhoneSessionManager: NSObject, ObservableObject {
     var watchSettings: WatchSettings {
         WatchSettings(teamAColorHex: teamAColorHex,
                       teamBColorHex: teamBColorHex,
-                      sportSetting: sportSetting)
+                      sportSetting: sportSetting,
+                      healthMonitoringEnabled: healthMonitoringEnabled)
     }
 
     func pushSettingsToWatch() {
@@ -49,7 +60,11 @@ extension PhoneSessionManager: WCSessionDelegate {
         error: (any Error)?
     ) {
         let installed = session.isWatchAppInstalled
-        Task { @MainActor in isWatchAppInstalled = installed }
+        let status = HealthAuthStatusMessage.status(from: session.receivedApplicationContext)
+        Task { @MainActor in
+            isWatchAppInstalled = installed
+            if let status { watchHealthAuthStatusRaw = status.rawValue }
+        }
     }
 
     nonisolated func sessionWatchStateDidChange(_ session: WCSession) {
@@ -68,6 +83,14 @@ extension PhoneSessionManager: WCSessionDelegate {
 
     nonisolated func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {
         insertMatch(from: userInfo)
+    }
+
+    nonisolated func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
+        // The watch→phone channel carries only the HealthKit auth status. Decode
+        // the Sendable value before crossing onto the main actor; an unrecognized
+        // or absent value returns nil and leaves the persisted status untouched.
+        guard let status = HealthAuthStatusMessage.status(from: applicationContext) else { return }
+        Task { @MainActor in watchHealthAuthStatusRaw = status.rawValue }
     }
 
     private nonisolated func insertMatch(from dict: [String: Any]) {
@@ -96,7 +119,9 @@ extension PhoneSessionManager: WCSessionDelegate {
                 setHistoryData: setData,
                 matchTypeRaw: payload.matchType.rawValue,
                 teamAName: payload.teamAName,
-                teamBName: payload.teamBName
+                teamBName: payload.teamBName,
+                activeCalories: payload.activeCalories,
+                avgHeartRate: payload.avgHeartRate
             )
             context.insert(match)
             try? context.save()

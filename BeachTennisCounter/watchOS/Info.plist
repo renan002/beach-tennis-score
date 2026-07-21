@@ -22,8 +22,16 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Beach Tennis Score reads your heart rate and calories during a match to show your heart rate live and record your workout stats.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Beach Tennis Score saves each match as a workout in the Health app so you get activity credit.</string>
 	<key>WKApplication</key>
 	<true/>
+	<key>WKBackgroundModes</key>
+	<array>
+		<string>workout-processing</string>
+	</array>
 	<key>WKCompanionAppBundleIdentifier</key>
 	<string>com.renan.beachtennis</string>
 	<key>WKRunsIndependentlyOfCompanionApp</key>

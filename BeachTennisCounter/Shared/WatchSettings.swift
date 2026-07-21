@@ -10,16 +10,31 @@ struct WatchSettings: Sendable, Equatable {
     static let defaultTeamAColorHex = "E74C3C"
     static let defaultTeamBColorHex = "5B8DEF"
     static let defaultSportSetting = "beachTennis"
+    static let defaultHealthMonitoringEnabled = true
 
     let teamAColorHex: String
     let teamBColorHex: String
     let sportSetting: String
+    let healthMonitoringEnabled: Bool
+
+    init(
+        teamAColorHex: String,
+        teamBColorHex: String,
+        sportSetting: String,
+        healthMonitoringEnabled: Bool = defaultHealthMonitoringEnabled
+    ) {
+        self.teamAColorHex = teamAColorHex
+        self.teamBColorHex = teamBColorHex
+        self.sportSetting = sportSetting
+        self.healthMonitoringEnabled = healthMonitoringEnabled
+    }
 
     func toApplicationContext() -> [String: Any] {
         [
             WatchMessageKey.teamAColor: teamAColorHex,
             WatchMessageKey.teamBColor: teamBColorHex,
-            WatchMessageKey.sportSetting: sportSetting
+            WatchMessageKey.sportSetting: sportSetting,
+            WatchMessageKey.healthMonitoring: healthMonitoringEnabled
         ]
     }
 
@@ -30,7 +45,8 @@ struct WatchSettings: Sendable, Equatable {
         WatchSettings(
             teamAColorHex: dict[WatchMessageKey.teamAColor] as? String ?? defaultTeamAColorHex,
             teamBColorHex: dict[WatchMessageKey.teamBColor] as? String ?? defaultTeamBColorHex,
-            sportSetting: dict[WatchMessageKey.sportSetting] as? String ?? defaultSportSetting
+            sportSetting: dict[WatchMessageKey.sportSetting] as? String ?? defaultSportSetting,
+            healthMonitoringEnabled: dict[WatchMessageKey.healthMonitoring] as? Bool ?? defaultHealthMonitoringEnabled
         )
     }
 }

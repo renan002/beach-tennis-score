@@ -6,11 +6,13 @@ final class WatchSettingsTests: XCTestCase {
     private func makeSettings(
         teamAColorHex: String = "E74C3C",
         teamBColorHex: String = "5B8DEF",
-        sportSetting: String = "beachTennis"
+        sportSetting: String = "beachTennis",
+        healthMonitoringEnabled: Bool = true
     ) -> WatchSettings {
         WatchSettings(teamAColorHex: teamAColorHex,
                       teamBColorHex: teamBColorHex,
-                      sportSetting: sportSetting)
+                      sportSetting: sportSetting,
+                      healthMonitoringEnabled: healthMonitoringEnabled)
     }
 
     // MARK: - Round-trip
@@ -45,7 +47,7 @@ final class WatchSettingsTests: XCTestCase {
         XCTAssertEqual(context[WatchMessageKey.teamAColor] as? String, "AABBCC")
         XCTAssertEqual(context[WatchMessageKey.teamBColor] as? String, "DDEEFF")
         XCTAssertEqual(context[WatchMessageKey.sportSetting] as? String, "tennis")
-        XCTAssertEqual(context.count, 3)
+        XCTAssertEqual(context.count, 4)
     }
 
     // MARK: - Missing fields fall back to defaults (full-trio replace semantics)
@@ -79,5 +81,25 @@ final class WatchSettingsTests: XCTestCase {
     func test_from_emptyDict_usesAllDefaults() {
         let decoded = WatchSettings.from([:])
         XCTAssertEqual(decoded, makeSettings())
+    }
+
+    // MARK: - Health Monitoring
+
+    func test_roundtrip_healthMonitoring() {
+        let decoded = WatchSettings.from(makeSettings(healthMonitoringEnabled: false).toApplicationContext())
+        XCTAssertFalse(decoded.healthMonitoringEnabled)
+    }
+
+    func test_from_missingHealthMonitoring_defaultsTrue() {
+        let decoded = WatchSettings.from([
+            WatchMessageKey.teamAColor: "2ECC71",
+            WatchMessageKey.teamBColor: "9B59B6",
+            WatchMessageKey.sportSetting: "tennis"
+        ])
+        XCTAssertTrue(decoded.healthMonitoringEnabled)
+    }
+
+    func test_from_emptyDict_healthMonitoringDefaultsTrue() {
+        XCTAssertTrue(WatchSettings.from([:]).healthMonitoringEnabled)
     }
 }

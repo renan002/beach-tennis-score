@@ -9,8 +9,10 @@ final class WatchSessionManager: NSObject, ObservableObject {
     @Published var teamAColor: Color = .red
     @Published var teamBColor: Color = .blue
     @Published var sportSetting: String = "beachTennis"
+    @Published var healthMonitoringEnabled: Bool = WatchSettings.defaultHealthMonitoringEnabled
 
     private nonisolated static let pendingResultKey = "pendingMatchResult"
+    private nonisolated static let lastReportedAuthKey = "lastReportedHealthAuthStatus"
 
     private override init() {
         super.init()
@@ -20,7 +22,12 @@ final class WatchSessionManager: NSObject, ObservableObject {
         }
     }
 
-    func sendMatchResult(_ state: MatchState, duration: TimeInterval) {
+    func sendMatchResult(
+        _ state: MatchState,
+        duration: TimeInterval,
+        activeCalories: Double? = nil,
+        avgHeartRate: Double? = nil
+    ) {
         guard let winner = state.winner else { return }
 
         let payload = MatchResultPayload(
@@ -36,7 +43,9 @@ final class WatchSessionManager: NSObject, ObservableObject {
             setHistory: state.setHistory,
             matchType: state.matchType,
             teamAName: state.teamAName,
-            teamBName: state.teamBName
+            teamBName: state.teamBName,
+            activeCalories: activeCalories,
+            avgHeartRate: avgHeartRate
         )
 
         guard WCSession.default.activationState == .activated else {
@@ -63,6 +72,21 @@ final class WatchSessionManager: NSObject, ObservableObject {
         teamAColor = Color(hex: settings.teamAColorHex) ?? .red
         teamBColor = Color(hex: settings.teamBColorHex) ?? .blue
         sportSetting = settings.sportSetting
+        healthMonitoringEnabled = settings.healthMonitoringEnabled
+    }
+
+    /// Pushes the watch's HealthKit authorization status to the phone, on change
+    /// only (the phone can't query it directly). The change gate is
+    /// `WorkoutPolicy.shouldReport` against the last value persisted here.
+    func reportHealthAuthStatus(_ status: HealthAuthStatus) {
+        let last = UserDefaults.standard.string(forKey: Self.lastReportedAuthKey)
+            .flatMap(HealthAuthStatus.init(rawValue:))
+        guard WorkoutPolicy.shouldReport(status: status, lastReported: last) else { return }
+        UserDefaults.standard.set(status.rawValue, forKey: Self.lastReportedAuthKey)
+        guard WCSession.default.activationState == .activated else { return }
+        try? WCSession.default.updateApplicationContext(
+            HealthAuthStatusMessage(status: status).toApplicationContext()
+        )
     }
 }
 
