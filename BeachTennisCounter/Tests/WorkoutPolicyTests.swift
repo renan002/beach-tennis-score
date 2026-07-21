@@ -7,14 +7,14 @@ final class WorkoutPolicyTests: XCTestCase {
 
     func test_start_whenEnabledAndIdle_attempts() {
         XCTAssertEqual(
-            WorkoutPolicy.startDecision(monitoringEnabled: true, sessionRunning: false),
+            WorkoutPolicy.startDecision(monitoringEnabled: true, sessionRunning: false, recoveryPending: false),
             .start
         )
     }
 
     func test_start_whenMonitoringOff_skips() {
         XCTAssertEqual(
-            WorkoutPolicy.startDecision(monitoringEnabled: false, sessionRunning: false),
+            WorkoutPolicy.startDecision(monitoringEnabled: false, sessionRunning: false, recoveryPending: false),
             .skip
         )
     }
@@ -22,14 +22,41 @@ final class WorkoutPolicyTests: XCTestCase {
     func test_start_whenAlreadyRunning_skips() {
         // Idempotence: a re-entered / resumed score screen must not start a second session.
         XCTAssertEqual(
-            WorkoutPolicy.startDecision(monitoringEnabled: true, sessionRunning: true),
+            WorkoutPolicy.startDecision(monitoringEnabled: true, sessionRunning: true, recoveryPending: false),
             .skip
         )
     }
 
     func test_start_whenOffAndRunning_skips() {
         XCTAssertEqual(
-            WorkoutPolicy.startDecision(monitoringEnabled: false, sessionRunning: true),
+            WorkoutPolicy.startDecision(monitoringEnabled: false, sessionRunning: true, recoveryPending: false),
+            .skip
+        )
+    }
+
+    // MARK: - Crash recovery race
+
+    func test_start_whileRecoveryPending_defers() {
+        // After a crash/force-quit the recovery lookup is async. Starting before it
+        // answers would give the resumed Match a second workout.
+        XCTAssertEqual(
+            WorkoutPolicy.startDecision(monitoringEnabled: true, sessionRunning: false, recoveryPending: true),
+            .deferUntilRecovered
+        )
+    }
+
+    func test_start_whileRecoveryPendingWithMonitoringOff_skips() {
+        // Monitoring off never touches HealthKit at all — nothing to wait for.
+        XCTAssertEqual(
+            WorkoutPolicy.startDecision(monitoringEnabled: false, sessionRunning: false, recoveryPending: true),
+            .skip
+        )
+    }
+
+    func test_start_whileRecoveryPendingWithSessionRunning_skips() {
+        // A session already attached answers the question: no start, no waiting.
+        XCTAssertEqual(
+            WorkoutPolicy.startDecision(monitoringEnabled: true, sessionRunning: true, recoveryPending: true),
             .skip
         )
     }

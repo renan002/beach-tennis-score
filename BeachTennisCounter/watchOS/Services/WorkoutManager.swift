@@ -31,6 +31,13 @@ final class WorkoutManager: NSObject, ObservableObject {
     /// session) must not start a second session.
     private var isSessionRunning: Bool { session != nil }
 
+    /// True from launch until `recoverActiveWorkoutSession` answers. A Match start
+    /// that lands in this window is held (`pendingStartMonitoringEnabled`) and
+    /// replayed once recovery resolves — otherwise a Match resumed right after a
+    /// force-quit would open a second workout alongside the recovered one.
+    private var isRecoveryPending = true
+    private var pendingStartMonitoringEnabled: Bool?
+
     private let typesToShare: Set<HKSampleType> = [HKQuantityType.workoutType()]
     private let typesToRead: Set<HKObjectType> = [
         HKQuantityType(.heartRate),
@@ -55,10 +62,19 @@ final class WorkoutManager: NSObject, ObservableObject {
 
         reportCurrentAuthStatus()
 
-        guard WorkoutPolicy.startDecision(
+        switch WorkoutPolicy.startDecision(
             monitoringEnabled: monitoringEnabled,
-            sessionRunning: isSessionRunning
-        ) == .start else { return }
+            sessionRunning: isSessionRunning,
+            recoveryPending: isRecoveryPending
+        ) {
+        case .skip:
+            return
+        case .deferUntilRecovered:
+            pendingStartMonitoringEnabled = monitoringEnabled
+            return
+        case .start:
+            break
+        }
 
         healthStore.requestAuthorization(toShare: typesToShare, read: typesToRead) { [weak self] _, _ in
             Task { @MainActor in
@@ -87,6 +103,9 @@ final class WorkoutManager: NSObject, ObservableObject {
     /// Ends and saves the workout asynchronously. The caller has already sent the
     /// Match result, so a save failure here can't lose the Match.
     func endAndFinish() {
+        // A start still waiting on recovery belongs to the Match that just ended —
+        // dropping it keeps a workout from opening behind the finished score screen.
+        pendingStartMonitoringEnabled = nil
         guard let session, let builder else { return }
         let end = Date()
         session.end()
@@ -102,6 +121,7 @@ final class WorkoutManager: NSObject, ObservableObject {
     /// Applies the cancel policy: below the threshold discard (accidental start),
     /// above it end and save (the exercise was real even if the Match wasn't).
     func cancelWorkout(elapsed: TimeInterval) {
+        pendingStartMonitoringEnabled = nil
         guard let session, let builder else { return }
         switch WorkoutPolicy.cancelDecision(elapsed: elapsed) {
         case .discard:
@@ -157,10 +177,25 @@ final class WorkoutManager: NSObject, ObservableObject {
     }
 
     private func recoverActiveSession() {
-        guard HKHealthStore.isHealthDataAvailable() else { return }
+        guard HKHealthStore.isHealthDataAvailable() else {
+            isRecoveryPending = false
+            return
+        }
         healthStore.recoverActiveWorkoutSession { session, _ in
-            guard let session else { return }
-            Task { @MainActor [weak self] in self?.attach(session) }
+            Task { @MainActor [weak self] in self?.recoveryDidFinish(with: session) }
+        }
+    }
+
+    /// Closes the recovery window: reattach a surviving session (the resumed Match
+    /// keeps its original workout), then replay a Match start that was held while
+    /// the lookup was in flight. With a session recovered the replayed start is a
+    /// no-op by idempotence; with none it starts a fresh workout as usual.
+    private func recoveryDidFinish(with recovered: HKWorkoutSession?) {
+        if let recovered { attach(recovered) }
+        isRecoveryPending = false
+        if let monitoringEnabled = pendingStartMonitoringEnabled {
+            pendingStartMonitoringEnabled = nil
+            matchDidStart(monitoringEnabled: monitoringEnabled)
         }
     }
 
