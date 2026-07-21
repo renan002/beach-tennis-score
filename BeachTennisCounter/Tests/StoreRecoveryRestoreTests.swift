@@ -26,7 +26,9 @@ final class StoreRecoveryRestoreTests: XCTestCase {
         duration: TimeInterval = 60,
         gameHistoryData: Data = Data(),
         teamAName: String = "",
-        teamBName: String = ""
+        teamBName: String = "",
+        activeCalories: Double? = nil,
+        avgHeartRate: Double? = nil
     ) -> StoredMatch {
         StoredMatch(
             id: id,
@@ -37,7 +39,9 @@ final class StoreRecoveryRestoreTests: XCTestCase {
             duration: duration,
             gameHistoryData: gameHistoryData,
             teamAName: teamAName,
-            teamBName: teamBName
+            teamBName: teamBName,
+            activeCalories: activeCalories,
+            avgHeartRate: avgHeartRate
         )
     }
 
@@ -181,6 +185,34 @@ final class StoreRecoveryRestoreTests: XCTestCase {
         let restored = try XCTUnwrap(try liveMatches().first { $0.id == named.id })
         XCTAssertEqual(restored.teamAName, "Renan")
         XCTAssertEqual(restored.teamBName, "Visitors")
+    }
+
+    func test_restore_roundTripsWorkoutStatsThroughTheCopyingInitializer() throws {
+        // Same copy seam as the Team Names: the workout stats must survive a
+        // restore, or recovering a Quarantined Store silently strips the heart
+        // rate and calories off every monitored match it brings back.
+        let monitored = makeMatch(activeCalories: 245.6, avgHeartRate: 142.3)
+        let quarantine = try quarantineStore(with: [monitored])
+
+        XCTAssertEqual(try StoreRecovery.restore(from: quarantine, into: liveContainer()), 1)
+
+        let restored = try XCTUnwrap(try liveMatches().first { $0.id == monitored.id })
+        XCTAssertEqual(try XCTUnwrap(restored.activeCalories), 245.6, accuracy: 0.001)
+        XCTAssertEqual(try XCTUnwrap(restored.avgHeartRate), 142.3, accuracy: 0.001)
+    }
+
+    func test_restore_roundTripsAbsentWorkoutStatsAsNil() throws {
+        // A match played with Health denied or monitoring off carries no stats;
+        // restore must bring it back absent, never zeroed — `nil` is the single
+        // absent state the detail rows key off.
+        let unmonitored = makeMatch()
+        let quarantine = try quarantineStore(with: [unmonitored])
+
+        XCTAssertEqual(try StoreRecovery.restore(from: quarantine, into: liveContainer()), 1)
+
+        let restored = try XCTUnwrap(try liveMatches().first { $0.id == unmonitored.id })
+        XCTAssertNil(restored.activeCalories)
+        XCTAssertNil(restored.avgHeartRate)
     }
 
     func test_restore_isIdempotent_secondRunInsertsNothing() throws {

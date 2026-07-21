@@ -69,6 +69,12 @@ final class LiveStoreTests: XCTestCase {
         XCTAssertEqual(matches.map(\.teamAName), ["", ""])
         XCTAssertEqual(matches.map(\.teamBName), ["", ""])
 
+        // Likewise the workout stats: a match played before the feature existed
+        // materializes them absent, never as a fabricated 0 kcal / 0 bpm — the
+        // detail rows hide on nil, so this is what keeps old matches unchanged.
+        XCTAssertEqual(matches.map(\.activeCalories), [nil, nil])
+        XCTAssertEqual(matches.map(\.avgHeartRate), [nil, nil])
+
         // A store that opens is never quarantined.
         XCTAssertTrue(try quarantineDirs().isEmpty)
     }
