@@ -22,9 +22,8 @@ struct ResultCard: Sendable, Equatable {
     /// Tennis only: the games in each completed set, "6-4  3-6  10-8". `nil`
     /// when there is no set to break down.
     let setBreakdown: String?
+    /// The side to highlight, `nil` when no known side won.
     let winner: Team?
-    /// The winning side's Team Name, `nil` when no known side won.
-    let winnerName: String?
     let sportName: String
     let dateText: String
     let durationText: String
@@ -35,12 +34,11 @@ struct ResultCard: Sendable, Equatable {
         teamAName = match.teamName(for: .a)
         teamBName = match.teamName(for: .b)
 
-        let sets = match.matchType == .tennis ? match.setHistory : []
-        let hasSetsWon = match.setsWonA > 0 || match.setsWonB > 0
-        if match.matchType == .tennis && hasSetsWon {
+        if match.isSetScored {
+            let sets = match.setHistory
             scoreA = match.setsWonA
             scoreB = match.setsWonB
-            scoreUnitLabel = String(localized: "Sets")
+            scoreUnitLabel = MatchType.setsSectionTitle
             setBreakdown = sets.isEmpty
                 ? nil
                 : sets.map { "\($0.gamesA)-\($0.gamesB)" }.joined(separator: "  ")
@@ -52,10 +50,13 @@ struct ResultCard: Sendable, Equatable {
         }
 
         winner = match.winnerTeam
-        winnerName = match.winnerTeam.map { match.teamName(for: $0) }
         sportName = match.matchType.displayName
         dateText = match.date.formatted(date: .abbreviated, time: .shortened)
-        durationText = match.durationDisplay
+        // Hours and minutes, localized by the system — the history screen's
+        // "75:20" is fine next to a "Duration" label but reads as a score on a
+        // card shared with no label at all.
+        durationText = Duration.seconds(match.duration)
+            .formatted(.units(allowed: [.hours, .minutes], width: .narrow))
         watermark = showsWatermark ? Self.appWatermark : nil
     }
 }

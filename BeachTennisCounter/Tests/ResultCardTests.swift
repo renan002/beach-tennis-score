@@ -96,7 +96,7 @@ final class ResultCardTests: XCTestCase {
 
         XCTAssertEqual(card.scoreA, 2)
         XCTAssertEqual(card.scoreB, 1)
-        XCTAssertEqual(card.scoreUnitLabel, String(localized: "Sets"))
+        XCTAssertEqual(card.scoreUnitLabel, MatchType.setsSectionTitle)
         XCTAssertEqual(card.setBreakdown, "6-4  3-6  10-8")
     }
 
@@ -117,11 +117,11 @@ final class ResultCardTests: XCTestCase {
 
     // MARK: - Winner
 
-    func test_winner_highlightsStoredSideWithItsName() {
+    func test_winner_isTheStoredSide() {
         let card = ResultCard(match: makeMatch(winner: "b", teamAName: "Renan", teamBName: "Visitors"))
 
         XCTAssertEqual(card.winner, .b)
-        XCTAssertEqual(card.winnerName, "Visitors")
+        XCTAssertEqual(card.teamBName, "Visitors")
     }
 
     /// A match whose stored winner names no known side highlights nobody
@@ -130,7 +130,6 @@ final class ResultCardTests: XCTestCase {
         let card = ResultCard(match: makeMatch(winner: ""))
 
         XCTAssertNil(card.winner)
-        XCTAssertNil(card.winnerName)
     }
 
     // MARK: - Sport, date, duration
@@ -150,11 +149,15 @@ final class ResultCardTests: XCTestCase {
         XCTAssertEqual(card.dateText, date.formatted(date: .abbreviated, time: .shortened))
     }
 
-    func test_durationText_matchesTheHistoryDisplay() {
-        let match = makeMatch(duration: 3_723)
-        let card = ResultCard(match: match)
+    /// The card carries the duration in hours and minutes — unlike the history
+    /// screen's "62:03", a card is shared with no "Duration" label beside it.
+    func test_durationText_isHoursAndMinutes() {
+        let card = ResultCard(match: makeMatch(duration: 3_723))
 
-        XCTAssertEqual(card.durationText, match.durationDisplay)
+        XCTAssertEqual(
+            card.durationText,
+            Duration.seconds(3_723).formatted(.units(allowed: [.hours, .minutes], width: .narrow))
+        )
     }
 
     // MARK: - Watermark

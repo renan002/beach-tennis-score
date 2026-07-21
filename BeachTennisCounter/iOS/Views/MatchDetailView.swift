@@ -3,10 +3,6 @@ import SwiftUI
 struct MatchDetailView: View {
     @EnvironmentObject private var phoneSession: PhoneSessionManager
     let match: StoredMatch
-    /// The Cartão de Resultado, rendered once the view is on screen. `nil`
-    /// while it renders (or if rendering fails), and the share action simply
-    /// isn't offered — nothing else on the screen depends on it.
-    @State private var cardImage: Image?
 
     var body: some View {
         List {
@@ -92,30 +88,23 @@ struct MatchDetailView: View {
         .navigationTitle("Match Details")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if let cardImage {
-                ToolbarItem(placement: .topBarTrailing) {
-                    ShareLink(
-                        item: cardImage,
-                        preview: SharePreview(Text("Result Card"), image: cardImage)
-                    ) {
-                        Label("Share Result Card", systemImage: "square.and.arrow.up")
-                    }
+            ToolbarItem(placement: .topBarTrailing) {
+                ShareLink(item: shareableCard, preview: SharePreview(Text("Result Card"))) {
+                    Label("Share Result Card", systemImage: "square.and.arrow.up")
                 }
             }
         }
-        .task { cardImage = renderCard() }
     }
 
-    /// Renders the card off the stored match — no network, no screenshot, so an
-    /// old match shares exactly like a fresh one.
-    @MainActor
-    private func renderCard() -> Image? {
-        let view = ResultCardView(
+    /// The card is built from the stored match alone — no network, no
+    /// screenshot — so a match recorded before this feature shipped shares
+    /// exactly like a fresh one.
+    private var shareableCard: ShareableResultCard {
+        ShareableResultCard(
             card: ResultCard(match: match),
             teamAColor: Color(hex: phoneSession.teamAColorHex),
             teamBColor: Color(hex: phoneSession.teamBColorHex)
         )
-        return view.rendered().map { Image(uiImage: $0) }
     }
 }
 

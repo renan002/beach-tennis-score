@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// Renders a `ResultCard` as the shareable Cartão de Resultado. Purely a shell
 /// around the model — every string and number it draws comes from `card`, so
@@ -115,14 +116,40 @@ struct ResultCardView: View {
 }
 
 extension ResultCardView {
-    /// The card as a shareable image, `nil` if rendering fails. `scale` lifts
-    /// the 400 pt card to a social-sized bitmap.
+    /// The card as an image, `nil` if rendering fails. `scale` lifts the 400 pt
+    /// card to a social-sized bitmap.
     @MainActor
     func rendered(scale: CGFloat = 3) -> UIImage? {
         let renderer = ImageRenderer(content: self)
         renderer.scale = scale
         renderer.isOpaque = true
         return renderer.uiImage
+    }
+}
+
+/// The card as the share sheet takes it. Rendering happens inside the export,
+/// so opening a match costs nothing and the share action is always offered —
+/// only the sharing player pays for the bitmap.
+struct ShareableResultCard: Transferable, Sendable {
+    let card: ResultCard
+    let teamAColor: Color
+    let teamBColor: Color
+
+    struct RenderFailure: Error {}
+
+    static var transferRepresentation: some TransferRepresentation {
+        DataRepresentation(exportedContentType: .png) { shareable in
+            try await shareable.pngData()
+        }
+        // Not localized: a file name, not display copy.
+        .suggestedFileName("beach-tennis-score.png")
+    }
+
+    @MainActor
+    private func pngData() throws -> Data {
+        let view = ResultCardView(card: card, teamAColor: teamAColor, teamBColor: teamBColor)
+        guard let data = view.rendered()?.pngData() else { throw RenderFailure() }
+        return data
     }
 }
 
