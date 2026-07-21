@@ -202,8 +202,16 @@ final class WorkoutManager: NSObject, ObservableObject {
     private func attach(_ session: HKWorkoutSession) {
         guard self.session == nil else { return }
         let builder = session.associatedWorkoutBuilder()
+        // A recovered builder comes back without a data source, and without one it
+        // collects nothing: no `didCollectDataOf`, so no live heart rate and empty
+        // end-of-Match stats for the rest of the resumed Match. Collection itself
+        // is already running from before the crash — only the source is missing.
         session.delegate = self
         builder.delegate = self
+        builder.dataSource = HKLiveWorkoutDataSource(
+            healthStore: healthStore,
+            workoutConfiguration: session.workoutConfiguration
+        )
         self.session = session
         self.builder = builder
     }
