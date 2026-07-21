@@ -13,7 +13,9 @@ final class MatchResultPayloadTests: XCTestCase {
         setHistory: [SetRecord] = [],
         matchType: MatchType = .beachTennis,
         teamAName: String = "",
-        teamBName: String = ""
+        teamBName: String = "",
+        activeCalories: Double? = nil,
+        avgHeartRate: Double? = nil
     ) -> MatchResultPayload {
         MatchResultPayload(matchId: matchId,
                            setScoreA: setScoreA, setScoreB: setScoreB,
@@ -21,7 +23,8 @@ final class MatchResultPayloadTests: XCTestCase {
                            winner: winner, duration: duration,
                            date: date, gameHistory: gameHistory,
                            setHistory: setHistory, matchType: matchType,
-                           teamAName: teamAName, teamBName: teamBName)
+                           teamAName: teamAName, teamBName: teamBName,
+                           activeCalories: activeCalories, avgHeartRate: avgHeartRate)
     }
 
     // MARK: - Round-trip
@@ -119,6 +122,33 @@ final class MatchResultPayloadTests: XCTestCase {
         let decoded = MatchResultPayload.from(makePayload().toDictionary())
         XCTAssertEqual(decoded?.teamAName, "")
         XCTAssertEqual(decoded?.teamBName, "")
+    }
+
+    // MARK: - Workout stats
+
+    func test_roundtrip_workoutStats() {
+        let payload = makePayload(activeCalories: 245.6, avgHeartRate: 142.3)
+        let decoded = MatchResultPayload.from(payload.toDictionary())
+        XCTAssertEqual(decoded?.activeCalories ?? 0, 245.6, accuracy: 0.001)
+        XCTAssertEqual(decoded?.avgHeartRate ?? 0, 142.3, accuracy: 0.001)
+    }
+
+    func test_from_missingWorkoutStats_decodeToNil() {
+        // A denied / monitoring-off / old-watch payload omits the keys entirely;
+        // the result must still decode, with the stats materializing nil.
+        let dict = makePayload().toDictionary()
+        XCTAssertNil(dict[WatchMessageKey.activeCalories])
+        XCTAssertNil(dict[WatchMessageKey.avgHeartRate])
+        let decoded = MatchResultPayload.from(dict)
+        XCTAssertNotNil(decoded)
+        XCTAssertNil(decoded?.activeCalories)
+        XCTAssertNil(decoded?.avgHeartRate)
+    }
+
+    func test_toDictionary_omitsNilWorkoutStats() {
+        let dict = makePayload(activeCalories: nil, avgHeartRate: nil).toDictionary()
+        XCTAssertFalse(dict.keys.contains(WatchMessageKey.activeCalories))
+        XCTAssertFalse(dict.keys.contains(WatchMessageKey.avgHeartRate))
     }
 
     // MARK: - Codable round-trip (local persistence)

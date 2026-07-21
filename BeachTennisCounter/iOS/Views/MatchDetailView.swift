@@ -44,6 +44,22 @@ struct MatchDetailView: View {
                     Spacer()
                     Text(match.durationDisplay)
                 }
+                if let avgHeartRate = match.avgHeartRateDisplay {
+                    HStack {
+                        Text("Avg Heart Rate")
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text(avgHeartRate)
+                    }
+                }
+                if let activeCalories = match.activeCaloriesDisplay {
+                    HStack {
+                        Text("Active Calories")
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text(activeCalories)
+                    }
+                }
             }
 
             let sets = match.setHistory

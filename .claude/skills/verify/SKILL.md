@@ -45,3 +45,59 @@ Gotchas, learned the hard way:
   entirely; don't grind on them, verify that path in unit tests instead.
 - A click that "does nothing" usually means the Simulator lost frontmost
   status — re-activate and re-read the window frame first.
+
+## Verifying the watchOS app (paired iPhone + Watch)
+
+The watch app is the product's primary UI, so most runtime checks live here.
+CLAUDE.md says the *combined* CLI build is blocked, but building each target
+**separately** against its own destination works fine.
+
+```bash
+# Find the active pair; boot both (the watch is often already booted).
+xcrun simctl list pairs | grep -A2 active     # -> phone + watch UDIDs
+xcrun simctl boot <phoneUDID>; xcrun simctl boot <watchUDID>
+
+xcodebuild -project BeachTennisCounter.xcodeproj -scheme BeachTennisCounterWatch \
+  -destination 'platform=watchOS Simulator,id=<watchUDID>' -derivedDataPath build build
+xcrun simctl install <watchUDID> build/Build/Products/Debug-watchsimulator/BeachTennisCounterWatch.app
+xcrun simctl launch <watchUDID> com.renan.beachtennis.watchkitapp
+xcrun simctl io <watchUDID> screenshot watch.png
+```
+
+Bundle ids: phone `com.renan.beachtennis`, watch `com.renan.beachtennis.watchkitapp`.
+
+**Watch tap calibration** (same Quartz `CGEventPost` flow as the iPhone). The
+watch screenshot is **416×496**. Read the Simulator window whose name contains
+`46mm`, then `scale = winW/416` (~0.66), `titleOffset = winH − 496*scale` (~49),
+`screen_x = winX + ox*scale`, `screen_y = winY + titleOffset + oy*scale`.
+Synthetic taps drop ~40% when sent fast — send extras and screenshot to confirm
+each step; don't trust a blind count.
+
+**Match flow that fires a watch→phone result send:** tap `+` (Nova Partida) →
+sport picker (Beach Tennis) → serve picker (Time A) → score view. In the score
+view the Team A red square center is ~(115,285), Team B blue ~(300,285); ~24
+taps on A wins 6–0 (no deuce) and calls `sendMatchResult`. Verify persistence on
+the phone: `xcrun simctl get_app_container <phoneUDID> com.renan.beachtennis data`
+then sqlite3 on `<container>/Library/Application Support/default.store`.
+
+### Entitlement-gated features (HealthKit, etc.)
+
+`CODE_SIGNING_ALLOWED=NO` **strips entitlements** — the app runs but every
+HealthKit call fails with `Code=4 "Missing com.apple.developer.healthkit
+entitlement"` and the feature silently no-ops. To exercise such a feature, build
+**without** that flag: plain `xcodebuild … build` ad-hoc-signs (`--sign -`) and
+embeds the generated `*-Simulated.xcent` into the binary's `__entitlements`
+section, which is what the simulator actually reads. (`codesign -d --entitlements`
+shows an *empty* dict on the bundle signature — that's normal; the real grant is
+in the linked section, confirmable via the `*-Simulated.xcent` file.)
+
+Read HealthKit runtime behavior from the watch's log:
+`xcrun simctl spawn <watchUDID> log show --last 60s --predicate 'senderImagePath CONTAINS[c] "HealthKit"'`
+— look for `Initializing workout session`, `Running(2)`, `Missing … entitlement`.
+
+**System privacy sheets can't be driven synthetically.** The HealthKit
+authorization sheet ("Acesso ao App Saúde" / "Health Access") runs out-of-process
+and ignores `CGEventPost` taps — you can confirm it *appears* (in-context, right
+copy/locale) but cannot grant it via automation. To finish an end-to-end check
+that needs the grant, ask the user to click through it in the Simulator window
+(Revisar → toggle categories → Concluir), then resume driving.

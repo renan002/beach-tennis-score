@@ -44,6 +44,15 @@ struct SettingsView: View {
                             hexBinding: $phoneSession.teamBColorHex)
                 }
 
+                Section {
+                    Toggle("Health Monitoring", isOn: healthMonitoringBinding)
+                        .disabled(isHealthDenied)
+                } header: {
+                    Text("Health")
+                } footer: {
+                    Text(healthFooter)
+                }
+
                 if !quarantines.isEmpty {
                     QuarantinedStoresSection(
                         quarantines: quarantines,
@@ -109,6 +118,28 @@ struct SettingsView: View {
     /// Name length cap: keeps the watch serve buttons and history lines from
     /// truncating. Counts grapheme clusters, so a 12-emoji name is still 12.
     private static let nameMaxLength = 12
+
+    /// The watch last reported that Health access was denied on-watch.
+    private var isHealthDenied: Bool {
+        phoneSession.watchHealthAuthStatus == .denied
+    }
+
+    /// A display override, not an overwrite: while denied the toggle reads off and
+    /// is disabled, but the stored setting is left untouched — so on re-grant the
+    /// user's real choice auto-resumes. Otherwise it binds to the stored setting.
+    private var healthMonitoringBinding: Binding<Bool> {
+        if isHealthDenied {
+            return .constant(false)
+        }
+        return $phoneSession.healthMonitoringEnabled
+    }
+
+    private var healthFooter: String {
+        if isHealthDenied {
+            return String(localized: "Health access was denied on the Watch. To re-enable it, open Settings › Privacy & Security › Health.")
+        }
+        return String(localized: "The Watch records each match as a workout with live heart rate.")
+    }
 
     @ViewBuilder
     private func teamRow(

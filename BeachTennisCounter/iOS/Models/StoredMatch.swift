@@ -24,6 +24,12 @@ final class StoredMatch {
     // empty names. Empty means unnamed; display falls back to "Team A"/"Team B".
     var teamAName: String = ""
     var teamBName: String = ""
+    // Workout stats from the watch's HealthKit session, `nil` when absent
+    // (HealthKit denied, Health Monitoring off, or a pre-feature match). Optional
+    // with a `nil` default satisfies the #47 lightweight-migration rule — an older
+    // store migrates in place, leaving these null.
+    var activeCalories: Double? = nil
+    var avgHeartRate: Double? = nil
 
     init(
         id: UUID = UUID(),
@@ -38,7 +44,9 @@ final class StoredMatch {
         setHistoryData: Data = Data(),
         matchTypeRaw: String = "beachTennis",
         teamAName: String = "",
-        teamBName: String = ""
+        teamBName: String = "",
+        activeCalories: Double? = nil,
+        avgHeartRate: Double? = nil
     ) {
         self.id = id
         self.date = date
@@ -53,6 +61,8 @@ final class StoredMatch {
         self.matchTypeRaw = matchTypeRaw
         self.teamAName = teamAName
         self.teamBName = teamBName
+        self.activeCalories = activeCalories
+        self.avgHeartRate = avgHeartRate
     }
 
     /// A detached copy for inserting into another context. Copies every
@@ -72,7 +82,9 @@ final class StoredMatch {
             setHistoryData: other.setHistoryData,
             matchTypeRaw: other.matchTypeRaw,
             teamAName: other.teamAName,
-            teamBName: other.teamBName
+            teamBName: other.teamBName,
+            activeCalories: other.activeCalories,
+            avgHeartRate: other.avgHeartRate
         )
     }
 
@@ -92,5 +104,17 @@ final class StoredMatch {
         let minutes = Int(duration) / 60
         let seconds = Int(duration) % 60
         return String(format: "%d:%02d", minutes, seconds)
+    }
+
+    /// `nil` when no workout data was recorded — the detail row hides.
+    var activeCaloriesDisplay: String? {
+        guard let activeCalories else { return nil }
+        return "\(Int(activeCalories.rounded())) kcal"
+    }
+
+    /// `nil` when no workout data was recorded — the detail row hides.
+    var avgHeartRateDisplay: String? {
+        guard let avgHeartRate else { return nil }
+        return "\(Int(avgHeartRate.rounded())) bpm"
     }
 }
