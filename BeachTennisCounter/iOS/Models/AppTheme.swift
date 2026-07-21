@@ -1,3 +1,4 @@
+import SwiftUI
 import UIKit
 
 /// The `@AppStorage("appTheme")` setting. Raw values are persisted in `UserDefaults`
@@ -19,6 +20,14 @@ enum AppTheme: String, CaseIterable {
         case .system: return .unspecified
         case .light:  return .light
         case .dark:   return .dark
+        }
+    }
+
+    var displayName: LocalizedStringKey {
+        switch self {
+        case .system: return "System"
+        case .light:  return "Light"
+        case .dark:   return "Dark"
         }
     }
 }

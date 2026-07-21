@@ -50,9 +50,9 @@ struct SettingsView: View {
 
                 Section("Appearance") {
                     Picker("Theme", selection: $appTheme) {
-                        Text("System").tag(AppTheme.system)
-                        Text("Light").tag(AppTheme.light)
-                        Text("Dark").tag(AppTheme.dark)
+                        ForEach(AppTheme.allCases, id: \.self) { theme in
+                            Text(theme.displayName).tag(theme)
+                        }
                     }
                     .pickerStyle(.segmented)
                 }
