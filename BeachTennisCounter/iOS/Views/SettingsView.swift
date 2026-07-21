@@ -96,16 +96,15 @@ struct SettingsView: View {
                 syncToWatchIfChanged()
             }
             .safeAreaInset(edge: .bottom) {
-                Text("Version \(appVersion)")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.bottom, 8)
-            }
-            // PROTOTYPE (#102) — floating variant switcher. Remove with the switch above.
-            .overlay(alignment: .bottom) {
-                HealthPrototypeBar(proto: proto)
-                    .padding(.bottom, 28)
+                VStack(spacing: 8) {
+                    Text("Version \(appVersion)")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                    // PROTOTYPE (#102) — variant switcher. Remove with the switch above.
+                    HealthPrototypeBar(proto: proto)
+                }
+                .padding(.bottom, 8)
             }
         }
     }

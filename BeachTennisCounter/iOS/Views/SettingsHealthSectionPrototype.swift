@@ -199,13 +199,12 @@ struct HealthPrototypeBar: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            HStack(spacing: 14) {
-                Button { proto.cycle(by: -1) } label: { Image(systemName: "chevron.left") }
-                Text("\(proto.variant.rawValue) — \(proto.variant.name)")
-                    .font(.footnote.monospaced().weight(.semibold))
-                    .frame(minWidth: 150)
-                Button { proto.cycle(by: 1) } label: { Image(systemName: "chevron.right") }
+            Picker("Variant", selection: $proto.variant) {
+                ForEach(HealthSectionPrototype.Variant.allCases, id: \.self) { v in
+                    Text("\(v.rawValue) — \(v.name)").tag(v)
+                }
             }
+            .pickerStyle(.segmented)
             Picker("Watch reports", selection: $proto.fakedStatus) {
                 ForEach(HealthAuthStatus.allCases, id: \.self) { s in
                     Text(s.rawValue).tag(s)

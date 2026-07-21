@@ -53,6 +53,9 @@ struct MatchListView: View {
                     .environmentObject(phoneSession)
             }
             .task { reloadQuarantines() }
+            // PROTOTYPE (#102) — auto-open Settings so the variant switcher is
+            // reachable from automation (nav-bar taps are swallowed in the Sim).
+            .task { showSettings = true }
         }
     }
 

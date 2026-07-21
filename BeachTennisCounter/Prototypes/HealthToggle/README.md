@@ -46,4 +46,31 @@ marked hunks in `iOS/Views/SettingsView.swift`.
 
 ## Verdict
 
-_(fill in — which variant won, and whether the display-override model held)_
+**UI: variant B — Explained wins.** Driven in the iPhone 17 Simulator on
+2026-07-21 against the real Settings screen. Screenshots of all three variants
+in both the granted and denied states are in `screenshots/`.
+
+B's card states what the watch actually records — live heart rate, active
+calories into Match History, the match saved as a workout — before asking for
+the toggle. The bare row (A) asks for a health permission with one sentence of
+justification; the status-first layout (C) puts the watch's grant state above
+the user's own choice, which reads as a diagnostic panel rather than a setting.
+When denied, B degrades cleanly: the bullet list disappears and the card
+collapses to icon + title + denied footer with the toggle off and dimmed.
+
+**Folding B in requires new String Catalog keys.** The three bullet strings and
+B's inline description are English literals in the prototype and rendered
+untranslated next to pt-BR copy. Per CLAUDE.md they must be keyed in the same
+commit that lands the copy.
+
+**Logic: the display-override model held.** No sequence broke it — a denial
+never writes the stored value, so re-granting auto-resumes the user's choice.
+Two things the TUI surfaced, both correct-by-design but worth knowing:
+
+1. **Stored ≠ synced.** Settings only reach the watch on Done/dismiss, so
+   toggling off and killing the app before dismissing leaves the watch on the
+   old value and it still starts a workout at the next Match.
+2. **The shipped model has no "never reported" state.** `PhoneSessionManager`
+   defaults `watchHealthAuthStatus` to `.undetermined`, so the prototype's
+   `nil` case collapses onto `.undetermined`. Both render the normal footer,
+   so nothing is lost — the model is simpler than the prototype assumed.
