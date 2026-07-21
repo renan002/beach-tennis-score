@@ -137,15 +137,13 @@ struct MatchState: Codable, Sendable {
         matchType: MatchType,
         initialServer: Team,
         teamAName: String = "",
-        teamBName: String = "",
-        startDate: Date = Date()
+        teamBName: String = ""
     ) -> MatchState {
         var s = MatchState()
         s.matchType = matchType
         s.servingTeam = initialServer
         s.initialServer = initialServer
         s.tiebreakFirstServer = initialServer
-        s.matchStartDate = startDate
         s.teamAName = teamAName
         s.teamBName = teamBName
         return s
