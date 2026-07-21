@@ -34,7 +34,9 @@ final class WatchSessionManager: NSObject, ObservableObject {
             date: Date(),
             gameHistory: state.gameHistory,
             setHistory: state.setHistory,
-            matchType: state.matchType
+            matchType: state.matchType,
+            teamAName: state.teamAName,
+            teamBName: state.teamBName
         )
 
         guard WCSession.default.activationState == .activated else {

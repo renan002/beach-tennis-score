@@ -24,6 +24,7 @@
 		2F9C0112E5C196546694D0B8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 02192104EF03F8618E7F05D8 /* PrivacyInfo.xcprivacy */; };
 		338E5A754083D3F8C446DAC5 /* MatchPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21275F20964C30E0BE57431F /* MatchPersistence.swift */; };
 		35241BE0AF00D8DEF3997A7A /* MatchState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F51DDD9F7DDD920BA32478B6 /* MatchState.swift */; };
+		4291A25B5E810818C7555F75 /* MatchStateTeamNameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F051F216DBABF6C5F8D81CBE /* MatchStateTeamNameTests.swift */; };
 		4947961FE0BFB634D9083982 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F607F579215BBD1758D83877 /* Assets.xcassets */; };
 		564FFB929783F14E683261CB /* StoreRecovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC40D6416C38F7B65B653DD8 /* StoreRecovery.swift */; };
 		5B6F69490F861256230C277A /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 53AC24C14225AFDAE7BC7BFD /* Localizable.xcstrings */; };
@@ -128,6 +129,7 @@
 		C4A4D3115E5DE217FA7F7D86 /* BeachTennisCounterWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BeachTennisCounterWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D62011185524F3A6907CE940 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		EC40D6416C38F7B65B653DD8 /* StoreRecovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreRecovery.swift; sourceTree = "<group>"; };
+		F051F216DBABF6C5F8D81CBE /* MatchStateTeamNameTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchStateTeamNameTests.swift; sourceTree = "<group>"; };
 		F51DDD9F7DDD920BA32478B6 /* MatchState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchState.swift; sourceTree = "<group>"; };
 		F54B8E19A416BAD074ED1CE9 /* MatchHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchHistoryView.swift; sourceTree = "<group>"; };
 		F607F579215BBD1758D83877 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -208,6 +210,7 @@
 				191AACA24ACE1BF3823FBA7F /* LiveStoreTests.swift */,
 				038CBBD1CA1760963EFF6BE3 /* MatchPersistenceTests.swift */,
 				ADC3734F1362AB35FC860532 /* MatchResultPayloadTests.swift */,
+				F051F216DBABF6C5F8D81CBE /* MatchStateTeamNameTests.swift */,
 				68B2336A3635F40C8D56E97C /* MatchTypeLabelTests.swift */,
 				0C4F5BF1EE5C2D60E7F3EFD5 /* PointScoreTests.swift */,
 				29D3F1B882D2930CBA69F677 /* ScoreEngineTests.swift */,
@@ -436,6 +439,7 @@
 				734249C74C96DAB64F77F7EE /* LiveStoreTests.swift in Sources */,
 				054EB5716E374A09AF656986 /* MatchPersistenceTests.swift in Sources */,
 				2C908B4320388ACDAA67CAE4 /* MatchResultPayloadTests.swift in Sources */,
+				4291A25B5E810818C7555F75 /* MatchStateTeamNameTests.swift in Sources */,
 				1409A1806C27458EAED5BA4A /* MatchTypeLabelTests.swift in Sources */,
 				77AE42A898482A62ECC20CA6 /* PointScoreTests.swift in Sources */,
 				1C3E9BB2ECB15A30CA626AA3 /* ScoreEngineTests.swift in Sources */,

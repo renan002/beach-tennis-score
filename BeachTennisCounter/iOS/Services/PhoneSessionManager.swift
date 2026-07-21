@@ -94,7 +94,9 @@ extension PhoneSessionManager: WCSessionDelegate {
                 duration: payload.duration,
                 gameHistoryData: gameData,
                 setHistoryData: setData,
-                matchTypeRaw: payload.matchType.rawValue
+                matchTypeRaw: payload.matchType.rawValue,
+                teamAName: payload.teamAName,
+                teamBName: payload.teamBName
             )
             context.insert(match)
             try? context.save()

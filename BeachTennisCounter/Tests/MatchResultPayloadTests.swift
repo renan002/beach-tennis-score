@@ -11,14 +11,17 @@ final class MatchResultPayloadTests: XCTestCase {
         date: Date = Date(timeIntervalSince1970: 1_000_000),
         gameHistory: [GameRecord] = [],
         setHistory: [SetRecord] = [],
-        matchType: MatchType = .beachTennis
+        matchType: MatchType = .beachTennis,
+        teamAName: String = "",
+        teamBName: String = ""
     ) -> MatchResultPayload {
         MatchResultPayload(matchId: matchId,
                            setScoreA: setScoreA, setScoreB: setScoreB,
                            setsWonA: setsWonA, setsWonB: setsWonB,
                            winner: winner, duration: duration,
                            date: date, gameHistory: gameHistory,
-                           setHistory: setHistory, matchType: matchType)
+                           setHistory: setHistory, matchType: matchType,
+                           teamAName: teamAName, teamBName: teamBName)
     }
 
     // MARK: - Round-trip
@@ -89,6 +92,33 @@ final class MatchResultPayloadTests: XCTestCase {
         var dict = makePayload().toDictionary()
         dict[WatchMessageKey.matchId] = "not-a-uuid"
         XCTAssertNotNil(MatchResultPayload.from(dict))
+    }
+
+    // MARK: - Team Names
+
+    func test_roundtrip_teamNames() {
+        let payload = makePayload(teamAName: "Renan", teamBName: "Visitors")
+        let decoded = MatchResultPayload.from(payload.toDictionary())
+        XCTAssertEqual(decoded?.teamAName, "Renan")
+        XCTAssertEqual(decoded?.teamBName, "Visitors")
+    }
+
+    func test_from_missingTeamNames_decodeToEmptyStrings() {
+        // An old watch never wrote the name keys; the result must still decode
+        // (never nil), with names materializing empty rather than absent.
+        var dict = makePayload(teamAName: "Renan", teamBName: "Visitors").toDictionary()
+        dict.removeValue(forKey: WatchMessageKey.teamAName)
+        dict.removeValue(forKey: WatchMessageKey.teamBName)
+        let decoded = MatchResultPayload.from(dict)
+        XCTAssertNotNil(decoded)
+        XCTAssertEqual(decoded?.teamAName, "")
+        XCTAssertEqual(decoded?.teamBName, "")
+    }
+
+    func test_from_emptyTeamNames_roundTripEmpty() {
+        let decoded = MatchResultPayload.from(makePayload().toDictionary())
+        XCTAssertEqual(decoded?.teamAName, "")
+        XCTAssertEqual(decoded?.teamBName, "")
     }
 
     // MARK: - Codable round-trip (local persistence)
