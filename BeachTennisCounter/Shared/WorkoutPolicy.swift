@@ -16,6 +16,9 @@ enum HealthAuthStatus: String, Sendable, Equatable, CaseIterable {
 enum WorkoutStartDecision: Equatable {
     case start
     case skip
+    /// Crash recovery hasn't answered yet — hold the start until it does, so a
+    /// resumed Match reattaches its original session instead of opening a second one.
+    case deferUntilRecovered
 }
 
 /// Verdict for what to do with a workout when a Match is cancelled.
@@ -37,10 +40,16 @@ enum WorkoutPolicy {
     ///
     /// Skips when Health Monitoring is off (never touch HealthKit, never prompt)
     /// or when a session is already running (idempotence — a re-entered or
-    /// resumed score screen must not start a second session).
-    static func startDecision(monitoringEnabled: Bool, sessionRunning: Bool) -> WorkoutStartDecision {
+    /// resumed score screen must not start a second session). Defers while crash
+    /// recovery is still in flight: the lookup is async, so starting now is how a
+    /// Match resumed after a force-quit would end up with two workouts.
+    static func startDecision(
+        monitoringEnabled: Bool,
+        sessionRunning: Bool,
+        recoveryPending: Bool
+    ) -> WorkoutStartDecision {
         guard monitoringEnabled, !sessionRunning else { return .skip }
-        return .start
+        return recoveryPending ? .deferUntilRecovered : .start
     }
 
     /// Whether a cancelled Match's workout should be discarded or saved.
