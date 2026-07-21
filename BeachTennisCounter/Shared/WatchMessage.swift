@@ -16,6 +16,8 @@ enum WatchMessageKey {
     static let setHistory = "setHistory"
     static let matchType = "matchType"
     static let sportSetting = "sportSetting"
+    static let teamAName = "teamAName"
+    static let teamBName = "teamBName"
 }
 
 enum WatchMessageType {
@@ -35,6 +37,11 @@ struct MatchResultPayload: Codable, Sendable {
     let gameHistory: [GameRecord]
     let setHistory: [SetRecord]
     let matchType: MatchType
+    // Team Names stamped at match creation. Empty means unnamed. Join the
+    // second decode tier below — a payload from an old watch lacks these keys
+    // and must still decode, materializing empty strings rather than failing.
+    let teamAName: String
+    let teamBName: String
 
     func toDictionary() -> [String: Any] {
         var dict: [String: Any] = [
@@ -47,7 +54,9 @@ struct MatchResultPayload: Codable, Sendable {
             WatchMessageKey.winner: winner.rawValue,
             WatchMessageKey.duration: duration,
             WatchMessageKey.date: ISO8601DateFormatter().string(from: date),
-            WatchMessageKey.matchType: matchType.rawValue
+            WatchMessageKey.matchType: matchType.rawValue,
+            WatchMessageKey.teamAName: teamAName,
+            WatchMessageKey.teamBName: teamBName
         ]
         if let data = try? JSONEncoder().encode(gameHistory) {
             dict[WatchMessageKey.gameHistory] = data
@@ -77,6 +86,9 @@ struct MatchResultPayload: Codable, Sendable {
         let matchTypeRaw = dict[WatchMessageKey.matchType] as? String ?? "beachTennis"
         let matchType = MatchType(rawValue: matchTypeRaw) ?? .beachTennis
 
+        let teamAName = dict[WatchMessageKey.teamAName] as? String ?? ""
+        let teamBName = dict[WatchMessageKey.teamBName] as? String ?? ""
+
         let gameHistory: [GameRecord]
         if let data = dict[WatchMessageKey.gameHistory] as? Data,
            let records = try? JSONDecoder().decode([GameRecord].self, from: data) {
@@ -99,7 +111,8 @@ struct MatchResultPayload: Codable, Sendable {
             setsWonA: setsWonA, setsWonB: setsWonB,
             winner: winner, duration: duration, date: date,
             gameHistory: gameHistory, setHistory: setHistory,
-            matchType: matchType
+            matchType: matchType,
+            teamAName: teamAName, teamBName: teamBName
         )
     }
 }

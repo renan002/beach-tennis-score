@@ -64,6 +64,11 @@ final class LiveStoreTests: XCTestCase {
         XCTAssertEqual(matches.map(\.setsWonB), [0, 0])
         XCTAssertEqual(matches.map(\.matchType), [.beachTennis, .beachTennis])
 
+        // A store written without the Team Name attributes migrates in place:
+        // its rows materialize empty names, never nil or a failed open.
+        XCTAssertEqual(matches.map(\.teamAName), ["", ""])
+        XCTAssertEqual(matches.map(\.teamBName), ["", ""])
+
         // A store that opens is never quarantined.
         XCTAssertTrue(try quarantineDirs().isEmpty)
     }

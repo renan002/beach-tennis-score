@@ -18,6 +18,12 @@ final class StoredMatch {
     var gameHistoryData: Data = Data()
     var setHistoryData: Data = Data()
     var matchTypeRaw: String = "beachTennis"
+    // Team Names as they were when the match was played — immutable history.
+    // Property-level defaults, same #47 reasoning as setsWonA/B above: a store
+    // written without these attributes must migrate in place, materializing
+    // empty names. Empty means unnamed; display falls back to "Team A"/"Team B".
+    var teamAName: String = ""
+    var teamBName: String = ""
 
     init(
         id: UUID = UUID(),
@@ -30,7 +36,9 @@ final class StoredMatch {
         duration: TimeInterval,
         gameHistoryData: Data = Data(),
         setHistoryData: Data = Data(),
-        matchTypeRaw: String = "beachTennis"
+        matchTypeRaw: String = "beachTennis",
+        teamAName: String = "",
+        teamBName: String = ""
     ) {
         self.id = id
         self.date = date
@@ -43,6 +51,8 @@ final class StoredMatch {
         self.gameHistoryData = gameHistoryData
         self.setHistoryData = setHistoryData
         self.matchTypeRaw = matchTypeRaw
+        self.teamAName = teamAName
+        self.teamBName = teamBName
     }
 
     /// A detached copy for inserting into another context. Copies every
@@ -60,7 +70,9 @@ final class StoredMatch {
             duration: other.duration,
             gameHistoryData: other.gameHistoryData,
             setHistoryData: other.setHistoryData,
-            matchTypeRaw: other.matchTypeRaw
+            matchTypeRaw: other.matchTypeRaw,
+            teamAName: other.teamAName,
+            teamBName: other.teamBName
         )
     }
 

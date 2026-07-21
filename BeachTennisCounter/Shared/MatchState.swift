@@ -123,6 +123,19 @@ struct MatchState: Codable, Sendable {
     var matchStartDate: Date = Date()
     var gameHistory: [GameRecord] = []
 
+    // Team Names in effect when this match was created. Empty means unnamed;
+    // display sites resolve through `teamName(for:)`, never `Team.displayName`
+    // directly, so the localized fallback stays the single source of truth.
+    var teamAName: String = ""
+    var teamBName: String = ""
+
+    /// The label to show for `team`: its Team Name when set, otherwise the
+    /// localized `Team.displayName` fallback.
+    func teamName(for team: Team) -> String {
+        let name = team == .a ? teamAName : teamBName
+        return name.isEmpty ? team.displayName : name
+    }
+
     func setScore(for team: Team) -> Int {
         team == .a ? setScoreA : setScoreB
     }

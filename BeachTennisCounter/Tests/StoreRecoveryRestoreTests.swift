@@ -24,7 +24,9 @@ final class StoreRecoveryRestoreTests: XCTestCase {
     private func makeMatch(
         id: UUID = UUID(),
         duration: TimeInterval = 60,
-        gameHistoryData: Data = Data()
+        gameHistoryData: Data = Data(),
+        teamAName: String = "",
+        teamBName: String = ""
     ) -> StoredMatch {
         StoredMatch(
             id: id,
@@ -33,7 +35,9 @@ final class StoreRecoveryRestoreTests: XCTestCase {
             setScoreB: 4,
             winner: "a",
             duration: duration,
-            gameHistoryData: gameHistoryData
+            gameHistoryData: gameHistoryData,
+            teamAName: teamAName,
+            teamBName: teamBName
         )
     }
 
@@ -163,6 +167,20 @@ final class StoreRecoveryRestoreTests: XCTestCase {
         XCTAssertEqual(restored.gameHistoryData, Data("games".utf8))
         XCTAssertEqual(restored.setScoreA, 6)
         XCTAssertEqual(restored.winner, "a")
+    }
+
+    func test_restore_roundTripsTeamNamesThroughTheCopyingInitializer() throws {
+        // A restore rebuilds each missing match through `init(copying:)`; the
+        // Team Names must survive that copy so recovery round-trips the whole
+        // record, names included.
+        let named = makeMatch(teamAName: "Renan", teamBName: "Visitors")
+        let quarantine = try quarantineStore(with: [named])
+
+        XCTAssertEqual(try StoreRecovery.restore(from: quarantine, into: liveContainer()), 1)
+
+        let restored = try XCTUnwrap(try liveMatches().first { $0.id == named.id })
+        XCTAssertEqual(restored.teamAName, "Renan")
+        XCTAssertEqual(restored.teamBName, "Visitors")
     }
 
     func test_restore_isIdempotent_secondRunInsertsNothing() throws {
