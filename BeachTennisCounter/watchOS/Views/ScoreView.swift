@@ -3,6 +3,7 @@ import WatchKit
 
 struct ScoreView: View {
     @EnvironmentObject private var sessionManager: WatchSessionManager
+    @EnvironmentObject private var workoutManager: WorkoutManager
     @Environment(\.dismiss) private var dismiss
 
     let matchType: MatchType
@@ -53,11 +54,21 @@ struct ScoreView: View {
         .navigationBarHidden(true)
         .onAppear {
             MatchPersistence.save(state)
+            workoutManager.matchDidStart(monitoringEnabled: sessionManager.healthMonitoringEnabled)
         }
         .onChange(of: state.isMatchOver) { _, isOver in
             guard isOver else { return }
             showMatchOver = true
-            sessionManager.sendMatchResult(state, duration: Date().timeIntervalSince(state.matchStartDate))
+            // Snapshot stats synchronously first so the result send never waits on
+            // HealthKit, then end/finish the workout asynchronously.
+            let stats = workoutManager.snapshotStats()
+            sessionManager.sendMatchResult(
+                state,
+                duration: Date().timeIntervalSince(state.matchStartDate),
+                activeCalories: stats.activeCalories,
+                avgHeartRate: stats.avgHeartRate
+            )
+            workoutManager.endAndFinish()
         }
         .sheet(isPresented: $showHistory) {
             MatchHistoryView(history: state.gameHistory, matchType: matchType)
@@ -65,6 +76,9 @@ struct ScoreView: View {
         }
         .alert("Cancel Match?", isPresented: $showCancelAlert) {
             Button("End Match", role: .destructive) {
+                // Below ~2 min the workout is discarded (accidental start), above it
+                // is saved (real exercise); the manager applies the policy.
+                workoutManager.cancelWorkout(elapsed: Date().timeIntervalSince(state.matchStartDate))
                 MatchPersistence.clear()
                 isActive = false
             }
@@ -108,6 +122,20 @@ struct ScoreView: View {
                 .disabled(history.isEmpty)
                 .padding(.leading, 6)
                 Spacer()
+                // Live heart rate mirrors the undo arrow. Rendered only while a
+                // workout feeds a reading — absent (denied / off / no sample) it
+                // takes no space and the top bar looks exactly as it did before.
+                if let bpm = workoutManager.currentHeartRate {
+                    HStack(spacing: 2) {
+                        Image(systemName: "heart.fill")
+                            .foregroundStyle(.red)
+                        Text("\(Int(bpm.rounded()))")
+                            .foregroundStyle(.white)
+                            .monospacedDigit()
+                    }
+                    .font(.system(size: 13, weight: .medium))
+                    .padding(.trailing, 6)
+                }
             }
         }
     }

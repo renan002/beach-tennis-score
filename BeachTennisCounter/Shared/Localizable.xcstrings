@@ -1,49 +1,49 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "%@ wins" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ venceu"
+  "sourceLanguage": "en",
+  "strings": {
+    "%@ wins": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ venceu"
           }
         }
       }
     },
-    "%lld can be restored" : {
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld can be restored"
+    "%lld can be restored": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld can be restored"
                 }
               },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld can be restored"
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld can be restored"
                 }
               }
             }
           }
         },
-        "pt-BR" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld pode ser restaurada"
+        "pt-BR": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld pode ser restaurada"
                 }
               },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld podem ser restauradas"
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld podem ser restauradas"
                 }
               }
             }
@@ -51,79 +51,39 @@
         }
       }
     },
-    "%lld matches" : {
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld match"
+    "%lld matches": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld match"
                 }
               },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld matches"
-                }
-              }
-            }
-          }
-        },
-        "pt-BR" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld partida"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld partidas"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "%lld matches restored." : {
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld match restored."
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld matches restored."
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld matches"
                 }
               }
             }
           }
         },
-        "pt-BR" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld partida restaurada."
+        "pt-BR": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld partida"
                 }
               },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld partidas restauradas."
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld partidas"
                 }
               }
             }
@@ -131,130 +91,39 @@
         }
       }
     },
-    "All" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Todos"
-          }
-        }
-      }
-    },
-    "All of its matches are already in your Match History." : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Todas as suas partidas já estão no seu Histórico de Partidas."
-          }
-        }
-      }
-    },
-    "Appearance" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aparência"
-          }
-        }
-      }
-    },
-    "Can't be read by this version of the app" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Não pode ser lido por esta versão do app"
-          }
-        }
-      }
-    },
-    "Cancel Match?" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancelar Partida?"
-          }
-        }
-      }
-    },
-    "Dark" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Escuro"
-          }
-        }
-      }
-    },
-    "Date" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Data"
-          }
-        }
-      }
-    },
-    "Details" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Detalhes"
-          }
-        }
-      }
-    },
-    "Discard" : {
-      "comment" : "Glossary term (CONTEXT.md): the only user-facing delete in store recovery.",
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Descartar"
-          }
-        }
-      }
-    },
-    "Discard %lld matches?" : {
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Discard %lld match?"
+    "%lld matches restored.": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld match restored."
                 }
               },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Discard %lld matches?"
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld matches restored."
                 }
               }
             }
           }
         },
-        "pt-BR" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Descartar %lld partida?"
+        "pt-BR": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld partida restaurada."
                 }
               },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Descartar %lld partidas?"
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld partidas restauradas."
                 }
               }
             }
@@ -262,556 +131,747 @@
         }
       }
     },
-    "Discard failed" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Falha ao descartar"
+    "Active Calories": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calorias Ativas"
           }
         }
       }
     },
-    "Discard this Quarantined Store?" : {
-      "comment" : "Confirmation title when the store is unreadable, so its match count is unknown.",
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Descartar este armazenamento em quarentena?"
+    "All": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todos"
           }
         }
       }
     },
-    "Done" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Concluído"
+    "All of its matches are already in your Match History.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todas as suas partidas já estão no seu Histórico de Partidas."
           }
         }
       }
     },
-    "Duration" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Duração"
+    "Appearance": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aparência"
           }
         }
       }
     },
-    "End Match" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Encerrar Partida"
+    "Avg Heart Rate": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frequência Cardíaca Média"
           }
         }
       }
     },
-    "Game %lld" : {
-      "comment" : "Tennis game rows only; \"game\" is a loanword in pt-BR tennis, keep untranslated. Beach games use the \"Set %lld\" key instead, chosen by MatchType.gameLabel — see CONTEXT.md \"Scoring units\".",
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Game %lld"
+    "Can't be read by this version of the app": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não pode ser lido por esta versão do app"
           }
         }
       }
     },
-    "Games" : {
-      "comment" : "Tennis-mode section header; loanword in pt-BR, keep untranslated — see CONTEXT.md \"Scoring units\".",
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Games"
+    "Cancel Match?": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar Partida?"
           }
         }
       }
     },
-    "History" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Histórico"
+    "Dark": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escuro"
           }
         }
       }
     },
-    "It may become readable after an app update." : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Poderá ser lido após uma atualização do app."
+    "Date": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Data"
           }
         }
       }
     },
-    "Its matches will be permanently deleted." : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suas partidas serão excluídas permanentemente."
+    "Details": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detalhes"
           }
         }
       }
     },
-    "Keep Playing" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Continuar Jogando"
+    "Discard": {
+      "comment": "Glossary term (CONTEXT.md): the only user-facing delete in store recovery.",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descartar"
           }
         }
       }
     },
-    "Light" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Claro"
+    "Discard %lld matches?": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Discard %lld match?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Discard %lld matches?"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Descartar %lld partida?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Descartar %lld partidas?"
+                }
+              }
+            }
           }
         }
       }
     },
-    "Match Details" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Detalhes da Partida"
+    "Discard failed": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Falha ao descartar"
           }
         }
       }
     },
-    "Match History" : {
-      "comment" : "Settings section header for Quarantined Store recovery — see CONTEXT.md \"Match History\".",
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Histórico de Partidas"
+    "Discard this Quarantined Store?": {
+      "comment": "Confirmation title when the store is unreadable, so its match count is unknown.",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descartar este armazenamento em quarentena?"
           }
         }
       }
     },
-    "Match History the app couldn't open is kept here, set aside intact. Restore adds its matches back without changing the ones you already have." : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Históricos de Partidas que o app não conseguiu abrir ficam guardados aqui, intactos. Restaurar adiciona as partidas de volta sem alterar as que você já tem."
+    "Done": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concluído"
           }
         }
       }
     },
-    "Match Over!" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fim de Jogo!"
+    "Duration": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duração"
           }
         }
       }
     },
-    "Modality" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Modalidade"
+    "End Match": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encerrar Partida"
           }
         }
       }
     },
-    "Multiple" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vários"
+    "Game %lld": {
+      "comment": "Tennis game rows only; \"game\" is a loanword in pt-BR tennis, keep untranslated. Beach games use the \"Set %lld\" key instead, chosen by MatchType.gameLabel — see CONTEXT.md \"Scoring units\".",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Game %lld"
           }
         }
       }
     },
-    "Name" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nome"
+    "Games": {
+      "comment": "Tennis-mode section header; loanword in pt-BR, keep untranslated — see CONTEXT.md \"Scoring units\".",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Games"
           }
         }
       }
     },
-    "New Match" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nova Partida"
+    "Health": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saúde"
           }
         }
       }
     },
-    "No matches yet" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nenhuma partida ainda"
+    "Health Monitoring": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monitoramento de Saúde"
           }
         }
       }
     },
-    "Old matches can be restored" : {
-      "comment" : "Match History notice row shown while a Quarantined Store still holds restorable matches; taps through to Settings.",
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Partidas antigas podem ser restauradas"
+    "Health access was denied on the Watch. To re-enable it, open Settings › Privacy & Security › Health.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O acesso à Saúde foi negado no Watch. Para reativar, abra Ajustes › Privacidade e Segurança › Saúde."
           }
         }
       }
     },
-    "Open the app on your Apple Watch to start a match" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abra o app no seu Apple Watch para começar uma partida"
+    "History": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Histórico"
           }
         }
       }
     },
-    "Restore" : {
-      "comment" : "Glossary term (CONTEXT.md): merges quarantined matches into the live Match History. Never \"recover\" or \"import\".",
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Restaurar"
+    "It may become readable after an app update.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poderá ser lido após uma atualização do app."
           }
         }
       }
     },
-    "Restore complete" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Restauração concluída"
+    "Its matches will be permanently deleted.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suas partidas serão excluídas permanentemente."
           }
         }
       }
     },
-    "Restore failed" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Falha na restauração"
+    "Keep Playing": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar Jogando"
           }
         }
       }
     },
-    "Restored" : {
-      "comment" : "Row state once every match in the Quarantined Store is back in the live Match History.",
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Restaurado"
+    "Light": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claro"
           }
         }
       }
     },
-    "Result" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Resultado"
+    "Match Details": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detalhes da Partida"
           }
         }
       }
     },
-    "Resume Match" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retomar Partida"
+    "Match History": {
+      "comment": "Settings section header for Quarantined Store recovery — see CONTEXT.md \"Match History\".",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Histórico de Partidas"
           }
         }
       }
     },
-    "Score" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Placar"
+    "Match History the app couldn't open is kept here, set aside intact. Restore adds its matches back without changing the ones you already have.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Históricos de Partidas que o app não conseguiu abrir ficam guardados aqui, intactos. Restaurar adiciona as partidas de volta sem alterar as que você já tem."
           }
         }
       }
     },
-    "Score Counter" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Placar"
+    "Match Over!": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fim de Jogo!"
           }
         }
       }
     },
-    "Select Sport" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Escolha o Esporte"
+    "Modality": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modalidade"
           }
         }
       }
     },
-    "Set %lld" : {
-      "comment" : "Tennis set rows AND beach-tennis game rows (beach displays games as \"Sets\" in every language); \"set\" is a loanword in pt-BR, keep untranslated — see CONTEXT.md \"Scoring units\".",
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Set %lld"
+    "Multiple": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vários"
           }
         }
       }
     },
-    "Sets" : {
-      "comment" : "Section header / score-view label in both sports; loanword in pt-BR, keep untranslated — see CONTEXT.md \"Scoring units\".",
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sets"
+    "Name": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome"
           }
         }
       }
     },
-    "Settings" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ajustes"
+    "New Match": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nova Partida"
           }
         }
       }
     },
-    "Sport" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esporte"
+    "No matches yet": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhuma partida ainda"
           }
         }
       }
     },
-    "System" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sistema"
+    "Old matches can be restored": {
+      "comment": "Match History notice row shown while a Quarantined Store still holds restorable matches; taps through to Settings.",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partidas antigas podem ser restauradas"
           }
         }
       }
     },
-    "Team %@" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Time %@"
+    "Open the app on your Apple Watch to start a match": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abra o app no seu Apple Watch para começar uma partida"
           }
         }
       }
     },
-    "Team %@ wins" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Time %@ venceu"
+    "Restore": {
+      "comment": "Glossary term (CONTEXT.md): merges quarantined matches into the live Match History. Never \"recover\" or \"import\".",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurar"
           }
         }
       }
     },
-    "Team A" : {
-      "comment" : "The (Nós)/(Eles) framing is intentional — the watch's owner is Team A.",
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Time A (Nós)"
+    "Restore complete": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restauração concluída"
           }
         }
       }
     },
-    "Team B" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Time B (Eles)"
+    "Restore failed": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Falha na restauração"
           }
         }
       }
     },
-    "Teams" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Times"
+    "Restored": {
+      "comment": "Row state once every match in the Quarantined Store is back in the live Match History.",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurado"
           }
         }
       }
     },
-    "Tennis" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tênis"
+    "Result": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resultado"
           }
         }
       }
     },
-    "The Quarantined Store was not removed." : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O armazenamento em quarentena não foi removido."
+    "Resume Match": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retomar Partida"
           }
         }
       }
     },
-    "The Watch will always start a Beach Tennis match." : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O Watch sempre iniciará uma partida de Beach Tennis."
+    "Score": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Placar"
           }
         }
       }
     },
-    "The Watch will always start a Tennis match." : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O Watch sempre iniciará uma partida de Tênis."
+    "Score Counter": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Placar"
           }
         }
       }
     },
-    "The Watch will ask which sport before each match." : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O Watch perguntará qual esporte antes de cada partida."
+    "Select Sport": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolha o Esporte"
           }
         }
       }
     },
-    "Theme" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tema"
+    "Set %lld": {
+      "comment": "Tennis set rows AND beach-tennis game rows (beach displays games as \"Sets\" in every language); \"set\" is a loanword in pt-BR, keep untranslated — see CONTEXT.md \"Scoring units\".",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set %lld"
           }
         }
       }
     },
-    "They will be permanently deleted." : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Elas serão excluídas permanentemente."
+    "Sets": {
+      "comment": "Section header / score-view label in both sports; loanword in pt-BR, keep untranslated — see CONTEXT.md \"Scoring units\".",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sets"
           }
         }
       }
     },
-    "Version %@" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versão %@"
+    "Settings": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajustes"
           }
         }
       }
     },
-    "Watch app not installed" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App do Watch não instalado"
+    "Sport": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esporte"
           }
         }
       }
     },
-    "Who serves first?" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quem saca primeiro?"
+    "System": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sistema"
           }
         }
       }
     },
-    "Winner" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vencedor"
+    "Team %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time %@"
           }
         }
       }
     },
-    "Your Match History was not changed." : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Seu Histórico de Partidas não foi alterado."
+    "Team %@ wins": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time %@ venceu"
+          }
+        }
+      }
+    },
+    "Team A": {
+      "comment": "The (Nós)/(Eles) framing is intentional — the watch's owner is Team A.",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time A (Nós)"
+          }
+        }
+      }
+    },
+    "Team B": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time B (Eles)"
+          }
+        }
+      }
+    },
+    "Teams": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Times"
+          }
+        }
+      }
+    },
+    "Tennis": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tênis"
+          }
+        }
+      }
+    },
+    "The Quarantined Store was not removed.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O armazenamento em quarentena não foi removido."
+          }
+        }
+      }
+    },
+    "The Watch records each match as a workout with live heart rate.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Watch registra cada partida como um treino com frequência cardíaca em tempo real."
+          }
+        }
+      }
+    },
+    "The Watch will always start a Beach Tennis match.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Watch sempre iniciará uma partida de Beach Tennis."
+          }
+        }
+      }
+    },
+    "The Watch will always start a Tennis match.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Watch sempre iniciará uma partida de Tênis."
+          }
+        }
+      }
+    },
+    "The Watch will ask which sport before each match.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Watch perguntará qual esporte antes de cada partida."
+          }
+        }
+      }
+    },
+    "Theme": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tema"
+          }
+        }
+      }
+    },
+    "They will be permanently deleted.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elas serão excluídas permanentemente."
+          }
+        }
+      }
+    },
+    "Version %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versão %@"
+          }
+        }
+      }
+    },
+    "Watch app not installed": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App do Watch não instalado"
+          }
+        }
+      }
+    },
+    "Who serves first?": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quem saca primeiro?"
+          }
+        }
+      }
+    },
+    "Winner": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vencedor"
+          }
+        }
+      }
+    },
+    "Your Match History was not changed.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seu Histórico de Partidas não foi alterado."
           }
         }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

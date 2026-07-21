@@ -18,11 +18,36 @@ enum WatchMessageKey {
     static let sportSetting = "sportSetting"
     static let teamAName = "teamAName"
     static let teamBName = "teamBName"
+    static let activeCalories = "activeCalories"
+    static let avgHeartRate = "avgHeartRate"
+    static let healthMonitoring = "healthMonitoring"
+    static let healthAuthStatus = "healthAuthStatus"
 }
 
 enum WatchMessageType {
     static let matchResult = "matchResult"
     static let colorUpdate = "colorUpdate"
+}
+
+/// The watch→phone HealthKit authorization-status channel — the reverse
+/// direction of the settings application-context path (`WatchSettings`).
+///
+/// The phone cannot query the watch app's HealthKit grant (authorization is
+/// per-app, and no API reads another app's status), so the watch reports its
+/// own status on change only. Decode returns `nil` for an absent or
+/// unrecognized value, so the phone leaves its last-known status untouched
+/// rather than clobbering it with garbage.
+struct HealthAuthStatusMessage: Sendable, Equatable {
+    let status: HealthAuthStatus
+
+    func toApplicationContext() -> [String: Any] {
+        [WatchMessageKey.healthAuthStatus: status.rawValue]
+    }
+
+    static func status(from dict: [String: Any]) -> HealthAuthStatus? {
+        guard let raw = dict[WatchMessageKey.healthAuthStatus] as? String else { return nil }
+        return HealthAuthStatus(rawValue: raw)
+    }
 }
 
 struct MatchResultPayload: Codable, Sendable {
@@ -42,6 +67,45 @@ struct MatchResultPayload: Codable, Sendable {
     // and must still decode, materializing empty strings rather than failing.
     let teamAName: String
     let teamBName: String
+    // Workout stats snapshotted from the live builder at match end. `nil` is the
+    // single uniform absent state — HealthKit denied, Health Monitoring off, or a
+    // pre-feature payload. Second decode tier, same as the team names above.
+    let activeCalories: Double?
+    let avgHeartRate: Double?
+
+    init(
+        matchId: UUID,
+        setScoreA: Int,
+        setScoreB: Int,
+        setsWonA: Int,
+        setsWonB: Int,
+        winner: Team,
+        duration: TimeInterval,
+        date: Date,
+        gameHistory: [GameRecord],
+        setHistory: [SetRecord],
+        matchType: MatchType,
+        teamAName: String,
+        teamBName: String,
+        activeCalories: Double? = nil,
+        avgHeartRate: Double? = nil
+    ) {
+        self.matchId = matchId
+        self.setScoreA = setScoreA
+        self.setScoreB = setScoreB
+        self.setsWonA = setsWonA
+        self.setsWonB = setsWonB
+        self.winner = winner
+        self.duration = duration
+        self.date = date
+        self.gameHistory = gameHistory
+        self.setHistory = setHistory
+        self.matchType = matchType
+        self.teamAName = teamAName
+        self.teamBName = teamBName
+        self.activeCalories = activeCalories
+        self.avgHeartRate = avgHeartRate
+    }
 
     func toDictionary() -> [String: Any] {
         var dict: [String: Any] = [
@@ -58,6 +122,8 @@ struct MatchResultPayload: Codable, Sendable {
             WatchMessageKey.teamAName: teamAName,
             WatchMessageKey.teamBName: teamBName
         ]
+        if let activeCalories { dict[WatchMessageKey.activeCalories] = activeCalories }
+        if let avgHeartRate { dict[WatchMessageKey.avgHeartRate] = avgHeartRate }
         if let data = try? JSONEncoder().encode(gameHistory) {
             dict[WatchMessageKey.gameHistory] = data
         }
@@ -89,6 +155,9 @@ struct MatchResultPayload: Codable, Sendable {
         let teamAName = dict[WatchMessageKey.teamAName] as? String ?? ""
         let teamBName = dict[WatchMessageKey.teamBName] as? String ?? ""
 
+        let activeCalories = dict[WatchMessageKey.activeCalories] as? Double
+        let avgHeartRate = dict[WatchMessageKey.avgHeartRate] as? Double
+
         let gameHistory: [GameRecord]
         if let data = dict[WatchMessageKey.gameHistory] as? Data,
            let records = try? JSONDecoder().decode([GameRecord].self, from: data) {
@@ -112,7 +181,8 @@ struct MatchResultPayload: Codable, Sendable {
             winner: winner, duration: duration, date: date,
             gameHistory: gameHistory, setHistory: setHistory,
             matchType: matchType,
-            teamAName: teamAName, teamBName: teamBName
+            teamAName: teamAName, teamBName: teamBName,
+            activeCalories: activeCalories, avgHeartRate: avgHeartRate
         )
     }
 }

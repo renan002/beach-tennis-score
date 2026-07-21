@@ -82,6 +82,14 @@ targets:
         WKCompanionAppBundleIdentifier: com.renan.beachtennis
         WKApplication: true
         WKRunsIndependentlyOfCompanionApp: true
+        WKBackgroundModes:
+          - workout-processing
+        NSHealthShareUsageDescription: "Beach Tennis Score reads your heart rate and calories during a match to show your heart rate live and record your workout stats."
+        NSHealthUpdateUsageDescription: "Beach Tennis Score saves each match as a workout in the Health app so you get activity credit."
+    entitlements:
+      path: watchOS/BeachTennisCounterWatch.entitlements
+      properties:
+        com.apple.developer.healthkit: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.renan.beachtennis.watchkitapp
