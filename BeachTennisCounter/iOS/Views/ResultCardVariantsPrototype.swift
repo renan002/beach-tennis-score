@@ -218,11 +218,19 @@ struct ResultCardVariantC2: View {
     let card: ResultCard
     let teamAColor: Color
     let teamBColor: Color
+    /// The sport's own colour — the ball you actually play with. Tennis is the
+    /// felt of a Wilson US Open ball sampled off a photo (#D8E035, between the
+    /// shadowed felt #CBD030 and the ITF's spec optic yellow #DFFF4F); beach
+    /// keeps the app's orange.
+    let sportColor: Color
     var padded = false
 
     static let ticketWidth: CGFloat = 460
     static let ticketHeight: CGFloat = 200
     static let side: CGFloat = 560
+
+    static let tennisBall = Color(red: 216 / 255, green: 224 / 255, blue: 53 / 255)
+    static let beachOrange = Color(red: 240 / 255, green: 138 / 255, blue: 48 / 255)
 
     private let paper = Color(white: 0.09)
 
@@ -234,6 +242,14 @@ struct ResultCardVariantC2: View {
         }
     }
 
+    /// Black on optic yellow, white on the darker beach orange — the stub has
+    /// to stay legible whichever ball the sport plays with.
+    private var onSport: Color {
+        var white: CGFloat = 0
+        UIColor(sportColor).getWhite(&white, alpha: nil)
+        return white > 0.6 ? Color(white: 0.06) : .white
+    }
+
     @ViewBuilder
     var body: some View {
         if padded {
@@ -241,7 +257,7 @@ struct ResultCardVariantC2: View {
                 .shadow(color: .black.opacity(0.5), radius: 18, y: 8)
                 .frame(width: Self.side, height: Self.side)
                 .background(
-                    LinearGradient(colors: [winnerColor.opacity(0.30), Color(white: 0.04)],
+                    LinearGradient(colors: [sportColor.opacity(0.28), Color(white: 0.04)],
                                    startPoint: .top, endPoint: .bottom)
                 )
                 .environment(\.colorScheme, .dark)
@@ -267,7 +283,7 @@ struct ResultCardVariantC2: View {
                 Text(card.sportName.uppercased())
                     .font(.system(size: 11, weight: .black))
                     .kerning(2.5)
-                    .foregroundStyle(winnerColor)
+                    .foregroundStyle(sportColor)
                 Spacer()
                 Text(card.dateText)
                     .font(.system(size: 10))
@@ -349,12 +365,12 @@ struct ResultCardVariantC2: View {
 
     private var stub: some View {
         ZStack {
-            winnerColor
+            sportColor
             VStack(spacing: 2) {
                 Spacer()
                 Text("\(card.scoreA)")
                     .font(.system(size: 46, weight: .black).monospacedDigit())
-                Rectangle().fill(.white.opacity(0.5)).frame(width: 26, height: 2)
+                Rectangle().fill(onSport.opacity(0.5)).frame(width: 26, height: 2)
                 Text("\(card.scoreB)")
                     .font(.system(size: 46, weight: .black).monospacedDigit())
                 Spacer()
@@ -366,7 +382,7 @@ struct ResultCardVariantC2: View {
                         .minimumScaleFactor(0.6)
                 }
             }
-            .foregroundStyle(.white)
+            .foregroundStyle(onSport)
             .padding(.vertical, 12)
             .padding(.horizontal, 8)
         }
