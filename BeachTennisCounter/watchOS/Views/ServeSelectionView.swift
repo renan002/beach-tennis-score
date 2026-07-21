@@ -38,7 +38,11 @@ struct ServeSelectionView: View {
         }
         .navigationBarHidden(true)
         .navigationDestination(isPresented: $navigateToScore) {
-            ScoreView(initialServer: selectedServer, matchType: matchType, isActive: $isActive)
+            ScoreView(initialServer: selectedServer,
+                      matchType: matchType,
+                      teamAName: sessionManager.teamAName,
+                      teamBName: sessionManager.teamBName,
+                      isActive: $isActive)
         }
     }
 
