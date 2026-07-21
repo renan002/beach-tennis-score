@@ -10,6 +10,8 @@ final class PhoneSessionManager: NSObject, ObservableObject {
     @AppStorage("teamAColorHex") var teamAColorHex: String = WatchSettings.defaultTeamAColorHex
     @AppStorage("teamBColorHex") var teamBColorHex: String = WatchSettings.defaultTeamBColorHex
     @AppStorage("sportSetting") var sportSetting: String = WatchSettings.defaultSportSetting
+    @AppStorage("teamAName") var teamAName: String = WatchSettings.defaultTeamAName
+    @AppStorage("teamBName") var teamBName: String = WatchSettings.defaultTeamBName
 
     /// nil = session not yet activated (unknown); true/false = known state
     @Published private(set) var isWatchAppInstalled: Bool? = nil
@@ -32,7 +34,9 @@ final class PhoneSessionManager: NSObject, ObservableObject {
     var watchSettings: WatchSettings {
         WatchSettings(teamAColorHex: teamAColorHex,
                       teamBColorHex: teamBColorHex,
-                      sportSetting: sportSetting)
+                      sportSetting: sportSetting,
+                      teamAName: teamAName,
+                      teamBName: teamBName)
     }
 
     func pushSettingsToWatch() {

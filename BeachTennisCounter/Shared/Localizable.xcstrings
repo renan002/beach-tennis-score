@@ -446,6 +446,16 @@
         }
       }
     },
+    "Name" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome"
+          }
+        }
+      }
+    },
     "New Match" : {
       "localizations" : {
         "pt-BR" : {
@@ -672,12 +682,12 @@
         }
       }
     },
-    "Team Colors" : {
+    "Teams" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cores dos Times"
+            "value" : "Times"
           }
         }
       }

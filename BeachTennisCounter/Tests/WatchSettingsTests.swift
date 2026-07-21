@@ -6,11 +6,15 @@ final class WatchSettingsTests: XCTestCase {
     private func makeSettings(
         teamAColorHex: String = "E74C3C",
         teamBColorHex: String = "5B8DEF",
-        sportSetting: String = "beachTennis"
+        sportSetting: String = "beachTennis",
+        teamAName: String = "",
+        teamBName: String = ""
     ) -> WatchSettings {
         WatchSettings(teamAColorHex: teamAColorHex,
                       teamBColorHex: teamBColorHex,
-                      sportSetting: sportSetting)
+                      sportSetting: sportSetting,
+                      teamAName: teamAName,
+                      teamBName: teamBName)
     }
 
     // MARK: - Round-trip
@@ -28,6 +32,13 @@ final class WatchSettingsTests: XCTestCase {
         XCTAssertEqual(decoded.sportSetting, "tennis")
     }
 
+    func test_roundtrip_teamNames() {
+        let settings = makeSettings(teamAName: "Ana & Bia", teamBName: "Cadu & Dedé")
+        let decoded = WatchSettings.from(settings.toApplicationContext())
+        XCTAssertEqual(decoded.teamAName, "Ana & Bia")
+        XCTAssertEqual(decoded.teamBName, "Cadu & Dedé")
+    }
+
     func test_roundtrip_preservesWholeValue() {
         let settings = makeSettings(teamAColorHex: "E67E22",
                                     teamBColorHex: "2ECC71",
@@ -41,11 +52,15 @@ final class WatchSettingsTests: XCTestCase {
     func test_toApplicationContext_usesSharedKeys() {
         let context = makeSettings(teamAColorHex: "AABBCC",
                                    teamBColorHex: "DDEEFF",
-                                   sportSetting: "tennis").toApplicationContext()
+                                   sportSetting: "tennis",
+                                   teamAName: "Ana",
+                                   teamBName: "Bia").toApplicationContext()
         XCTAssertEqual(context[WatchMessageKey.teamAColor] as? String, "AABBCC")
         XCTAssertEqual(context[WatchMessageKey.teamBColor] as? String, "DDEEFF")
         XCTAssertEqual(context[WatchMessageKey.sportSetting] as? String, "tennis")
-        XCTAssertEqual(context.count, 3)
+        XCTAssertEqual(context[WatchMessageKey.teamAName] as? String, "Ana")
+        XCTAssertEqual(context[WatchMessageKey.teamBName] as? String, "Bia")
+        XCTAssertEqual(context.count, 5)
     }
 
     // MARK: - Missing fields fall back to defaults (full-trio replace semantics)
@@ -74,6 +89,25 @@ final class WatchSettingsTests: XCTestCase {
         ])
         XCTAssertEqual(decoded.teamAColorHex, "E74C3C")
         XCTAssertEqual(decoded.teamBColorHex, "9B59B6")
+    }
+
+    func test_from_missingNames_usesEmptyDefaults() {
+        let decoded = WatchSettings.from([
+            WatchMessageKey.teamAColor: "2ECC71",
+            WatchMessageKey.teamBColor: "9B59B6",
+            WatchMessageKey.sportSetting: "tennis"
+        ])
+        XCTAssertEqual(decoded.teamAName, "")
+        XCTAssertEqual(decoded.teamBName, "")
+    }
+
+    func test_from_wrongNameType_usesEmptyDefault() {
+        let decoded = WatchSettings.from([
+            WatchMessageKey.teamAName: 42,
+            WatchMessageKey.teamBName: "Bia"
+        ])
+        XCTAssertEqual(decoded.teamAName, "")
+        XCTAssertEqual(decoded.teamBName, "Bia")
     }
 
     func test_from_emptyDict_usesAllDefaults() {

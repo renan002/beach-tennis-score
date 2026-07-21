@@ -10,16 +10,24 @@ struct WatchSettings: Sendable, Equatable {
     static let defaultTeamAColorHex = "E74C3C"
     static let defaultTeamBColorHex = "5B8DEF"
     static let defaultSportSetting = "beachTennis"
+    /// Default team names are empty — the watch serve buttons fall back to the
+    /// localized "Team A"/"Team B" literals when a name is empty.
+    static let defaultTeamAName = ""
+    static let defaultTeamBName = ""
 
     let teamAColorHex: String
     let teamBColorHex: String
     let sportSetting: String
+    let teamAName: String
+    let teamBName: String
 
     func toApplicationContext() -> [String: Any] {
         [
             WatchMessageKey.teamAColor: teamAColorHex,
             WatchMessageKey.teamBColor: teamBColorHex,
-            WatchMessageKey.sportSetting: sportSetting
+            WatchMessageKey.sportSetting: sportSetting,
+            WatchMessageKey.teamAName: teamAName,
+            WatchMessageKey.teamBName: teamBName
         ]
     }
 
@@ -30,7 +38,9 @@ struct WatchSettings: Sendable, Equatable {
         WatchSettings(
             teamAColorHex: dict[WatchMessageKey.teamAColor] as? String ?? defaultTeamAColorHex,
             teamBColorHex: dict[WatchMessageKey.teamBColor] as? String ?? defaultTeamBColorHex,
-            sportSetting: dict[WatchMessageKey.sportSetting] as? String ?? defaultSportSetting
+            sportSetting: dict[WatchMessageKey.sportSetting] as? String ?? defaultSportSetting,
+            teamAName: dict[WatchMessageKey.teamAName] as? String ?? defaultTeamAName,
+            teamBName: dict[WatchMessageKey.teamBName] as? String ?? defaultTeamBName
         )
     }
 }
