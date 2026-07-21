@@ -18,16 +18,20 @@ struct MatchDetailView: View {
                     Text("Score")
                         .foregroundColor(.secondary)
                     Spacer()
-                    Text("A \(match.scoreDisplay) B")
+                    // Plain String, not a literal — a user-entered Team Name
+                    // must never go through String Catalog lookup.
+                    Text(match.scoreLineDisplay)
                         .font(.headline)
                 }
-                HStack {
-                    Text("Winner")
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    Text("Team \(match.winner.uppercased())")
-                        .font(.headline)
-                        .foregroundColor(.orange)
+                if !match.winnerDisplayName.isEmpty {
+                    HStack {
+                        Text("Winner")
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text(match.winnerDisplayName)
+                            .font(.headline)
+                            .foregroundColor(.orange)
+                    }
                 }
             }
 

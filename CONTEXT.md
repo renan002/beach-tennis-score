@@ -13,6 +13,12 @@ particular for the three different things this project has historically called
 A single contest between two teams, from first point to final point. The unit a
 player starts, scores, and finishes.
 
+**Team Name**:
+The user-set label attached to side A or B of a match; empty means unnamed, and
+the UI falls back to the localized "Team A"/"Team B". Stamped onto the match at
+its start, so renaming in Settings never rewrites a match already played.
+_Avoid_: player name, team label
+
 **Match History**:
 The durable collection of completed matches, kept on the phone. It is the only
 lasting record of what a player has played — the watch keeps no record of past
