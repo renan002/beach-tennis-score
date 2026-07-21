@@ -6,7 +6,6 @@ struct ScoreView: View {
     @EnvironmentObject private var workoutManager: WorkoutManager
     @Environment(\.dismiss) private var dismiss
 
-    let initialServer: Team
     let matchType: MatchType
     @Binding var isActive: Bool
 
@@ -16,27 +15,30 @@ struct ScoreView: View {
     @State private var showHistory = false
     @State private var showCancelAlert = false
 
+    /// Starts a fresh match, stamping the synced Team Names at match start.
     init(
         initialServer: Team,
         matchType: MatchType,
         teamAName: String = "",
         teamBName: String = "",
-        restoredState: MatchState? = nil,
         isActive: Binding<Bool>
     ) {
-        self.initialServer = initialServer
-        self.matchType = restoredState?.matchType ?? matchType
+        self.matchType = matchType
         self._isActive = isActive
-        if let restored = restoredState {
-            _state = State(initialValue: restored)
-        } else {
-            _state = State(initialValue: MatchState.newMatch(
-                matchType: matchType,
-                initialServer: initialServer,
-                teamAName: teamAName,
-                teamBName: teamBName
-            ))
-        }
+        _state = State(initialValue: MatchState.newMatch(
+            matchType: matchType,
+            initialServer: initialServer,
+            teamAName: teamAName,
+            teamBName: teamBName
+        ))
+    }
+
+    /// Resumes a persisted match. The restored state carries its own stamped
+    /// names and serve wiring, so no fresh-match params apply here.
+    init(restoredState: MatchState, isActive: Binding<Bool>) {
+        self.matchType = restoredState.matchType
+        self._isActive = isActive
+        _state = State(initialValue: restoredState)
     }
 
     var body: some View {
