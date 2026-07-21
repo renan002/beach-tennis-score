@@ -9,6 +9,8 @@ final class WatchSessionManager: NSObject, ObservableObject {
     @Published var teamAColor: Color = .red
     @Published var teamBColor: Color = .blue
     @Published var sportSetting: String = "beachTennis"
+    @Published var teamAName: String = WatchSettings.defaultTeamAName
+    @Published var teamBName: String = WatchSettings.defaultTeamBName
     @Published var healthMonitoringEnabled: Bool = WatchSettings.defaultHealthMonitoringEnabled
 
     private nonisolated static let pendingResultKey = "pendingMatchResult"
@@ -72,6 +74,8 @@ final class WatchSessionManager: NSObject, ObservableObject {
         teamAColor = Color(hex: settings.teamAColorHex) ?? .red
         teamBColor = Color(hex: settings.teamBColorHex) ?? .blue
         sportSetting = settings.sportSetting
+        teamAName = settings.teamAName
+        teamBName = settings.teamBName
         healthMonitoringEnabled = settings.healthMonitoringEnabled
     }
 

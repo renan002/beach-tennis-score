@@ -131,6 +131,16 @@
         }
       }
     },
+    "Active Calories": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calorias Ativas"
+          }
+        }
+      }
+    },
     "All": {
       "localizations": {
         "pt-BR": {
@@ -157,6 +167,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aparência"
+          }
+        }
+      }
+    },
+    "Avg Heart Rate": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frequência Cardíaca Média"
           }
         }
       }
@@ -335,6 +355,36 @@
         }
       }
     },
+    "Health": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saúde"
+          }
+        }
+      }
+    },
+    "Health Monitoring": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monitoramento de Saúde"
+          }
+        }
+      }
+    },
+    "Health access was denied on the Watch. To re-enable it, open Settings › Privacy & Security › Health.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O acesso à Saúde foi negado no Watch. Para reativar, abra Ajustes › Privacidade e Segurança › Saúde."
+          }
+        }
+      }
+    },
     "History": {
       "localizations": {
         "pt-BR": {
@@ -442,6 +492,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vários"
+          }
+        }
+      }
+    },
+    "Name": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome"
           }
         }
       }
@@ -672,12 +732,12 @@
         }
       }
     },
-    "Team Colors": {
+    "Teams": {
       "localizations": {
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cores dos Times"
+            "value": "Times"
           }
         }
       }
@@ -698,6 +758,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "O armazenamento em quarentena não foi removido."
+          }
+        }
+      }
+    },
+    "The Watch records each match as a workout with live heart rate.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Watch registra cada partida como um treino com frequência cardíaca em tempo real."
           }
         }
       }
@@ -798,66 +868,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Seu Histórico de Partidas não foi alterado."
-          }
-        }
-      }
-    },
-    "Health": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saúde"
-          }
-        }
-      }
-    },
-    "Health Monitoring": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Monitoramento de Saúde"
-          }
-        }
-      }
-    },
-    "The Watch records each match as a workout with live heart rate.": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O Watch registra cada partida como um treino com frequência cardíaca em tempo real."
-          }
-        }
-      }
-    },
-    "Health access was denied on the Watch. To re-enable it, open Settings › Privacy & Security › Health.": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O acesso à Saúde foi negado no Watch. Para reativar, abra Ajustes › Privacidade e Segurança › Saúde."
-          }
-        }
-      }
-    },
-    "Avg Heart Rate": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Frequência Cardíaca Média"
-          }
-        }
-      }
-    },
-    "Active Calories": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Calorias Ativas"
           }
         }
       }

@@ -16,20 +16,26 @@ struct ScoreView: View {
     @State private var showHistory = false
     @State private var showCancelAlert = false
 
-    init(initialServer: Team, matchType: MatchType, restoredState: MatchState? = nil, isActive: Binding<Bool>) {
+    init(
+        initialServer: Team,
+        matchType: MatchType,
+        teamAName: String = "",
+        teamBName: String = "",
+        restoredState: MatchState? = nil,
+        isActive: Binding<Bool>
+    ) {
         self.initialServer = initialServer
         self.matchType = restoredState?.matchType ?? matchType
         self._isActive = isActive
         if let restored = restoredState {
             _state = State(initialValue: restored)
         } else {
-            var s = MatchState()
-            s.matchType = matchType
-            s.servingTeam = initialServer
-            s.initialServer = initialServer
-            s.tiebreakFirstServer = initialServer
-            s.matchStartDate = Date()
-            _state = State(initialValue: s)
+            _state = State(initialValue: MatchState.newMatch(
+                matchType: matchType,
+                initialServer: initialServer,
+                teamAName: teamAName,
+                teamBName: teamBName
+            ))
         }
     }
 
@@ -261,7 +267,7 @@ struct ScoreView: View {
                 .font(.headline)
                 .foregroundStyle(.white)
 
-            Text("\(state.winner?.displayName ?? "") wins")
+            Text("\(state.winner.map { state.teamName(for: $0) } ?? "") wins")
                 .font(.subheadline)
                 .foregroundStyle(.orange)
 

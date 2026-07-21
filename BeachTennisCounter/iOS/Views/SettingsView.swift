@@ -35,9 +35,13 @@ struct SettingsView: View {
                     Text(sportSettingFooter)
                 }
 
-                Section("Team Colors") {
-                    colorPicker(label: "Team A", hexBinding: $phoneSession.teamAColorHex)
-                    colorPicker(label: "Team B", hexBinding: $phoneSession.teamBColorHex)
+                Section("Teams") {
+                    teamRow(label: "Team A",
+                            nameBinding: $phoneSession.teamAName,
+                            hexBinding: $phoneSession.teamAColorHex)
+                    teamRow(label: "Team B",
+                            nameBinding: $phoneSession.teamBName,
+                            hexBinding: $phoneSession.teamBColorHex)
                 }
 
                 Section {
@@ -111,6 +115,10 @@ struct SettingsView: View {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
     }
 
+    /// Name length cap: keeps the watch serve buttons and history lines from
+    /// truncating. Counts grapheme clusters, so a 12-emoji name is still 12.
+    private static let nameMaxLength = 12
+
     /// The watch last reported that Health access was denied on-watch.
     private var isHealthDenied: Bool {
         phoneSession.watchHealthAuthStatus == .denied
@@ -134,11 +142,19 @@ struct SettingsView: View {
     }
 
     @ViewBuilder
-    private func colorPicker(label: LocalizedStringKey, hexBinding: Binding<String>) -> some View {
+    private func teamRow(
+        label: LocalizedStringKey,
+        nameBinding: Binding<String>,
+        hexBinding: Binding<String>
+    ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(label)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+
+            TextField("Name", text: cappedName(nameBinding))
+                .textInputAutocapitalization(.words)
+                .autocorrectionDisabled()
 
             HStack(spacing: 12) {
                 ForEach(colorOptions, id: \.hex) { option in
@@ -160,7 +176,28 @@ struct SettingsView: View {
         .padding(.vertical, 4)
     }
 
+    /// Wraps a name binding so typed/pasted input is hard-capped at
+    /// `nameMaxLength` characters. Trimming happens later, on commit.
+    private func cappedName(_ source: Binding<String>) -> Binding<String> {
+        Binding(
+            get: { source.wrappedValue },
+            set: { source.wrappedValue = String($0.prefix(Self.nameMaxLength)) }
+        )
+    }
+
+    /// Trims committed names to their canonical stored form: surrounding
+    /// whitespace stripped, whitespace-only collapsing to empty. Runs at the
+    /// commit points (Done / onDisappear) rather than per-keystroke so the
+    /// field stays natural to type in.
+    private func commitNames() {
+        phoneSession.teamAName = phoneSession.teamAName
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        phoneSession.teamBName = phoneSession.teamBName
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     private func syncToWatchIfChanged() {
+        commitNames()
         let current = phoneSession.watchSettings
         guard current != syncedSettings else { return }
         phoneSession.pushSettingsToWatch()

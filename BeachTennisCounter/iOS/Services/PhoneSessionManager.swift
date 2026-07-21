@@ -10,6 +10,8 @@ final class PhoneSessionManager: NSObject, ObservableObject {
     @AppStorage("teamAColorHex") var teamAColorHex: String = WatchSettings.defaultTeamAColorHex
     @AppStorage("teamBColorHex") var teamBColorHex: String = WatchSettings.defaultTeamBColorHex
     @AppStorage("sportSetting") var sportSetting: String = WatchSettings.defaultSportSetting
+    @AppStorage("teamAName") var teamAName: String = WatchSettings.defaultTeamAName
+    @AppStorage("teamBName") var teamBName: String = WatchSettings.defaultTeamBName
     @AppStorage("healthMonitoringEnabled") var healthMonitoringEnabled: Bool = WatchSettings.defaultHealthMonitoringEnabled
 
     /// Last-known HealthKit authorization status reported by the watch, persisted
@@ -43,6 +45,8 @@ final class PhoneSessionManager: NSObject, ObservableObject {
         WatchSettings(teamAColorHex: teamAColorHex,
                       teamBColorHex: teamBColorHex,
                       sportSetting: sportSetting,
+                      teamAName: teamAName,
+                      teamBName: teamBName,
                       healthMonitoringEnabled: healthMonitoringEnabled)
     }
 

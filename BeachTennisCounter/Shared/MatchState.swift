@@ -129,6 +129,28 @@ struct MatchState: Codable, Sendable {
     var teamAName: String = ""
     var teamBName: String = ""
 
+    /// Builds the starting state for a brand-new match, stamping the Team Names
+    /// in effect at match start. Names are copied by value, so a later Settings
+    /// rename never rewrites a match already under way or already stored —
+    /// history keeps the names it was played with.
+    static func newMatch(
+        matchType: MatchType,
+        initialServer: Team,
+        teamAName: String = "",
+        teamBName: String = "",
+        startDate: Date = Date()
+    ) -> MatchState {
+        var s = MatchState()
+        s.matchType = matchType
+        s.servingTeam = initialServer
+        s.initialServer = initialServer
+        s.tiebreakFirstServer = initialServer
+        s.matchStartDate = startDate
+        s.teamAName = teamAName
+        s.teamBName = teamBName
+        return s
+    }
+
     /// The label to show for `team`: its Team Name when set, otherwise the
     /// localized `Team.displayName` fallback.
     func teamName(for team: Team) -> String {
