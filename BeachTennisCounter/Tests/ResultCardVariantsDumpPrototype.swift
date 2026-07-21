@@ -32,6 +32,8 @@ final class ResultCardVariantsDumpPrototype: XCTestCase {
             try dump(ResultCardView(card: card, teamAColor: a, teamBColor: b), "\(sport)-A")
             try dump(ResultCardVariantB(card: card, teamAColor: a, teamBColor: b), "\(sport)-B")
             try dump(ResultCardVariantC(card: card, teamAColor: a, teamBColor: b), "\(sport)-C")
+            try dump(ResultCardVariantC2(card: card, teamAColor: a, teamBColor: b), "\(sport)-C2-ticket")
+            try dump(ResultCardVariantC2(card: card, teamAColor: a, teamBColor: b, padded: true), "\(sport)-C2-square")
             try dump(ResultCardVariantD(card: card, teamAColor: a, teamBColor: b), "\(sport)-D")
         }
     }

@@ -206,6 +206,174 @@ struct ResultCardVariantC: View {
     }
 }
 
+// MARK: - C2 — Ingresso, real ticket proportions
+
+/// C, but shaped like an actual ticket (2.3:1) instead of a square: body on the
+/// left, perforation with punched notches, tear-off stub on the right carrying
+/// the score and the watermark.
+///
+/// `padded` centres that ticket on a square canvas — a 2.3:1 image posts badly
+/// to a square feed, so the two are worth judging side by side.
+struct ResultCardVariantC2: View {
+    let card: ResultCard
+    let teamAColor: Color
+    let teamBColor: Color
+    var padded = false
+
+    static let ticketWidth: CGFloat = 460
+    static let ticketHeight: CGFloat = 200
+    static let side: CGFloat = 560
+
+    private let paper = Color(white: 0.09)
+
+    private var winnerColor: Color {
+        switch card.winner {
+        case .a: return teamAColor
+        case .b: return teamBColor
+        case nil: return .gray
+        }
+    }
+
+    @ViewBuilder
+    var body: some View {
+        if padded {
+            ticket
+                .shadow(color: .black.opacity(0.5), radius: 18, y: 8)
+                .frame(width: Self.side, height: Self.side)
+                .background(
+                    LinearGradient(colors: [winnerColor.opacity(0.30), Color(white: 0.04)],
+                                   startPoint: .top, endPoint: .bottom)
+                )
+                .environment(\.colorScheme, .dark)
+        } else {
+            ticket.environment(\.colorScheme, .dark)
+        }
+    }
+
+    private var ticket: some View {
+        HStack(spacing: 0) {
+            main
+            perforation
+            stub
+        }
+        .frame(width: Self.ticketWidth, height: Self.ticketHeight)
+        .background(paper)
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+    }
+
+    private var main: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Text(card.sportName.uppercased())
+                    .font(.system(size: 11, weight: .black))
+                    .kerning(2.5)
+                    .foregroundStyle(winnerColor)
+                Spacer()
+                Text(card.dateText)
+                    .font(.system(size: 10))
+                    .foregroundStyle(.white.opacity(0.45))
+            }
+
+            Spacer()
+
+            teamLine(card.teamAName, teamAColor, card.winner == .a)
+            teamLine(card.teamBName, teamBColor, card.winner == .b)
+                .padding(.top, 6)
+
+            Spacer()
+
+            HStack(spacing: 6) {
+                Text(card.scoreUnitLabel.uppercased())
+                    .font(.system(size: 9, weight: .bold))
+                    .kerning(1.5)
+                    .foregroundStyle(.white.opacity(0.35))
+                if let breakdown = card.setBreakdown {
+                    ForEach(Array(breakdown.split(separator: "  ").enumerated()), id: \.offset) { _, set in
+                        Text(String(set))
+                            .font(.system(size: 10, weight: .semibold).monospacedDigit())
+                            .foregroundStyle(.white.opacity(0.75))
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 3)
+                            .background(Capsule().fill(.white.opacity(0.1)))
+                    }
+                }
+                Spacer()
+                Text(card.durationText)
+                    .font(.system(size: 10).monospacedDigit())
+                    .foregroundStyle(.white.opacity(0.45))
+            }
+        }
+        .padding(18)
+    }
+
+    private func teamLine(_ name: String, _ color: Color, _ isWinner: Bool) -> some View {
+        HStack(spacing: 8) {
+            Circle()
+                .fill(isWinner ? color : color.opacity(0.3))
+                .frame(width: 8, height: 8)
+            Text(name)
+                .font(.system(size: 21, weight: isWinner ? .heavy : .regular))
+                .foregroundStyle(.white.opacity(isWinner ? 1 : 0.5))
+                .lineLimit(1).minimumScaleFactor(0.5)
+            if isWinner {
+                Image(systemName: "trophy.fill")
+                    .font(.system(size: 11))
+                    .foregroundStyle(color)
+            }
+        }
+    }
+
+    /// Dashed tear line with a notch punched top and bottom.
+    private var perforation: some View {
+        ZStack {
+            VStack(spacing: 5) {
+                ForEach(0..<12, id: \.self) { _ in
+                    Rectangle().fill(.white.opacity(0.25)).frame(width: 1, height: 6)
+                }
+            }
+            VStack {
+                notch.offset(y: -7)
+                Spacer()
+                notch.offset(y: 7)
+            }
+        }
+        .frame(width: 18)
+    }
+
+    /// Punched out of the ticket, so whatever is behind the card shows through.
+    private var notch: some View {
+        Circle()
+            .fill(Color(white: 0.02))
+            .frame(width: 14, height: 14)
+    }
+
+    private var stub: some View {
+        ZStack {
+            winnerColor
+            VStack(spacing: 2) {
+                Spacer()
+                Text("\(card.scoreA)")
+                    .font(.system(size: 46, weight: .black).monospacedDigit())
+                Rectangle().fill(.white.opacity(0.5)).frame(width: 26, height: 2)
+                Text("\(card.scoreB)")
+                    .font(.system(size: 46, weight: .black).monospacedDigit())
+                Spacer()
+                if let watermark = card.watermark {
+                    Text(watermark.uppercased())
+                        .font(.system(size: 8, weight: .black))
+                        .kerning(1)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                }
+            }
+            .foregroundStyle(.white)
+            .padding(.vertical, 12)
+            .padding(.horizontal, 8)
+        }
+        .frame(width: 118)
+    }
+}
+
 // MARK: - D — Manchete
 
 /// Story-shaped (4:5). The post's message is "X won" as a headline; the score
