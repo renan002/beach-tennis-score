@@ -194,13 +194,19 @@ struct MatchRowView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
-                Text("A \(match.scoreDisplay) B")
+                // Plain String, not a literal — a user-entered Team Name must
+                // never go through String Catalog lookup.
+                Text(match.scoreLineDisplay)
                     .font(.headline)
             }
 
             Spacer()
 
-            winnerBadge
+            // No recognizable winner (a corrupt stored value) leaves nothing to
+            // name — drop the capsule rather than badge a bare "wins".
+            if !match.winnerDisplayName.isEmpty {
+                winnerBadge
+            }
         }
         .padding(.vertical, 4)
     }
@@ -219,7 +225,7 @@ struct MatchRowView: View {
     }
 
     private var winnerBadge: some View {
-        Text("Team \(match.winner.uppercased()) wins")
+        Text("\(match.winnerDisplayName) wins")
             .font(.caption.bold())
             .foregroundColor(.white)
             .padding(.horizontal, 8)

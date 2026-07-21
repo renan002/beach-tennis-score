@@ -691,26 +691,6 @@
         }
       }
     },
-    "Team %@": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Time %@"
-          }
-        }
-      }
-    },
-    "Team %@ wins": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Time %@ venceu"
-          }
-        }
-      }
-    },
     "Team A": {
       "comment": "The (Nós)/(Eles) framing is intentional — the watch's owner is Team A.",
       "localizations": {
