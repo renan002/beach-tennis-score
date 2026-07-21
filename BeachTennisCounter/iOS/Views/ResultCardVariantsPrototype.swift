@@ -218,10 +218,8 @@ struct ResultCardVariantC2: View {
     let card: ResultCard
     let teamAColor: Color
     let teamBColor: Color
-    /// The sport's own colour — the ball you actually play with. Tennis is the
-    /// felt of a Wilson US Open ball sampled off a photo (#D8E035, between the
-    /// shadowed felt #CBD030 and the ITF's spec optic yellow #DFFF4F); beach
-    /// keeps the app's orange.
+    /// The sport's own colour — the ball you actually play with. Tennis is
+    /// optic yellow #CCFF00; beach keeps the app's orange.
     let sportColor: Color
     var padded = false
 
@@ -229,7 +227,7 @@ struct ResultCardVariantC2: View {
     static let ticketHeight: CGFloat = 200
     static let side: CGFloat = 560
 
-    static let tennisBall = Color(red: 216 / 255, green: 224 / 255, blue: 53 / 255)
+    static let tennisBall = Color(red: 204 / 255, green: 255 / 255, blue: 0)
     static let beachOrange = Color(red: 240 / 255, green: 138 / 255, blue: 48 / 255)
 
     private let paper = Color(white: 0.09)
