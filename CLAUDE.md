@@ -95,6 +95,10 @@ table and the build fails outright. `InfoPlist.strings` is separate and still pe
 ### Branches
 
 - New feature branches are always cut from `develop`, never from `main` or another feature branch.
+- **`git fetch origin` before cutting, and cut from `origin/develop`.** The local
+  `develop` ref only moves when you pull it, so in a worktree it is routinely many
+  commits stale — reading it without fetching will tell you that work already merged
+  is missing, and you will branch from the wrong base.
 - Create the branch before writing any code for that feature — don't develop first and branch later.
 - Name branches `<type>/<short-description>`, e.g. `feat/serve-rotation-fix`, `bug/watch-sync-crash`, matching the commit `<type>` below.
 

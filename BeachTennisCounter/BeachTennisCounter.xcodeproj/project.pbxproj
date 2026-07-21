@@ -60,6 +60,7 @@
 		E3B10497313DE7597CF2C65A /* StoredMatchDisplayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88C29C7EFF473AB896CCA2B8 /* StoredMatchDisplayTests.swift */; };
 		E780DAF383027DBE5F3111EF /* BeachTennisApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D28EC16CCCEA10A4E7D8BA1 /* BeachTennisApp.swift */; };
 		F457D0ECDD2D6D57DF573518 /* MatchListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A64CD23E997EF801E4A50E23 /* MatchListView.swift */; };
+		FCBE365F01B224013010D12D /* HealthSettingsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B6E8D11E8E5CCF54165EC7A /* HealthSettingsSection.swift */; };
 		FEF568E1C91B710F76382C44 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D62011185524F3A6907CE940 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
@@ -112,6 +113,7 @@
 		3BB743BC5C0C98046825D4C0 /* WorkoutPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutPolicyTests.swift; sourceTree = "<group>"; };
 		41390DBE859A457CB1FE6D9D /* StoreRecoveryRestoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreRecoveryRestoreTests.swift; sourceTree = "<group>"; };
 		425529E1E7F0F0708643A565 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
+		4B6E8D11E8E5CCF54165EC7A /* HealthSettingsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthSettingsSection.swift; sourceTree = "<group>"; };
 		53AC24C14225AFDAE7BC7BFD /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		559DA79145365F0EA4383EE1 /* InfoPlist.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = InfoPlist.strings; path = "pt-BR.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		616D650E03B50F5426E92D38 /* ServeSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServeSelectionView.swift; sourceTree = "<group>"; };
@@ -194,6 +196,7 @@
 		3A5073EF7578A3EDE2317682 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				4B6E8D11E8E5CCF54165EC7A /* HealthSettingsSection.swift */,
 				6384C90BFE76A48416288478 /* MatchDetailView.swift */,
 				A64CD23E997EF801E4A50E23 /* MatchListView.swift */,
 				971B4278F8EE09572EB0FA5F /* QuarantinedStoresSection.swift */,
@@ -435,6 +438,7 @@
 			files = (
 				253E85A5FC78D10B49D1E5E5 /* AppTheme.swift in Sources */,
 				E780DAF383027DBE5F3111EF /* BeachTennisApp.swift in Sources */,
+				FCBE365F01B224013010D12D /* HealthSettingsSection.swift in Sources */,
 				632E5000D7145D27111E2305 /* LiveStore.swift in Sources */,
 				A36E17FF54692A7E34AF41AE /* MatchDetailView.swift in Sources */,
 				F457D0ECDD2D6D57DF573518 /* MatchListView.swift in Sources */,

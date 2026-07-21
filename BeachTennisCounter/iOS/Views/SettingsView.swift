@@ -44,14 +44,10 @@ struct SettingsView: View {
                             hexBinding: $phoneSession.teamBColorHex)
                 }
 
-                Section {
-                    Toggle("Health Monitoring", isOn: healthMonitoringBinding)
-                        .disabled(isHealthDenied)
-                } header: {
-                    Text("Health")
-                } footer: {
-                    Text(healthFooter)
-                }
+                HealthSettingsSection(
+                    isOn: healthMonitoringBinding,
+                    isDenied: isHealthDenied
+                )
 
                 if !quarantines.isEmpty {
                     QuarantinedStoresSection(
@@ -132,13 +128,6 @@ struct SettingsView: View {
             return .constant(false)
         }
         return $phoneSession.healthMonitoringEnabled
-    }
-
-    private var healthFooter: String {
-        if isHealthDenied {
-            return String(localized: "Health access was denied on the Watch. To re-enable it, open Settings › Privacy & Security › Health.")
-        }
-        return String(localized: "The Watch records each match as a workout with live heart rate.")
     }
 
     @ViewBuilder
