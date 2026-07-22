@@ -206,4 +206,21 @@ final class ResultCardTests: XCTestCase {
 
         XCTAssertFalse(withoutURL.isEmpty)
     }
+
+    /// The link lands on a store page titled in the viewer's own language, so
+    /// the sentence beside it has to name the app the same way. One literal
+    /// feeds both — they cannot drift apart.
+    func test_shareMessage_namesTheAppTheSameWayTheWatermarkDoes() {
+        XCTAssertTrue(
+            ResultCard.shareMessage.contains(ResultCard.appWatermark),
+            "The share sentence must carry the same app name the card shows"
+        )
+    }
+
+    /// The name travels through the String Catalog now, so a missing entry
+    /// renders the key rather than crashing — an empty watermark would be a
+    /// blank corner on every shared card.
+    func test_appWatermark_isNeverEmpty() {
+        XCTAssertFalse(ResultCard.appWatermark.isEmpty)
+    }
 }

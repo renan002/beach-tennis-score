@@ -191,6 +191,17 @@
         }
       }
     },
+    "Beach Tennis Score": {
+      "comment": "The app's own name, as the card watermark and the share message say it. Matches the App Store listing per locale — not free copy.",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Placar para Beach Tennis"
+          }
+        }
+      }
+    },
     "Can't be read by this version of the app": {
       "localizations": {
         "pt-BR": {
@@ -691,12 +702,12 @@
         }
       }
     },
-    "Scored with Beach Tennis Score": {
+    "Scored with %@": {
       "localizations": {
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Marcado no Beach Tennis Score"
+            "value": "Marcado no %@"
           }
         }
       }
