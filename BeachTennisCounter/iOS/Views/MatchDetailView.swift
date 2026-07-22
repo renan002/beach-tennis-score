@@ -109,7 +109,8 @@ struct MatchDetailView: View {
         ShareableResultCard(
             card: ResultCard(match: match),
             teamAColor: Color(hex: phoneSession.teamAColorHex),
-            teamBColor: Color(hex: phoneSession.teamBColorHex)
+            teamBColor: Color(hex: phoneSession.teamBColorHex),
+            sport: match.matchType
         )
     }
 }

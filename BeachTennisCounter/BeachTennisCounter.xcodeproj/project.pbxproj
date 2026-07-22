@@ -19,6 +19,7 @@
 		1ED46F5135D057D59564554E /* MatchPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21275F20964C30E0BE57431F /* MatchPersistence.swift */; };
 		20A18206E21DB29E9E98361A /* ResultCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3545F89785DBE10F5C029336 /* ResultCardView.swift */; };
 		220DD4BF5CD96FEF418D738C /* WatchMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F815CA932C3F29E53938D4B /* WatchMessage.swift */; };
+		22A4AD85C314F1C3CE92B36F /* ResultCardTicketTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004C173454FB9984F644F21E /* ResultCardTicketTests.swift */; };
 		253E85A5FC78D10B49D1E5E5 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 425529E1E7F0F0708643A565 /* AppTheme.swift */; };
 		29591432F72CE1EB4A9B60E3 /* WatchSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 737E5C4A27BD85CA551EB4C9 /* WatchSessionManager.swift */; };
 		2AF488F33CB68A4526B38325 /* PhoneSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2365A03997E1963FAE2FAFF3 /* PhoneSessionManager.swift */; };
@@ -99,6 +100,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		004C173454FB9984F644F21E /* ResultCardTicketTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultCardTicketTests.swift; sourceTree = "<group>"; };
 		02192104EF03F8618E7F05D8 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		038CBBD1CA1760963EFF6BE3 /* MatchPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchPersistenceTests.swift; sourceTree = "<group>"; };
 		0973F4D84A6A7F8646D3F5D2 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
@@ -239,6 +241,7 @@
 				68B2336A3635F40C8D56E97C /* MatchTypeLabelTests.swift */,
 				0C4F5BF1EE5C2D60E7F3EFD5 /* PointScoreTests.swift */,
 				3480A90BCBEEA8CC3F6FB98F /* ResultCardTests.swift */,
+				004C173454FB9984F644F21E /* ResultCardTicketTests.swift */,
 				29D3F1B882D2930CBA69F677 /* ScoreEngineTests.swift */,
 				88C29C7EFF473AB896CCA2B8 /* StoredMatchDisplayTests.swift */,
 				41390DBE859A457CB1FE6D9D /* StoreRecoveryRestoreTests.swift */,
@@ -480,6 +483,7 @@
 				1409A1806C27458EAED5BA4A /* MatchTypeLabelTests.swift in Sources */,
 				77AE42A898482A62ECC20CA6 /* PointScoreTests.swift in Sources */,
 				D12A62A2338CB39D5AA0F5BD /* ResultCardTests.swift in Sources */,
+				22A4AD85C314F1C3CE92B36F /* ResultCardTicketTests.swift in Sources */,
 				1C3E9BB2ECB15A30CA626AA3 /* ScoreEngineTests.swift in Sources */,
 				B72701CF7686A78E82C00AB4 /* StoreRecoveryRestoreTests.swift in Sources */,
 				07A1FB876AC0C9E772BC2127 /* StoreRecoveryTests.swift in Sources */,
