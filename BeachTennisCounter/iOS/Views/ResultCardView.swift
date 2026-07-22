@@ -9,8 +9,9 @@ extension MatchType {
     /// Team colours keep their own job on the card — they mark the team dots.
     var cardAccent: Color {
         switch self {
-        case .tennis: return Color(red: 204 / 255, green: 255 / 255, blue: 0)
-        case .beachTennis: return Color(red: 240 / 255, green: 138 / 255, blue: 48 / 255)
+        // Same hex path the team colours travel — see `Color(hex:)`.
+        case .tennis: return Color(hex: "CCFF00")
+        case .beachTennis: return Color(hex: "F08A30")
         }
     }
 
