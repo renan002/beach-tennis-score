@@ -6,8 +6,28 @@ import Foundation
 /// card's content is testable without rendering anything.
 struct ResultCard: Sendable, Equatable {
     /// Names the app on every free card — the watermark is the growth loop, not
-    /// a defect. Not localized: it is the app's name, the same in every locale.
-    static let appWatermark = "Beach Tennis Score"
+    /// a defect. Localized, because the App Store listing the card's link lands
+    /// on is itself localized: a card that says one name over a store page
+    /// titled another breaks the loop at the last step. A plain `String`, so it
+    /// needs `String(localized:)` — `LocalizedStringKey` does not reach here.
+    static var appWatermark: String { String(localized: "Beach Tennis Score") }
+
+    /// Where the watermark points. A constant, never fetched: sharing works in
+    /// airplane mode exactly as it did before the link existed. Locale-free
+    /// (`/app/`, not `/br/app/`) so the App Store redirects each viewer to
+    /// their own storefront.
+    static let appStoreURL = URL(string: "https://apps.apple.com/app/id6765569699")!
+
+    /// The share-sheet message that travels beside the card image. WhatsApp,
+    /// Messages and Mail carry it as text next to the photo; Instagram-style
+    /// targets take the image alone and ignore it, which is exactly the old
+    /// behaviour. The sentence is localized, the URL never is.
+    ///
+    /// The app's name is interpolated rather than written into the sentence, so
+    /// the message and the watermark can only ever say the same thing.
+    static var shareMessage: String {
+        "\(String(localized: "Scored with \(appWatermark)")) \(appStoreURL.absoluteString)"
+    }
 
     let teamAName: String
     let teamBName: String

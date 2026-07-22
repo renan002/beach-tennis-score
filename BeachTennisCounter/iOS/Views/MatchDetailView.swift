@@ -89,7 +89,13 @@ struct MatchDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                ShareLink(item: shareableCard, preview: SharePreview(Text("Result Card"))) {
+                // `message:` is already-localized plain text, so it goes in
+                // verbatim — a second String Catalog lookup would miss.
+                ShareLink(
+                    item: shareableCard,
+                    message: Text(verbatim: ResultCard.shareMessage),
+                    preview: SharePreview(Text("Result Card"))
+                ) {
                     Label("Share Result Card", systemImage: "square.and.arrow.up")
                 }
             }
@@ -103,7 +109,8 @@ struct MatchDetailView: View {
         ShareableResultCard(
             card: ResultCard(match: match),
             teamAColor: Color(hex: phoneSession.teamAColorHex),
-            teamBColor: Color(hex: phoneSession.teamBColorHex)
+            teamBColor: Color(hex: phoneSession.teamBColorHex),
+            sport: match.matchType
         )
     }
 }
