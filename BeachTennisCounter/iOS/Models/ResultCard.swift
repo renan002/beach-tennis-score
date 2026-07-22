@@ -9,6 +9,20 @@ struct ResultCard: Sendable, Equatable {
     /// a defect. Not localized: it is the app's name, the same in every locale.
     static let appWatermark = "Beach Tennis Score"
 
+    /// Where the watermark points. A constant, never fetched: sharing works in
+    /// airplane mode exactly as it did before the link existed. Locale-free
+    /// (`/app/`, not `/br/app/`) so the App Store redirects each viewer to
+    /// their own storefront.
+    static let appStoreURL = URL(string: "https://apps.apple.com/app/id6765569699")!
+
+    /// The share-sheet message that travels beside the card image. WhatsApp,
+    /// Messages and Mail carry it as text next to the photo; Instagram-style
+    /// targets take the image alone and ignore it, which is exactly the old
+    /// behaviour. The sentence is localized, the URL never is.
+    static var shareMessage: String {
+        "\(String(localized: "Scored with Beach Tennis Score")) \(appStoreURL.absoluteString)"
+    }
+
     let teamAName: String
     let teamBName: String
     /// The headline numbers, in the unit named by `scoreUnitLabel`.

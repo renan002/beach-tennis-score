@@ -691,6 +691,16 @@
         }
       }
     },
+    "Scored with Beach Tennis Score": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marcado no Beach Tennis Score"
+          }
+        }
+      }
+    },
     "Settings": {
       "localizations": {
         "pt-BR": {

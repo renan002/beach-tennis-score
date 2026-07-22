@@ -176,4 +176,34 @@ final class ResultCardTests: XCTestCase {
 
         XCTAssertNil(card.watermark)
     }
+
+    // MARK: - Way back to the app
+
+    /// The shared message is what makes the watermark actionable: a viewer in a
+    /// WhatsApp group taps the link instead of guessing the app's name.
+    func test_shareMessage_carriesTheAppStoreLink() {
+        XCTAssertTrue(
+            ResultCard.shareMessage.contains(ResultCard.appStoreURL.absoluteString),
+            "The share text must carry the App Store URL verbatim"
+        )
+    }
+
+    /// A locale-free App Store path lets the store redirect each viewer to
+    /// their own storefront; the URL is a constant, never translated.
+    func test_appStoreURL_isLocaleFreeAndConstant() {
+        XCTAssertEqual(
+            ResultCard.appStoreURL.absoluteString,
+            "https://apps.apple.com/app/id6765569699"
+        )
+    }
+
+    /// The URL is not the whole message — a bare link reads as spam, and the
+    /// sentence around it is the part the String Catalog owns.
+    func test_shareMessage_saysSomethingBesidesTheURL() {
+        let withoutURL = ResultCard.shareMessage
+            .replacingOccurrences(of: ResultCard.appStoreURL.absoluteString, with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        XCTAssertFalse(withoutURL.isEmpty)
+    }
 }
