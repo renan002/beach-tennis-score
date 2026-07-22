@@ -82,15 +82,26 @@ final class WatchSessionManager: NSObject, ObservableObject {
     /// Pushes the watch's HealthKit authorization status to the phone, on change
     /// only (the phone can't query it directly). The change gate is
     /// `WorkoutPolicy.shouldReport` against the last value persisted here.
+    ///
+    /// The last-reported value is written **only after the context is accepted**.
+    /// Reporting is change-only, so recording a send that didn't happen would
+    /// strand the phone on a stale status until the watch's authorization changed
+    /// *again* — a deny that lands before `WCSession` finishes activating (a cold
+    /// launch straight into a Match) would leave the toggle enabled forever.
+    /// Leaving the key untouched instead makes the next Match start retry.
     func reportHealthAuthStatus(_ status: HealthAuthStatus) {
         let last = UserDefaults.standard.string(forKey: Self.lastReportedAuthKey)
             .flatMap(HealthAuthStatus.init(rawValue:))
         guard WorkoutPolicy.shouldReport(status: status, lastReported: last) else { return }
-        UserDefaults.standard.set(status.rawValue, forKey: Self.lastReportedAuthKey)
         guard WCSession.default.activationState == .activated else { return }
-        try? WCSession.default.updateApplicationContext(
-            HealthAuthStatusMessage(status: status).toApplicationContext()
-        )
+        do {
+            try WCSession.default.updateApplicationContext(
+                HealthAuthStatusMessage(status: status).toApplicationContext()
+            )
+            UserDefaults.standard.set(status.rawValue, forKey: Self.lastReportedAuthKey)
+        } catch {
+            // Not recorded — the next Match start reports this status again.
+        }
     }
 }
 
