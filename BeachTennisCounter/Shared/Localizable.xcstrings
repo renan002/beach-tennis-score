@@ -619,6 +619,16 @@
         }
       }
     },
+    "Result Card": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cartão de Resultado"
+          }
+        }
+      }
+    },
     "Resume Match": {
       "localizations": {
         "pt-BR": {
@@ -687,6 +697,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ajustes"
+          }
+        }
+      }
+    },
+    "Share Result Card": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compartilhar Cartão de Resultado"
           }
         }
       }

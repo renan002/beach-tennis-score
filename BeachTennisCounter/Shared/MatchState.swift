@@ -44,6 +44,11 @@ enum MatchType: String, Codable, Sendable, CaseIterable {
         case .tennis: return String(localized: "Games")
         }
     }
+
+    /// What a tennis match's sets are called. Beach tennis has no sets of its
+    /// own — it labels *games* "Sets" via `gamesSectionTitle` — so the two
+    /// sport's scoring vocabulary still lives in this one type.
+    static let setsSectionTitle = String(localized: "Sets")
 }
 
 enum PointScore: Int, Codable, Sendable, CaseIterable {

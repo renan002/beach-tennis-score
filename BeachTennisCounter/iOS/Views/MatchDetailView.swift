@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct MatchDetailView: View {
+    @EnvironmentObject private var phoneSession: PhoneSessionManager
     let match: StoredMatch
 
     var body: some View {
@@ -86,6 +87,24 @@ struct MatchDetailView: View {
         }
         .navigationTitle("Match Details")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                ShareLink(item: shareableCard, preview: SharePreview(Text("Result Card"))) {
+                    Label("Share Result Card", systemImage: "square.and.arrow.up")
+                }
+            }
+        }
+    }
+
+    /// The card is built from the stored match alone — no network, no
+    /// screenshot — so a match recorded before this feature shipped shares
+    /// exactly like a fresh one.
+    private var shareableCard: ShareableResultCard {
+        ShareableResultCard(
+            card: ResultCard(match: match),
+            teamAColor: Color(hex: phoneSession.teamAColorHex),
+            teamBColor: Color(hex: phoneSession.teamBColorHex)
+        )
     }
 }
 

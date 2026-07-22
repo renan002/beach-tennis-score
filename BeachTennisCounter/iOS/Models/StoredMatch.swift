@@ -93,11 +93,15 @@ final class StoredMatch {
     var setHistory: [SetRecord] { (try? JSONDecoder().decode([SetRecord].self, from: setHistoryData)) ?? [] }
     var winnerTeam: Team? { Team(rawValue: winner) }
 
+    /// True when the match is scored in sets — a tennis match with at least one
+    /// set on the board. Beach tennis never is, and a tennis match abandoned
+    /// inside its first set has no set to show, so both fall back to games.
+    var isSetScored: Bool {
+        matchType == .tennis && (setsWonA > 0 || setsWonB > 0)
+    }
+
     var scoreDisplay: String {
-        if matchType == .tennis && (setsWonA > 0 || setsWonB > 0) {
-            return "\(setsWonA) – \(setsWonB)"
-        }
-        return "\(setScoreA) – \(setScoreB)"
+        isSetScored ? "\(setsWonA) – \(setsWonB)" : "\(setScoreA) – \(setScoreB)"
     }
 
     /// The label for `team`: its stored Team Name, or the localized
