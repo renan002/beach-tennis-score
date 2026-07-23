@@ -404,6 +404,17 @@
         }
       }
     },
+    "Format": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Formato"
+          }
+        }
+      }
+    },
     "Game %lld": {
       "comment": "Tennis game rows only; \"game\" is a loanword in pt-BR tennis, keep untranslated. Beach games use the \"Set %lld\" key instead, chosen by MatchType.gameLabel — see CONTEXT.md \"Scoring units\".",
       "localizations": {
@@ -858,6 +869,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Esporte"
+          }
+        }
+      }
+    },
+    "Square": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quadrado"
           }
         }
       }

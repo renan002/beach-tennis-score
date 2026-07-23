@@ -60,13 +60,16 @@ final class ResultCardTicketTests: XCTestCase {
         XCTAssertLessThan(brightness(MatchType.tennis.cardInkOnAccent), 0.2)
     }
 
-    /// The canvas is square so the shared image posts cleanly to a feed, and
-    /// the ticket inside it keeps real ticket proportions.
-    func test_canvasIsSquare_andHoldsTheTicketWithMargin() {
-        XCTAssertGreaterThan(ResultCardView.side, ResultCardView.ticketWidth)
-        XCTAssertGreaterThan(ResultCardView.side, ResultCardView.ticketHeight)
+    /// The square canvas holds the ticket clear of every edge, and the ticket
+    /// inside it keeps real ticket proportions. (The shape geometry itself is
+    /// `CardShapeTests`' job; this only pins the square-canvas layout.)
+    func test_squareCanvas_holdsTheTicketWithMargin() {
+        let square = CardShape.square
+        XCTAssertGreaterThan(square.canvasSize.width, square.ticketWidth)
+        XCTAssertGreaterThan(square.canvasSize.height, square.ticketHeight)
+        XCTAssertEqual(square.canvasSize.width, square.canvasSize.height)
         XCTAssertEqual(
-            ResultCardView.ticketWidth / ResultCardView.ticketHeight, 2.3,
+            square.ticketWidth / square.ticketHeight, 2.3,
             accuracy: 0.05
         )
     }

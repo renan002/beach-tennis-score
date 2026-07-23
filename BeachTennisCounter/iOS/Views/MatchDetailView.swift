@@ -4,6 +4,8 @@ struct MatchDetailView: View {
     @EnvironmentObject private var phoneSession: PhoneSessionManager
     let match: StoredMatch
 
+    @State private var isSharingCard = false
+
     var body: some View {
         List {
             Section("Result") {
@@ -89,29 +91,22 @@ struct MatchDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                // `message:` is already-localized plain text, so it goes in
-                // verbatim — a second String Catalog lookup would miss.
-                ShareLink(
-                    item: shareableCard,
-                    message: Text(verbatim: ResultCard.shareMessage),
-                    preview: SharePreview(Text("Result Card"))
-                ) {
+                // The share sheet lets the player pick the Cartão's shape before
+                // sharing; the button itself just opens it.
+                Button {
+                    isSharingCard = true
+                } label: {
                     Label("Share Result Card", systemImage: "square.and.arrow.up")
                 }
             }
         }
-    }
-
-    /// The card is built from the stored match alone — no network, no
-    /// screenshot — so a match recorded before this feature shipped shares
-    /// exactly like a fresh one.
-    private var shareableCard: ShareableResultCard {
-        ShareableResultCard(
-            card: ResultCard(match: match),
-            teamAColor: Color(hex: phoneSession.teamAColorHex),
-            teamBColor: Color(hex: phoneSession.teamBColorHex),
-            sport: match.matchType
-        )
+        .sheet(isPresented: $isSharingCard) {
+            ResultCardShareSheet(
+                match: match,
+                teamAColor: Color(hex: phoneSession.teamAColorHex),
+                teamBColor: Color(hex: phoneSession.teamBColorHex)
+            )
+        }
     }
 }
 
