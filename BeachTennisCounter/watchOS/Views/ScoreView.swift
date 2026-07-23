@@ -283,6 +283,14 @@ struct ScoreView: View {
                     .foregroundStyle(.white)
             }
 
+            // One static line pointing to Estatísticas on the iPhone — shown to
+            // everyone, no entitlement awareness. The watch never links StoreKit
+            // and shows no purchase UI; this is its only Pro-adjacent touchpoint.
+            Text("See your stats on iPhone")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+
             Button("Done") {
                 isActive = false
             }
