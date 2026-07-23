@@ -181,6 +181,16 @@
         }
       }
     },
+    "Average per match": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Média por partida"
+          }
+        }
+      }
+    },
     "Avg Heart Rate": {
       "localizations": {
         "pt-BR": {
@@ -202,6 +212,26 @@
         }
       }
     },
+    "Best winning streak": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Melhor sequência de vitórias"
+          }
+        }
+      }
+    },
+    "By sport": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Por esporte"
+          }
+        }
+      }
+    },
     "Can't be read by this version of the app": {
       "localizations": {
         "pt-BR": {
@@ -218,6 +248,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cancelar Partida?"
+          }
+        }
+      }
+    },
+    "Court time": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tempo em quadra"
+          }
+        }
+      }
+    },
+    "Current winning streak": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sequência de vitórias atual"
           }
         }
       }
@@ -376,6 +426,16 @@
         }
       }
     },
+    "Golden points": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pontos de ouro"
+          }
+        }
+      }
+    },
     "Health": {
       "localizations": {
         "pt-BR": {
@@ -507,6 +567,16 @@
         }
       }
     },
+    "Matches played": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partidas jogadas"
+          }
+        }
+      }
+    },
     "Modality": {
       "localizations": {
         "pt-BR": {
@@ -557,6 +627,16 @@
         }
       }
     },
+    "No statistics yet": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhuma estatística ainda"
+          }
+        }
+      }
+    },
     "Old matches can be restored": {
       "comment": "Match History notice row shown while a Quarantined Store still holds restorable matches; taps through to Settings.",
       "localizations": {
@@ -574,6 +654,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Abra o app no seu Apple Watch para começar uma partida"
+          }
+        }
+      }
+    },
+    "Overview": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visão geral"
+          }
+        }
+      }
+    },
+    "Play a match to start building your statistics": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jogue uma partida para começar a montar suas estatísticas"
+          }
+        }
+      }
+    },
+    "Records": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retrospecto"
           }
         }
       }
@@ -670,6 +780,26 @@
         }
       }
     },
+    "Scored with %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marcado no %@"
+          }
+        }
+      }
+    },
+    "See your stats on iPhone": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Veja suas estatísticas no iPhone"
+          }
+        }
+      }
+    },
     "Select Sport": {
       "localizations": {
         "pt-BR": {
@@ -702,16 +832,6 @@
         }
       }
     },
-    "Scored with %@": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Marcado no %@"
-          }
-        }
-      }
-    },
     "Settings": {
       "localizations": {
         "pt-BR": {
@@ -738,6 +858,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Esporte"
+          }
+        }
+      }
+    },
+    "Statistics": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estatísticas"
+          }
+        }
+      }
+    },
+    "Statistics are calculated for Team A.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As estatísticas são calculadas para o Time A."
+          }
+        }
+      }
+    },
+    "Streaks": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sequências"
+          }
+        }
+      }
+    },
+    "Super tiebreaks": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Super tie-breaks"
           }
         }
       }
@@ -803,16 +963,6 @@
         }
       }
     },
-    "The match saved as a workout in Health": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A partida salva como treino no app Saúde"
-          }
-        }
-      }
-    },
     "The Watch records each match as a workout with live heart rate.": {
       "localizations": {
         "pt-BR": {
@@ -853,6 +1003,16 @@
         }
       }
     },
+    "The match saved as a workout in Health": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A partida salva como treino no app Saúde"
+          }
+        }
+      }
+    },
     "Theme": {
       "localizations": {
         "pt-BR": {
@@ -869,6 +1029,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Elas serão excluídas permanentemente."
+          }
+        }
+      }
+    },
+    "Total": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total"
           }
         }
       }
@@ -903,12 +1073,32 @@
         }
       }
     },
+    "Win rate": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aproveitamento"
+          }
+        }
+      }
+    },
     "Winner": {
       "localizations": {
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Vencedor"
+          }
+        }
+      }
+    },
+    "Wins": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vitórias"
           }
         }
       }

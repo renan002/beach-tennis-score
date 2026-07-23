@@ -6,6 +6,7 @@ struct MatchListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \StoredMatch.date, order: .reverse) private var allMatches: [StoredMatch]
     @State private var showSettings = false
+    @State private var showStatistics = false
     @State private var filter: String = "all"
     @State private var quarantines: [QuarantinedStore] = []
 
@@ -42,6 +43,13 @@ struct MatchListView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
+                        showStatistics = true
+                    } label: {
+                        Image(systemName: "chart.bar.xaxis")
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
                         showSettings = true
                     } label: {
                         Image(systemName: "gearshape")
@@ -51,6 +59,9 @@ struct MatchListView: View {
             .sheet(isPresented: $showSettings, onDismiss: reloadQuarantines) {
                 SettingsView()
                     .environmentObject(phoneSession)
+            }
+            .sheet(isPresented: $showStatistics) {
+                StatisticsView()
             }
             .task { reloadQuarantines() }
         }
