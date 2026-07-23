@@ -26,9 +26,14 @@ extension MatchType {
 }
 
 /// Renders a `ResultCard` as the shareable Cartão de Resultado: a match ticket,
-/// mounted centred on a square canvas. The body on the left carries the sport,
-/// the date and the two teams; a perforated tear line runs down the card; the
-/// tear-off stub on the right carries the score over the watermark.
+/// mounted centred on the canvas named by `shape`. The body on the left carries
+/// the sport, the date and the two teams; a perforated tear line runs down the
+/// card; the tear-off stub on the right carries the score over the watermark.
+///
+/// The two shapes are one design: the exact same ticket, drawn once at its base
+/// size and scaled to fit whichever canvas the player picked, so the Stories
+/// (9:16) card is the square's ticket enlarged over a taller sport-tinted
+/// backdrop — never a second layout composed from scratch.
 ///
 /// Purely a shell around the model — every string and number it draws comes
 /// from `card`, so what the card *says* is settled (and tested) before anything
@@ -40,14 +45,16 @@ struct ResultCardView: View {
     /// Chooses the accent. The card model describes one match's numbers; the
     /// sport is what the palette hangs off, so the view takes it directly.
     let sport: MatchType
+    /// The canvas the ticket is mounted on. The whole geometry — canvas size and
+    /// the ticket's rendered size — hangs off this; the fonts and spacings below
+    /// are all relative to the base ticket, so scaling the ticket scales them
+    /// with it. Defaults to square, the shape that shipped first.
+    var shape: CardShape = .default
 
-    /// Square, so the card posts cleanly to Instagram and WhatsApp alike. The
-    /// image renderer scales this up; every size below is relative to it.
-    static let side: CGFloat = 560
-    /// Real ticket proportions (2.3:1) — the shape is what reads as a stub torn
-    /// off at the end of the match rather than as a screenshot of a scoreboard.
-    static let ticketWidth: CGFloat = 460
-    static let ticketHeight: CGFloat = 200
+    /// The ticket is laid out once at the square's ticket size and `scaleEffect`
+    /// grows it for the Stories canvas — one layout, two sizes.
+    private static let baseTicketWidth = CardShape.square.ticketWidth
+    private static let baseTicketHeight = CardShape.square.ticketHeight
 
     /// The ticket stock. Near-black rather than black so the canvas behind it
     /// still reads as a separate surface under the drop shadow.
@@ -55,16 +62,37 @@ struct ResultCardView: View {
 
     var body: some View {
         ticket
+            .scaleEffect(shape.ticketWidth / Self.baseTicketWidth)
+            // Reserve the scaled footprint so the shadow hugs the enlarged
+            // ticket rather than the base one it was laid out at.
+            .frame(width: shape.ticketWidth, height: shape.ticketHeight)
             .shadow(color: .black.opacity(0.5), radius: 18, y: 8)
-            .frame(width: Self.side, height: Self.side)
-            .background {
-                LinearGradient(
-                    colors: [sport.cardAccent.opacity(0.28), Color(white: 0.04)],
-                    startPoint: .top,
-                    endPoint: .bottom
+            .frame(width: shape.canvasSize.width, height: shape.canvasSize.height)
+            .background { backdrop }
+            .environment(\.colorScheme, .dark)
+    }
+
+    /// The sport-tinted canvas the ticket is mounted on. The square keeps the
+    /// plain top-to-bottom wash it shipped with; the Stories canvas adds a pool
+    /// of the sport's colour gathered behind the ticket, so the extra height
+    /// reads as the backdrop deliberately framing the stub rather than as dead
+    /// space above and below a stranded card.
+    private var backdrop: some View {
+        ZStack {
+            LinearGradient(
+                colors: [sport.cardAccent.opacity(0.28), Color(white: 0.04)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            if shape == .stories {
+                RadialGradient(
+                    colors: [sport.cardAccent.opacity(0.30), .clear],
+                    center: .center,
+                    startRadius: 0,
+                    endRadius: shape.canvasSize.width * 0.62
                 )
             }
-            .environment(\.colorScheme, .dark)
+        }
     }
 
     private var ticket: some View {
@@ -73,7 +101,7 @@ struct ResultCardView: View {
             perforation
             stub
         }
-        .frame(width: Self.ticketWidth, height: Self.ticketHeight)
+        .frame(width: Self.baseTicketWidth, height: Self.baseTicketHeight)
         .background(paper)
         .clipShape(RoundedRectangle(cornerRadius: 10))
     }
@@ -240,6 +268,8 @@ struct ShareableResultCard: Transferable, Sendable {
     let teamAColor: Color
     let teamBColor: Color
     let sport: MatchType
+    /// Which canvas to render — the shape the player chose before sharing.
+    var shape: CardShape = .default
 
     struct RenderFailure: Error {}
 
@@ -257,7 +287,8 @@ struct ShareableResultCard: Transferable, Sendable {
             card: card,
             teamAColor: teamAColor,
             teamBColor: teamBColor,
-            sport: sport
+            sport: sport,
+            shape: shape
         )
         guard let data = view.rendered()?.pngData() else { throw RenderFailure() }
         return data
@@ -278,6 +309,24 @@ struct ShareableResultCard: Transferable, Sendable {
         teamAColor: Color(hex: WatchSettings.defaultTeamAColorHex),
         teamBColor: Color(hex: WatchSettings.defaultTeamBColorHex),
         sport: .beachTennis
+    )
+}
+
+#Preview("Beach — Stories") {
+    ResultCardView(
+        card: ResultCard(match: StoredMatch(
+            date: Date(),
+            setScoreA: 6,
+            setScoreB: 4,
+            winner: "a",
+            duration: 2_730,
+            teamAName: "Renan & Léo",
+            teamBName: "Visitors"
+        )),
+        teamAColor: Color(hex: WatchSettings.defaultTeamAColorHex),
+        teamBColor: Color(hex: WatchSettings.defaultTeamBColorHex),
+        sport: .beachTennis,
+        shape: .stories
     )
 }
 
