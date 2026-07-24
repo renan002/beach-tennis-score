@@ -1,9 +1,10 @@
 # Beach Tennis Counter
 
 Matches are scored live on the watch, point by point, and completed matches are
-kept on the phone. This glossary fixes the language for that split — in
-particular for the three different things this project has historically called
-"history".
+kept on the phone. (Truco is the one exception: it is also scored on the phone,
+because it is played at a table, not on a court.) This glossary fixes the
+language for that split — in particular for the three different things this
+project has historically called "history".
 
 ## Language
 
@@ -12,6 +13,20 @@ particular for the three different things this project has historically called
 **Match**:
 A single contest between two teams, from first point to final point. The unit a
 player starts, scores, and finishes.
+
+**Sport**:
+The game being played — beach tennis, tennis, ping pong, or truco. A match has
+exactly one, fixed at its start. The sport decides the scoring vocabulary, the
+shape of the score screen, and whether the match is physical.
+_Avoid_: mode, match type (in user-facing copy — `MatchType` is the type's name,
+not the word)
+
+**Placar**:
+A live scoreboard: the screen where a match in progress is scored. Normally the
+watch's, but truco is also scored on the phone. Each device owns at most one
+live Placar; the two devices are never coordinated, and a match scored on either
+lands in the same Match History.
+_Avoid_: scoreboard, counter (in user-facing pt-BR copy)
 
 **Team Name**:
 The user-set label attached to side A or B of a match; empty means unnamed, and
@@ -38,8 +53,21 @@ _Avoid_: history
 ### Scoring units
 
 **Game**:
-The unit of scoring won by taking points (0 → 15 → 30 → 40). Internally always
-called a game, in both sports (`GameRecord`, Game Log).
+The sport's scoring unit — the thing won, recorded in the Game Log, and counted
+toward the match. A game in tennis and ping pong, a Mão in truco. Internally
+always called a game in every sport (`GameRecord`, Game Log); only the label
+shown to the player varies, and it comes from the sport.
+
+**Mão**:
+Truco's scoring unit: one deal, won by one side and worth its Stake. Recorded in
+the Game Log as a Game, labelled "Mão N".
+_Avoid_: rodada (a rodada is one of the three card-plays inside a mão, which the
+app does not model), hand (in user-facing pt-BR copy)
+
+**Stake**:
+What a Mão is worth — 1 unless someone called truco, then 3, 6, 9, or 12. Not a
+score: it is the multiplier the winner of the Mão collects.
+_Avoid_: bet, points (for the stake itself)
 
 **Set**:
 In tennis, a real set — a collection of games. In beach tennis there are no
@@ -52,13 +80,51 @@ applies in every language, not just pt-BR.
 > reads "Game N" for games and "Set N" for sets in all languages ("game" and
 > "set" are loanwords in pt-BR tennis).
 
+> The truco terms above (**Mão**, **Stake**) are provisional pending the truco
+> research ticket, which settles the regional vocabulary before any of it
+> reaches the String Catalog.
+
+**Headline Score**:
+The single pair of numbers that stands for a match's result — in the match list,
+the Cartão de Resultado, and above the live Placar. It is the highest scoring
+level the sport has that the Ruleset leaves non-degenerate and that has a
+completed unit on the board; otherwise the level below. So: sets in tennis,
+games in beach tennis, games in a best-of-5 ping pong match, but *points* in a
+best-of-1 ping pong match or a match abandoned in its first game, and points in
+truco. Always derived, never a stored field of its own.
+_Avoid_: final score, score (unqualified)
+
+### Rules
+
+**Ruleset**:
+The rules a match is played under — how many points win a game, best of how many
+games, how the serve rotates, what the match is played to. One per sport is
+active at a time. A Ruleset is stamped by value onto a match at its start, name
+included, so editing or renaming it later never rewrites a match already played.
+User-facing: **Regras**.
+_Avoid_: config, settings, options, rules (unqualified)
+
+**Preset**:
+A named Ruleset that ships with the app, standing for how a variant is actually
+played ("Truco Paulista", "Ping pong ITTF"). Picking one is a single tap;
+changing any knob turns it into a Custom Ruleset.
+_Avoid_: template, default (a Preset may or may not be the default)
+
+**Custom Ruleset**:
+A Ruleset the player built and named themselves. Saved on the phone, listed
+alongside the Presets, editable and deletable. Editing one never touches the
+matches already stamped with it.
+_Avoid_: personalizado (as the type's name — *Personalizado* is the UI label for
+an unsaved Ruleset that no longer matches its Preset)
+
 ### Monetization
 
 **Pro**:
 The one-time lifetime unlock, purchased on the iPhone. Pro gates Estatísticas,
 Vários, and removes the watermark from the Cartão de Resultado. Scoring is
-never gated: both sports are playable for free, and the watch app shows no
-purchase UI and no paywall — every Pro touchpoint lives on the phone.
+never gated: every sport is playable for free, under any Ruleset, and the watch
+app shows no purchase UI and no paywall — every Pro touchpoint lives on the
+phone.
 _Avoid_: premium, subscription, upgrade (as a noun)
 
 **Vários**:
