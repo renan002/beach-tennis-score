@@ -61,13 +61,17 @@ shown to the player varies, and it comes from the sport.
 **Mão**:
 Truco's scoring unit: one deal, won by one side and worth its Stake. Recorded in
 the Game Log as a Game, labelled "Mão N".
-_Avoid_: rodada (a rodada is one of the three card-plays inside a mão, which the
-app does not model), hand (in user-facing pt-BR copy)
+_Avoid_: rodada (a rodada is one of the two or three card-plays inside a mão,
+which the app does not model), hand (in user-facing pt-BR copy)
 
 **Stake**:
-What a Mão is worth — 1 unless someone called truco, then 3, 6, 9, or 12. Not a
-score: it is the multiplier the winner of the Mão collects.
-_Avoid_: bet, points (for the stake itself)
+What a Mão is worth. The Ruleset supplies both the base value of an uncontested
+Mão and the ladder it climbs once someone calls truco — Paulista counts 1 then
+3, 6, 9, 12; Mineiro counts in twos, base 2 then 4, 6, 10, 12; Gaudério counts 1
+then 2, 3, 4 to a target of 24. Not a score: it is what the winner of the Mão
+collects. User-facing: **Valor** ("Valor da mão").
+_Avoid_: aposta (the app records a Mão's Valor even when nobody called truco and
+nothing was bet), bet, points (for the stake itself)
 
 **Set**:
 In tennis, a real set — a collection of games. In beach tennis there are no
@@ -80,9 +84,13 @@ applies in every language, not just pt-BR.
 > reads "Game N" for games and "Set N" for sets in all languages ("game" and
 > "set" are loanwords in pt-BR tennis).
 
-> The truco terms above (**Mão**, **Stake**) are provisional pending the truco
-> research ticket, which settles the regional vocabulary before any of it
-> reaches the String Catalog.
+> The truco words are settled (issue #124): the unit is **Mão**, the value is
+> **Valor**, and the match target is **Pontos** ("Pontos para vencer") — not
+> *tentos*, which is authentic but reads regional, and not *Meta*, which nobody
+> says at the table. What is still open is the *shape* of the Stake ladder, not
+> its vocabulary: issue #141 decides whether it is a free list of integers or a
+> fixed four-rung escalation, which also decides whether Gaudério ships as a
+> Preset at all.
 
 **Headline Score**:
 The single pair of numbers that stands for a match's result — in the match list,
