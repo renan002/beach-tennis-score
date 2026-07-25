@@ -537,10 +537,10 @@
 		0029B1070FECA42A8A9892AD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APPICON_SUFFIX)";
 				CODE_SIGN_ENTITLEMENTS = watchOS/BeachTennisCounterWatch.entitlements;
 				INFOPLIST_FILE = watchOS/Info.plist;
-				PRODUCT_BUNDLE_IDENTIFIER = com.renan.beachtennis.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BASE_BUNDLE_ID)$(BUNDLE_ID_SUFFIX).watchkitapp";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = 4;
@@ -551,10 +551,10 @@
 		0570C1807D350FC7ADBE4B72 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APPICON_SUFFIX)";
 				CODE_SIGN_ENTITLEMENTS = watchOS/BeachTennisCounterWatch.entitlements;
 				INFOPLIST_FILE = watchOS/Info.plist;
-				PRODUCT_BUNDLE_IDENTIFIER = com.renan.beachtennis.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BASE_BUNDLE_ID)$(BUNDLE_ID_SUFFIX).watchkitapp";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = 4;
@@ -562,10 +562,10 @@
 			};
 			name = Release;
 		};
-		3E033625DBDF0951BB457F56 /* Release */ = {
+		1564845FBFA8A82CB5EE19C8 /* Dev */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APPICON_SUFFIX)";
 				CODE_SIGN_ENTITLEMENTS = iOS/BeachTennisCounter.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = iOS/Info.plist;
@@ -574,7 +574,94 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.renan.beachtennis;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BASE_BUNDLE_ID)$(BUNDLE_ID_SUFFIX)";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Dev;
+		};
+		38E7AFF90DF026734B4D4715 /* Dev */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				APPICON_SUFFIX = "-Dev";
+				APP_DISPLAY_NAME = "Beach Dev";
+				BASE_BUNDLE_ID = com.renan.beachtennis;
+				BUNDLE_ID_SUFFIX = .dev;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 7;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.3.1;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Dev;
+		};
+		3E033625DBDF0951BB457F56 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APPICON_SUFFIX)";
+				CODE_SIGN_ENTITLEMENTS = iOS/BeachTennisCounter.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = iOS/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BASE_BUNDLE_ID)$(BUNDLE_ID_SUFFIX)";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -583,7 +670,7 @@
 		3EB1B323C86D899A2CC4606F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APPICON_SUFFIX)";
 				CODE_SIGN_ENTITLEMENTS = iOS/BeachTennisCounter.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = iOS/Info.plist;
@@ -592,11 +679,25 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.renan.beachtennis;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BASE_BUNDLE_ID)$(BUNDLE_ID_SUFFIX)";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
+		};
+		4A7EE4AF38764BAFBA0824CE /* Dev */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APPICON_SUFFIX)";
+				CODE_SIGN_ENTITLEMENTS = watchOS/BeachTennisCounterWatch.entitlements;
+				INFOPLIST_FILE = watchOS/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BASE_BUNDLE_ID)$(BUNDLE_ID_SUFFIX).watchkitapp";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Dev;
 		};
 		8F65FD737681855D42A23071 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -619,6 +720,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				APPICON_SUFFIX = "";
+				APP_DISPLAY_NAME = "Beach Tennis Score";
+				BASE_BUNDLE_ID = com.renan.beachtennis;
+				BUNDLE_ID_SUFFIX = "";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -701,6 +806,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				APPICON_SUFFIX = "";
+				APP_DISPLAY_NAME = "Beach Tennis Score";
+				BASE_BUNDLE_ID = com.renan.beachtennis;
+				BUNDLE_ID_SUFFIX = "";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -755,6 +864,23 @@
 			};
 			name = Release;
 		};
+		E630DB219737602F186D2950 /* Dev */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.renan.beachtennis.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BeachTennisCounter.app/BeachTennisCounter";
+			};
+			name = Dev;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -762,6 +888,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A40D0BBE1CD661E92CE2316B /* Debug */,
+				38E7AFF90DF026734B4D4715 /* Dev */,
 				DD355CAE04247CC5075A826D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -771,6 +898,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3EB1B323C86D899A2CC4606F /* Debug */,
+				1564845FBFA8A82CB5EE19C8 /* Dev */,
 				3E033625DBDF0951BB457F56 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -780,6 +908,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0029B1070FECA42A8A9892AD /* Debug */,
+				4A7EE4AF38764BAFBA0824CE /* Dev */,
 				0570C1807D350FC7ADBE4B72 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -789,6 +918,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8F65FD737681855D42A23071 /* Debug */,
+				E630DB219737602F186D2950 /* Dev */,
 				C9F8D8AC38D37119B8296E0C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;

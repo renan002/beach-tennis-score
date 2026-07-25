@@ -7,16 +7,43 @@ options:
   createIntermediateGroups: true
   groupSortPosition: top
   developmentLanguage: en
+  # Pinned rather than left to XcodeGen's "first configuration alphabetically",
+  # which `Dev` does not change today but any future config starting A–C would.
+  defaultConfig: Debug
   knownRegions:
     - Base
     - en
     - pt-BR
+
+# `Dev` is the dev flavor: a debug build that installs alongside the App Store
+# app under its own bundle id. `Debug` deliberately stays unflavored so the
+# production bundle id remains debuggable.
+#
+# XcodeGen matches `settings.configs` keys by case-insensitive *substring*
+# unless the key names a config exactly. `Dev` is exact and therefore safe —
+# but adding a config like `Development` would silently inherit everything
+# below.
+configs:
+  Debug: debug
+  Dev: debug
+  Release: release
 
 settings:
   base:
     SWIFT_VERSION: "6.0"
     MARKETING_VERSION: "1.3.1"
     CURRENT_PROJECT_VERSION: "7"
+    # The three axes the flavor varies. Everything else is derived from them,
+    # so a new flavor is a new `configs` entry and nothing more.
+    BASE_BUNDLE_ID: com.renan.beachtennis
+    BUNDLE_ID_SUFFIX: ""
+    APP_DISPLAY_NAME: Beach Tennis Score
+    APPICON_SUFFIX: ""
+  configs:
+    Dev:
+      BUNDLE_ID_SUFFIX: .dev
+      APP_DISPLAY_NAME: Beach Dev
+      APPICON_SUFFIX: "-Dev"
 
 targets:
   BeachTennisCounterTests:
@@ -42,7 +69,7 @@ targets:
       path: iOS/Info.plist
       properties:
         CFBundleName: BeachTennisCounter
-        CFBundleDisplayName: Beach Tennis Score
+        CFBundleDisplayName: "$(APP_DISPLAY_NAME)"
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         ITSAppUsesNonExemptEncryption: false
@@ -59,14 +86,18 @@ targets:
     entitlements:
       path: iOS/BeachTennisCounter.entitlements
       properties:
+        # Expanded, not literal, so it tracks the flavored bundle id in lockstep
+        # with the `AppGroupIdentifier` plist key above. Entitlements files do
+        # expand build settings — verified in the built `.xcent` per
+        # configuration, and on device by the installation ticket.
         com.apple.security.application-groups:
-          - group.com.renan.beachtennis
+          - group.$(BASE_BUNDLE_ID)$(BUNDLE_ID_SUFFIX)
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.renan.beachtennis
+        PRODUCT_BUNDLE_IDENTIFIER: $(BASE_BUNDLE_ID)$(BUNDLE_ID_SUFFIX)
         TARGETED_DEVICE_FAMILY: "1"
         INFOPLIST_FILE: iOS/Info.plist
-        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon$(APPICON_SUFFIX)
     dependencies:
       - target: BeachTennisCounterWatch
 
@@ -81,11 +112,14 @@ targets:
       path: watchOS/Info.plist
       properties:
         CFBundleName: BeachTennisWatch
-        CFBundleDisplayName: Beach Tennis Score
+        CFBundleDisplayName: "$(APP_DISPLAY_NAME)"
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         ITSAppUsesNonExemptEncryption: false
-        WKCompanionAppBundleIdentifier: com.renan.beachtennis
+        # Derived, so the watch app always points at the phone app of its own
+        # flavor. `:base` strips the last dot-component — `.watchkitapp` — off
+        # this target's own bundle id.
+        WKCompanionAppBundleIdentifier: "$(PRODUCT_BUNDLE_IDENTIFIER:base)"
         WKApplication: true
         WKRunsIndependentlyOfCompanionApp: true
         WKBackgroundModes:
@@ -98,9 +132,9 @@ targets:
         com.apple.developer.healthkit: true
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.renan.beachtennis.watchkitapp
+        PRODUCT_BUNDLE_IDENTIFIER: $(BASE_BUNDLE_ID)$(BUNDLE_ID_SUFFIX).watchkitapp
         INFOPLIST_FILE: watchOS/Info.plist
-        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon$(APPICON_SUFFIX)
 
 schemes:
   BeachTennisCounter:
@@ -124,3 +158,26 @@ schemes:
         BeachTennisCounterWatch: all
     run:
       config: Debug
+
+  # The dev flavor gets its own schemes rather than flipping the ones above:
+  # picking "Beach Dev" in Xcode's scheme menu is the whole gesture, and the
+  # production bundle id stays one pick away.
+  Beach Dev:
+    build:
+      targets:
+        BeachTennisCounter: all
+        BeachTennisCounterWatch: all
+        BeachTennisCounterTests: [testing]
+    run:
+      config: Dev
+    test:
+      config: Dev
+      targets:
+        - BeachTennisCounterTests
+
+  Beach Dev Watch:
+    build:
+      targets:
+        BeachTennisCounterWatch: all
+    run:
+      config: Dev

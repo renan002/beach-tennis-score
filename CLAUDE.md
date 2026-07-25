@@ -22,9 +22,30 @@ xcodebuild test -project BeachTennisCounter.xcodeproj -scheme BeachTennisCounter
 ```
 Substitute any available device from `xcrun simctl list devices available` if `iPhone 17` is absent. The same tests run in CI on every push/PR (`.github/workflows/ci.yml`), which is the authoritative gate.
 
-**Combined iOS + watchOS build:** Use Xcode.app. CLI combined builds are blocked by a CoreSimulator version mismatch (1051.49 vs 1051.50) in this environment.
+**Combined iOS + watchOS build:** Use Xcode.app, or a scheme build with an explicit destination:
+```bash
+xcodebuild -project BeachTennisCounter.xcodeproj -scheme BeachTennisCounter -destination 'platform=iOS Simulator,name=iPhone 17' build
+```
+Building the iOS *target* with `-sdk iphonesimulator` fails instead — it drags the watch target along under the iOS SDK, which its asset catalog rejects (`app icon set … did not have any applicable content`). Build each target with its own SDK, or go through a scheme.
 
 > After adding or removing any `.swift` file, always run `xcodegen generate` — the `.xcodeproj` won't pick up the new file automatically.
+
+### Build configurations
+
+Three: `Debug`, `Dev`, `Release` — `Dev` is a debug variant that installs alongside the App Store app.
+
+| | Debug / Release | Dev |
+|---|---|---|
+| iOS bundle id | `com.renan.beachtennis` | `com.renan.beachtennis.dev` |
+| Display name | Beach Tennis Score | Beach Dev |
+| App Group | `group.com.renan.beachtennis` | `group.com.renan.beachtennis.dev` |
+| App icon | `AppIcon` | `AppIcon-Dev` |
+
+Everything flavored derives from three settings in `project.yml` — `BUNDLE_ID_SUFFIX`, `APP_DISPLAY_NAME`, `APPICON_SUFFIX` — set per configuration in one place. Don't hardcode a flavored value anywhere else; the App Group in particular is read at runtime from the `AppGroupIdentifier` Info.plist key, which derives from the bundle id.
+
+Schemes **Beach Dev** and **Beach Dev Watch** run that configuration; the original schemes stay on `Debug`, so the production bundle id remains debuggable. Neither Dev scheme has an archive action — the dev flavor is a local Xcode install, not a distribution.
+
+XcodeGen matches `settings.configs` keys by case-insensitive **substring** unless the key is an exact config name. `Dev` is exact and safe; a config named `Development` would silently inherit every Dev setting.
 
 ## Architecture
 
