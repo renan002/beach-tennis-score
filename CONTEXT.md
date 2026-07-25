@@ -73,12 +73,14 @@ _Avoid_: bet, points (for the stake itself)
 In tennis, a real set — a collection of games. In beach tennis there are no
 sets; the match is a single sequence of games, but the UI displays each beach
 game as a "Set". This is the established Brazilian beach-tennis convention and
-applies in every language, not just pt-BR.
+applies in every language, not just pt-BR. Ping pong does the same: Brazilian
+table-tennis usage is "melhor de 5 sets", so a ping pong game is displayed as a
+"Set" too, reusing beach tennis's label rather than adding a third one.
 
 > Display rule: the Game/Set label is a function of the sport, never of the
-> locale. Beach tennis game-level labels read "Set N" in all languages; tennis
-> reads "Game N" for games and "Set N" for sets in all languages ("game" and
-> "set" are loanwords in pt-BR tennis).
+> locale. Beach tennis and ping pong game-level labels read "Set N" in all
+> languages; tennis reads "Game N" for games and "Set N" for sets in all
+> languages ("game" and "set" are loanwords in pt-BR tennis).
 
 > The truco terms above (**Mão**, **Stake**) are provisional pending the truco
 > research ticket, which settles the regional vocabulary before any of it
@@ -91,7 +93,9 @@ level the sport has that the Ruleset leaves non-degenerate and that has a
 completed unit on the board; otherwise the level below. So: sets in tennis,
 games in beach tennis, games in a best-of-5 ping pong match, but *points* in a
 best-of-1 ping pong match or a match abandoned in its first game, and points in
-truco. Always derived, never a stored field of its own.
+truco. Always derived, never a stored field of its own. The best-of-1 case is
+not a corner: the **Rápido** Preset ships it, so the fallback to points is a
+normal path and not something only Personalizado can reach.
 _Avoid_: final score, score (unqualified)
 
 ### Rules
@@ -106,9 +110,31 @@ _Avoid_: config, settings, options, rules (unqualified)
 
 **Preset**:
 A named Ruleset that ships with the app, standing for how a variant is actually
-played ("Truco Paulista", "Ping pong ITTF"). Picking one is a single tap;
-changing any knob turns it into a Custom Ruleset.
-_Avoid_: template, default (a Preset may or may not be the default)
+played ("Truco Paulista", "Ping pong Oficial"). Picking one is a single tap;
+changing any knob turns it into a Custom Ruleset. A Preset is named the way
+players name the variant, never after the body that publishes the rules — nobody
+invites anybody to play ITTF.
+_Avoid_: template, default (a Preset may or may not be the default), federation
+acronyms as Preset names
+
+**Serve Mode**:
+How the serve rotates in ping pong: every 2 points, every 5 points, or to
+whoever won the last point (the volleyball-style rally serve people play on bar
+and office tables). One knob with three mutually exclusive values, because
+turning on the rally serve makes any interval meaningless. User-facing:
+**Saque** — not "Saque a cada", which cannot accommodate the third value.
+
+> The interval modes carry the deuce rule with them: from `(target−1, target−1)`
+> the serve alternates every point, which is 10–10 in an 11-point set and 20–20
+> in a 21-point one, derived rather than configured. The rally mode has no deuce
+> case at all — the serve follows the point winner, always.
+
+> Ping pong's Ruleset is settled (issue #125): three knobs — **Pontos por set**
+> (11 / 21 / free), **Melhor de** (1 / 3 / 5 / 7 sets) and **Saque** above — and
+> three Presets: **Oficial** (11 · Bo5 · every 2, the factory default),
+> **Clássico** (21 · Bo3 · every 5) and **Rápido** (11 · Bo1 · every 2). Win-by-2
+> is a fixed rule, not a knob. The rally serve ships in no Preset; it is reached
+> through Personalizado and kept as a Custom Ruleset.
 
 **Custom Ruleset**:
 A Ruleset the player built and named themselves. Saved on the phone, listed
