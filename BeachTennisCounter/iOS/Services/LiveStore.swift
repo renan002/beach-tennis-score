@@ -5,8 +5,27 @@ import SwiftData
 /// is opened. Opening, quarantining and (later) restoring all resolve the
 /// location through here, so they can never disagree about where the store is.
 enum LiveStore {
-    static let appGroupIdentifier = "group.com.renan.beachtennis"
+    /// Info.plist key publishing the App Group this build's store lives in.
+    static let appGroupIdentifierKey = "AppGroupIdentifier"
     static let storeName = "default.store"
+
+    /// The App Group this build's store lives in, read from Info.plist rather
+    /// than hardcoded. `project.yml` sets it to `group.$(PRODUCT_BUNDLE_IDENTIFIER)`,
+    /// so a flavored bundle id carries its own group and the literal here can
+    /// never disagree with the one the app is entitled to.
+    ///
+    /// A missing or empty key is a build misconfiguration, not a runtime
+    /// condition — every build that gets this far has an Info.plist we
+    /// generated — so it fails loudly on first launch rather than silently
+    /// resolving to the wrong store.
+    static let appGroupIdentifier: String = {
+        guard let identifier = Bundle.main
+            .object(forInfoDictionaryKey: appGroupIdentifierKey) as? String,
+              !identifier.isEmpty else {
+            fatalError("Info.plist has no non-empty \(appGroupIdentifierKey): this build is misconfigured.")
+        }
+        return identifier
+    }()
 
     /// The directory the live store actually lives in: the App Group
     /// container's Application Support directory. SwiftData has always placed
@@ -22,7 +41,10 @@ enum LiveStore {
         // Without the App Group entitlement (e.g. an unsigned test host)
         // SwiftData itself falls back to the app sandbox; match that so we
         // resolve to wherever the implicit default store would have lived
-        // rather than crashing or orphaning it.
+        // rather than crashing or orphaning it. This case is indistinguishable
+        // at runtime from an entitlement that disagrees with
+        // `appGroupIdentifier`, which is why that disagreement is prevented at
+        // the build level instead — both sides derive from the bundle id.
         return .applicationSupportDirectory
     }
 
