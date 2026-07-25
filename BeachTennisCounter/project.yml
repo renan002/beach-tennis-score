@@ -33,6 +33,13 @@ settings:
     SWIFT_VERSION: "6.0"
     MARKETING_VERSION: "1.3.1"
     CURRENT_PROJECT_VERSION: "7"
+    # Device builds need a team, and picking one in Xcode's Signing &
+    # Capabilities tab writes it into the `.xcodeproj` — which `xcodegen
+    # generate` then throws away. Declared here so it survives regeneration.
+    # A team id is not a secret; it ships in the `application-identifier` of
+    # every distributed binary.
+    DEVELOPMENT_TEAM: CU54PVDRHC
+    CODE_SIGN_STYLE: Automatic
     # The three axes the flavor varies. Everything else is derived from them,
     # so a new flavor is a new `configs` entry and nothing more.
     BASE_BUNDLE_ID: com.renan.beachtennis
