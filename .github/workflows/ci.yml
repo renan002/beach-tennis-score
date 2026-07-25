@@ -4,6 +4,17 @@ on:
   pull_request:
 
 jobs:
+  # Release tooling is plain bash and needs no Xcode, so it runs on ubuntu
+  # ungated — it is quick, and the release bundle-id guard it covers is the one
+  # thing standing between a flavored build and the App Store.
+  scripts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - name: Test release version validation
+        run: scripts/test-validate-release-version.sh
+
   test:
     runs-on: macos-26
     timeout-minutes: 45

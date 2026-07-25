@@ -40,6 +40,7 @@ Three: `Debug`, `Dev`, `Release` — `Dev` is a debug variant that installs alon
 | Display name | Beach Tennis Score | Beach Dev |
 | App Group | `group.com.renan.beachtennis` | `group.com.renan.beachtennis.dev` |
 | App icon | `AppIcon` | `AppIcon-Dev` |
+| `DEV` marker in Settings | absent | present |
 
 Everything flavored derives from three settings in `project.yml` — `BUNDLE_ID_SUFFIX`, `APP_DISPLAY_NAME`, `APPICON_SUFFIX` — set per configuration in one place. Don't hardcode a flavored value anywhere else; the App Group in particular is read at runtime from the `AppGroupIdentifier` Info.plist key, which derives from the bundle id.
 
@@ -50,6 +51,12 @@ Everything flavored derives from three settings in `project.yml` — `BUNDLE_ID_
 Schemes **Beach Dev** and **Beach Dev Watch** run that configuration; the original schemes stay on `Debug`, so the production bundle id remains debuggable. Neither Dev scheme has an archive action — the dev flavor is a local Xcode install, not a distribution.
 
 XcodeGen matches `settings.configs` keys by case-insensitive **substring** unless the key is an exact config name. `Dev` is exact and safe; a config named `Development` would silently inherit every Dev setting.
+
+### Dev-flavor guardrails
+
+The `DEV` marker rides on the Settings version footer (`Versão 1.3.1 · DEV`), gated by `#if DEV_FLAVOR` — a compilation condition set only on the `Dev` configuration, so the string is physically absent from Debug and Release binaries. Settings is the **only** place it may appear: never the scoring screens, and never the Cartão de Resultado, which is an image made to be posted publicly. It is composed into the interpolated value rather than the copy, so the `Version %@` catalog key stays untouched and `DEV` reads the same in every locale.
+
+`scripts/validate-release-version.sh` refuses to cut a release whose bundle id carries a suffix. It resolves `BASE_BUNDLE_ID` + `BUNDLE_ID_SUFFIX` out of the **Release** configuration of the checked-in `project.pbxproj` — not `project.yml`, because the pbxproj is what Xcode archives — and fails loudly if it can no longer find what it walks, rather than silently vouching for nothing. `scripts/test-validate-release-version.sh` covers it and runs in CI on ubuntu; every one of its bundle-id cases fails if the guard is deleted.
 
 ## Architecture
 

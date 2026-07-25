@@ -107,8 +107,21 @@ struct SettingsView: View {
         }
     }
 
+    /// The version string for the Settings footer, carrying a `DEV` marker on
+    /// dev-flavor builds so a screenshot or a bug report says which app produced
+    /// it. Deliberately composed into the *interpolated value*, not the copy:
+    /// the `Version %@` catalog key is left untouched, and `DEV` — a build
+    /// identifier, not prose — stays untranslated in every locale.
+    ///
+    /// Settings is the only place this appears. It must never reach the scoring
+    /// screens or the Cartão de Resultado, which is an image made to be posted.
     private var appVersion: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
+        #if DEV_FLAVOR
+        return "\(version) · DEV"
+        #else
+        return version
+        #endif
     }
 
     /// Name length cap: keeps the watch serve buttons and history lines from
