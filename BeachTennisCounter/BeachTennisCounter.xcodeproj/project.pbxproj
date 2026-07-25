@@ -332,6 +332,7 @@
 			buildPhases = (
 				0AD3BFFAA4F34F62114BC89F /* Sources */,
 				497A93C5868FF3D0310F6A15 /* Resources */,
+				6F7A753B333A8851632B5389 /* Flavor the localized app name */,
 			);
 			buildRules = (
 			);
@@ -369,6 +370,7 @@
 				814673C23837AAED33E3E536 /* Sources */,
 				FD9C4D38B706C3EEFE157DF0 /* Resources */,
 				80490D0E90E1CF85DBF13BB0 /* Embed Watch Content */,
+				4AA3AC5ED7441133777B521F /* Flavor the localized app name */,
 			);
 			buildRules = (
 			);
@@ -451,6 +453,47 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		4AA3AC5ED7441133777B521F /* Flavor the localized app name */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Flavor the localized app name";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"$SRCROOT/../scripts/flavor-localized-app-name.sh\"\n";
+		};
+		6F7A753B333A8851632B5389 /* Flavor the localized app name */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Flavor the localized app name";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"$SRCROOT/../scripts/flavor-localized-app-name.sh\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		0AD3BFFAA4F34F62114BC89F /* Sources */ = {

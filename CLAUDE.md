@@ -43,6 +43,10 @@ Three: `Debug`, `Dev`, `Release` — `Dev` is a debug variant that installs alon
 
 Everything flavored derives from three settings in `project.yml` — `BUNDLE_ID_SUFFIX`, `APP_DISPLAY_NAME`, `APPICON_SUFFIX` — set per configuration in one place. Don't hardcode a flavored value anywhere else; the App Group in particular is read at runtime from the `AppGroupIdentifier` Info.plist key, which derives from the bundle id.
 
+`APP_DISPLAY_NAME` alone does **not** name the app. A localized `InfoPlist.strings` outranks `CFBundleDisplayName`, and `.strings` files get no build-setting expansion — so `scripts/flavor-localized-app-name.sh` rewrites the name in the built product as a post-build phase on both app targets. Verify a name change by reading the home screen on a pt-BR device, not `Info.plist`.
+
+`DEVELOPMENT_TEAM` and `CODE_SIGN_STYLE` live in `project.yml` because picking a team in Xcode's Signing & Capabilities tab writes it into the `.xcodeproj`, which `xcodegen generate` then discards.
+
 Schemes **Beach Dev** and **Beach Dev Watch** run that configuration; the original schemes stay on `Debug`, so the production bundle id remains debuggable. Neither Dev scheme has an archive action — the dev flavor is a local Xcode install, not a distribution.
 
 XcodeGen matches `settings.configs` keys by case-insensitive **substring** unless the key is an exact config name. `Dev` is exact and safe; a config named `Development` would silently inherit every Dev setting.
