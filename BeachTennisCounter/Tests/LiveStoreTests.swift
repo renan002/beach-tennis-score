@@ -28,6 +28,18 @@ final class LiveStoreTests: XCTestCase {
             .filter { $0.hasPrefix("quarantined-store-") }
     }
 
+    // MARK: - App Group id
+
+    /// The store's App Group must track the bundle id, so a flavored build gets
+    /// its own container instead of quietly resolving the production one (or
+    /// nothing at all). Hosted tests run inside the app, so `Bundle.main` here
+    /// is the built app bundle — this asserts on the shipped Info.plist.
+    func test_appGroupIdentifier_tracksTheBuildsBundleId() throws {
+        let bundleIdentifier = try XCTUnwrap(Bundle.main.bundleIdentifier)
+
+        XCTAssertEqual(LiveStore.appGroupIdentifier, "group.\(bundleIdentifier)")
+    }
+
     // MARK: - Fresh start
 
     func test_emptyDirectory_opensFreshEmptyStore_noQuarantine() throws {
