@@ -46,6 +46,12 @@ targets:
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         ITSAppUsesNonExemptEncryption: false
+        # The App Group holding the live Match History store, read at runtime by
+        # `LiveStore.appGroupIdentifier`. Derived from the bundle id so a
+        # flavored build carries its own group without touching Swift. The
+        # entitlement below is the same group spelled literally — flavor the two
+        # together or the app resolves a container it is not entitled to.
+        AppGroupIdentifier: "group.$(PRODUCT_BUNDLE_IDENTIFIER)"
         UILaunchScreen:
           UIColorName: ""
         UISupportedInterfaceOrientations:
