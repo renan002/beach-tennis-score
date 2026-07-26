@@ -128,7 +128,7 @@ struct SettingsView: View {
     @ViewBuilder
     private var proSection: some View {
         Section {
-            if pro.isPro {
+            if pro.ownsPro {
                 LabeledContent("Pro", value: String(localized: "Unlocked"))
             } else {
                 Button("Unlock Pro") { showProSheet = true }
@@ -138,7 +138,7 @@ struct SettingsView: View {
         } header: {
             Text("Pro")
         } footer: {
-            Text(ProPurchaseSheet.pitch(isPro: pro.isPro))
+            Text(ProPurchaseSheet.pitch(ownsPro: pro.ownsPro))
         }
     }
 
