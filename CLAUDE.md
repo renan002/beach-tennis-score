@@ -45,6 +45,8 @@ Everything flavored derives from three settings in `project.yml` — `BUNDLE_ID_
 
 `APP_DISPLAY_NAME` alone does **not** name the app. A localized `InfoPlist.strings` outranks `CFBundleDisplayName`, and `.strings` files get no build-setting expansion — so `scripts/flavor-localized-app-name.sh` rewrites the name in the built product as a post-build phase on both app targets. Verify a name change by reading the home screen on a pt-BR device, not `Info.plist`.
 
+CI gates the flavoring with `scripts/validate-bundle-ids.sh`, which asserts that all three configurations still resolve to the fixed bundle ids and that `PRODUCT_BUNDLE_IDENTIFIER` is still `BASE_BUNDLE_ID + BUNDLE_ID_SUFFIX` — the latter is what proves the entitlement's `group.$(BASE_BUNDLE_ID)$(BUNDLE_ID_SUFFIX)` and the plist's `group.$(PRODUCT_BUNDLE_IDENTIFIER)` name the same App Group. The unit suite cannot catch this: its one configuration-sensitive test asserts the group *tracks* the bundle id, which stays true when the bundle id is wrong. `scripts/test-validate-bundle-ids.sh` tests the validator against generated fixture projects; run it locally, CI does not.
+
 `DEVELOPMENT_TEAM` and `CODE_SIGN_STYLE` live in `project.yml` because picking a team in Xcode's Signing & Capabilities tab writes it into the `.xcodeproj`, which `xcodegen generate` then discards.
 
 Schemes **Beach Dev** and **Beach Dev Watch** run that configuration; the original schemes stay on `Debug`, so the production bundle id remains debuggable. Neither Dev scheme has an archive action — the dev flavor is a local Xcode install, not a distribution.
