@@ -66,6 +66,19 @@ struct SettingsView: View {
                     .pickerStyle(.segmented)
                 }
 
+                Section("About") {
+                    Link(destination: Self.privacyPolicyURL) {
+                        HStack {
+                            Text("Privacy Policy")
+                            Spacer()
+                            // Not a chevron: this leaves the app for Safari, and
+                            // `Link` tints the whole label so the glyph reads as
+                            // part of the affordance rather than a disclosure.
+                            Image(systemName: "arrow.up.right.square")
+                        }
+                    }
+                }
+
                 // Last, so the dev flavor's extra section never pushes a real
                 // setting off the first screen. Absent from every other build.
                 #if DEV_FLAVOR
@@ -98,6 +111,17 @@ struct SettingsView: View {
             }
         }
     }
+
+    /// The published privacy policy — App Store guideline 5.1.1 requires it to be
+    /// reachable from inside the app, not only from the App Store listing.
+    ///
+    /// GitHub Pages serves `privacy-policy.md` from the repo root of `main`, so
+    /// the document and the app ship from the same source: edit the Markdown and
+    /// this link follows. Force-unwrapped because a literal that fails to parse
+    /// is a typo to catch on first launch, not a condition to handle.
+    private static let privacyPolicyURL = URL(
+        string: "https://renan002.github.io/beach-tennis-score/privacy-policy"
+    )!
 
     private func reloadQuarantines() {
         quarantines = StoreRecovery.listQuarantinedStores(in: LiveStore.directory)
