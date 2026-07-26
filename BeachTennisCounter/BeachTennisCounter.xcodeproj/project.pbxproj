@@ -35,6 +35,7 @@
 		4A2A53C584B7DD59182CDDA7 /* WorkoutPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AC0E609B21CAC5A67228757 /* WorkoutPolicy.swift */; };
 		5024B6C1071D2BEE6CA04509 /* HealthAuthStatusMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541C4232813EBFCE41EDDEC /* HealthAuthStatusMessageTests.swift */; };
 		564FFB929783F14E683261CB /* StoreRecovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC40D6416C38F7B65B653DD8 /* StoreRecovery.swift */; };
+		575CA748055946F6DFD8BBD4 /* PROTOTYPE_DevToolsPlacement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F03BA5F21BE79D4F8E0B581 /* PROTOTYPE_DevToolsPlacement.swift */; };
 		5B6F69490F861256230C277A /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 53AC24C14225AFDAE7BC7BFD /* Localizable.xcstrings */; };
 		5EAC507F8BA00D007CB17A4F /* WorkoutPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AC0E609B21CAC5A67228757 /* WorkoutPolicy.swift */; };
 		632E5000D7145D27111E2305 /* LiveStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF2D1C2D253A267BD353C2ED /* LiveStore.swift */; };
@@ -115,6 +116,7 @@
 		0C4F5BF1EE5C2D60E7F3EFD5 /* PointScoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointScoreTests.swift; sourceTree = "<group>"; };
 		0E310D764A0970D265C75E09 /* WatchSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSettings.swift; sourceTree = "<group>"; };
 		0E80BA71634453CD2D2CA927 /* ResultCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultCard.swift; sourceTree = "<group>"; };
+		0F03BA5F21BE79D4F8E0B581 /* PROTOTYPE_DevToolsPlacement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PROTOTYPE_DevToolsPlacement.swift; sourceTree = "<group>"; };
 		191AACA24ACE1BF3823FBA7F /* LiveStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStoreTests.swift; sourceTree = "<group>"; };
 		1D2079D2D2B1621F0A22237B /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		1E6352B0F7598004C63192B3 /* BeachTennisCounter.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BeachTennisCounter.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -222,6 +224,7 @@
 				4B6E8D11E8E5CCF54165EC7A /* HealthSettingsSection.swift */,
 				6384C90BFE76A48416288478 /* MatchDetailView.swift */,
 				A64CD23E997EF801E4A50E23 /* MatchListView.swift */,
+				0F03BA5F21BE79D4F8E0B581 /* PROTOTYPE_DevToolsPlacement.swift */,
 				971B4278F8EE09572EB0FA5F /* QuarantinedStoresSection.swift */,
 				9594452A705D30BC6E09EB2C /* ResultCardShareSheet.swift */,
 				3545F89785DBE10F5C029336 /* ResultCardView.swift */,
@@ -531,6 +534,7 @@
 				1ED46F5135D057D59564554E /* MatchPersistence.swift in Sources */,
 				989396E3CA7A30F5747C2840 /* MatchState.swift in Sources */,
 				353C0529C1045A87F212F36D /* MatchStatistics.swift in Sources */,
+				575CA748055946F6DFD8BBD4 /* PROTOTYPE_DevToolsPlacement.swift in Sources */,
 				2AF488F33CB68A4526B38325 /* PhoneSessionManager.swift in Sources */,
 				D2CA7E2CD05F51014173004E /* QuarantinedStoresSection.swift in Sources */,
 				0B489373413FD7E122D3D81F /* ResultCard.swift in Sources */,
@@ -699,7 +703,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG DEV";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0;
 				WATCHOS_DEPLOYMENT_TARGET = 26.0;

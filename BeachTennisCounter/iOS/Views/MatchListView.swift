@@ -55,6 +55,14 @@ struct MatchListView: View {
                         Image(systemName: "gearshape")
                     }
                 }
+                // PROTOTYPE — throwaway mount point, delete with #148.
+                #if DEV
+                if prototypeVariant == .c {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        PrototypeVariantCToolbarButton()
+                    }
+                }
+                #endif
             }
             .sheet(isPresented: $showSettings, onDismiss: reloadQuarantines) {
                 SettingsView()
@@ -64,8 +72,29 @@ struct MatchListView: View {
                 StatisticsView()
             }
             .task { reloadQuarantines() }
+            // PROTOTYPE — throwaway mount points, delete with #148.
+            #if DEV
+            .overlay(alignment: .bottomTrailing) {
+                if prototypeVariant == .b {
+                    PrototypeVariantBBubble()
+                        .padding(.trailing, 20)
+                        .padding(.bottom, 80)
+                }
+            }
+            .overlay(alignment: .bottom) {
+                PrototypeSwitcherBar()
+            }
+            #endif
         }
     }
+
+    // PROTOTYPE — throwaway, delete with #148.
+    #if DEV
+    @AppStorage(prototypeVariantKey) private var prototypeVariantRaw: String = PrototypeVariant.a.rawValue
+    private var prototypeVariant: PrototypeVariant {
+        PrototypeVariant(rawValue: prototypeVariantRaw) ?? .a
+    }
+    #endif
 
     /// True while any Quarantined Store still holds matches missing from the
     /// live Match History — the notice disappears once nothing restorable

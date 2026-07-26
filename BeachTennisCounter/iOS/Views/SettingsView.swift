@@ -18,6 +18,10 @@ struct SettingsView: View {
     @State private var syncedSettings: WatchSettings?
     @State private var quarantines: [QuarantinedStore] = []
     @State private var liveMatchIDs: Set<UUID> = []
+    // PROTOTYPE — throwaway, delete with #148.
+    #if DEV
+    @AppStorage(prototypeVariantKey) private var prototypeVariantRaw: String = PrototypeVariant.a.rawValue
+    #endif
 
     var body: some View {
         NavigationStack {
@@ -65,6 +69,13 @@ struct SettingsView: View {
                     }
                     .pickerStyle(.segmented)
                 }
+
+                // PROTOTYPE — throwaway mount point, delete with #148.
+                #if DEV
+                if prototypeVariantRaw == PrototypeVariant.a.rawValue {
+                    PrototypeVariantASettingsSection()
+                }
+                #endif
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
