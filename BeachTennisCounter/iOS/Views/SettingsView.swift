@@ -11,6 +11,7 @@ private let colorOptions: [(name: String, hex: String, color: Color)] = [
 
 struct SettingsView: View {
     @EnvironmentObject private var phoneSession: PhoneSessionManager
+    @EnvironmentObject private var pro: ProEntitlement
     @AppStorage("appTheme") private var appTheme: AppTheme = .system
     @AppStorage("sportSetting") private var sportSetting: String = "beachTennis"
     @Environment(\.dismiss) private var dismiss
@@ -18,6 +19,7 @@ struct SettingsView: View {
     @State private var syncedSettings: WatchSettings?
     @State private var quarantines: [QuarantinedStore] = []
     @State private var liveMatchIDs: Set<UUID> = []
+    @State private var showProSheet = false
 
     var body: some View {
         NavigationStack {
@@ -66,6 +68,8 @@ struct SettingsView: View {
                     .pickerStyle(.segmented)
                 }
 
+                proSection
+
                 // Last, so the dev flavor's extra section never pushes a real
                 // setting off the first screen. Absent from every other build.
                 #if DEV_FLAVOR
@@ -82,6 +86,10 @@ struct SettingsView: View {
                     }
                 }
             }
+            .sheet(isPresented: $showProSheet) {
+                ProPurchaseSheet()
+                    .environmentObject(pro)
+            }
             .task { reloadQuarantines() }
             .onAppear {
                 syncedSettings = phoneSession.watchSettings
@@ -96,6 +104,28 @@ struct SettingsView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.bottom, 8)
             }
+        }
+    }
+
+    // MARK: - Pro
+
+    /// The Pro section: what the unlock is worth today (nothing is gated yet),
+    /// and — the part this ticket owes the App Store — a Restore Purchases
+    /// action that a buyer on a new iPhone can find without having hit a gate.
+    @ViewBuilder
+    private var proSection: some View {
+        Section {
+            if pro.isPro {
+                LabeledContent("Pro", value: String(localized: "Unlocked"))
+            } else {
+                Button("Unlock Pro") { showProSheet = true }
+            }
+
+            RestorePurchasesButton()
+        } header: {
+            Text("Pro")
+        } footer: {
+            Text(ProPurchaseSheet.pitch(isPro: pro.isPro))
         }
     }
 

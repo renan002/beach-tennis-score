@@ -5,6 +5,7 @@ import UIKit
 @main
 struct BeachTennisApp: App {
     @StateObject private var phoneSession: PhoneSessionManager
+    @StateObject private var pro = ProEntitlement.shared
     private let container: ModelContainer
     @AppStorage("appTheme") private var appTheme: AppTheme = .system
 
@@ -20,6 +21,12 @@ struct BeachTennisApp: App {
         WindowGroup {
             MatchListView()
                 .environmentObject(phoneSession)
+                .environmentObject(pro)
+                // Starts the StoreKit transaction listener and takes the first
+                // entitlement reading. Launch-time and cheap: no sign-in, no
+                // network requirement — an offline launch simply keeps the
+                // entitlement StoreKit already cached.
+                .task { pro.start() }
                 .onAppear { applyTheme(appTheme) }
                 .onChange(of: appTheme) { _, theme in applyTheme(theme) }
         }

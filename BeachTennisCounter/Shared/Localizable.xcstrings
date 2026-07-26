@@ -648,6 +648,16 @@
         }
       }
     },
+    "Nothing to restore": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nada para restaurar"
+          }
+        }
+      }
+    },
     "Old matches can be restored": {
       "comment": "Match History notice row shown while a Quarantined Store still holds restorable matches; taps through to Settings.",
       "localizations": {
@@ -655,6 +665,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Partidas antigas podem ser restauradas"
+          }
+        }
+      }
+    },
+    "One purchase, yours forever. No subscription.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma compra única, para sempre. Sem assinatura."
           }
         }
       }
@@ -689,6 +709,36 @@
         }
       }
     },
+    "Pro is unavailable right now. Please try again later.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Pro está indisponível no momento. Tente novamente mais tarde."
+          }
+        }
+      }
+    },
+    "Pro unlocked": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pro desbloqueado"
+          }
+        }
+      }
+    },
+    "Purchase failed": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A compra falhou"
+          }
+        }
+      }
+    },
     "Records": {
       "localizations": {
         "pt-BR": {
@@ -706,6 +756,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Restaurar"
+          }
+        }
+      }
+    },
+    "Restore Purchases": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurar compras"
           }
         }
       }
@@ -761,6 +821,16 @@
         }
       }
     },
+    "Result Card without watermark": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cartão de Resultado sem marca-d'água"
+          }
+        }
+      }
+    },
     "Resume Match": {
       "localizations": {
         "pt-BR": {
@@ -797,6 +867,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Marcado no %@"
+          }
+        }
+      }
+    },
+    "Scoring, Match History and the Result Card stay free.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marcar pontos, o Histórico de Partidas e o Cartão de Resultado continuam gratuitos."
+          }
+        }
+      }
+    },
+    "See what your Match History says about your play": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Veja o que seu Histórico de Partidas diz sobre o seu jogo"
           }
         }
       }
@@ -859,6 +949,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Compartilhar Cartão de Resultado"
+          }
+        }
+      }
+    },
+    "Share your result with nothing but the match on it": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compartilhe seu resultado só com a partida nele"
           }
         }
       }
@@ -975,6 +1075,16 @@
         }
       }
     },
+    "Thanks for supporting the app.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obrigado por apoiar o app."
+          }
+        }
+      }
+    },
     "The Quarantined Store was not removed.": {
       "localizations": {
         "pt-BR": {
@@ -1055,12 +1165,52 @@
         }
       }
     },
+    "This Apple Account has no Pro purchase to restore.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta Conta Apple não tem uma compra do Pro para restaurar."
+          }
+        }
+      }
+    },
     "Total": {
       "localizations": {
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Total"
+          }
+        }
+      }
+    },
+    "Unlock Pro": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desbloquear o Pro"
+          }
+        }
+      }
+    },
+    "Unlock Pro — %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desbloquear o Pro — %@"
+          }
+        }
+      }
+    },
+    "Unlocked": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desbloqueado"
           }
         }
       }
@@ -1131,6 +1281,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Seu Histórico de Partidas não foi alterado."
+          }
+        }
+      }
+    },
+    "Your purchase was restored.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sua compra foi restaurada."
           }
         }
       }
