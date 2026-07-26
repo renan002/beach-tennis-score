@@ -5,7 +5,7 @@
   ],
   "products" : [
     {
-      "displayPrice" : "3.99",
+      "displayPrice" : "19.90",
       "familyShareable" : false,
       "internalID" : "6A0C1D2E",
       "localizations" : [
@@ -28,7 +28,9 @@
   "settings" : {
     "_applicationInternalID" : "6765569699",
     "_developerTeamID" : "CU54PVDRHC",
-    "_lastSynchronizedDate" : 0
+    "_lastSynchronizedDate" : 0,
+    "_locale" : "pt_BR",
+    "_storefront" : "BRA"
   },
   "subscriptionGroups" : [
 
