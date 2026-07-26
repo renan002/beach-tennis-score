@@ -131,6 +131,16 @@
         }
       }
     },
+    "About": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sobre"
+          }
+        }
+      }
+    },
     "Active Calories": {
       "localizations": {
         "pt-BR": {
@@ -685,6 +695,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Jogue uma partida para começar a montar suas estatísticas"
+          }
+        }
+      }
+    },
+    "Privacy Policy": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Política de Privacidade"
           }
         }
       }
