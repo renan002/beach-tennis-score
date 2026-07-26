@@ -26,12 +26,14 @@ final class ProSurfaceTests: XCTestCase {
     ]
 
     /// The files allowed to speak that vocabulary. The first two *are* the
-    /// purchase surface; `SettingsView` is its one entry point, and is required
-    /// below to guard it.
+    /// purchase surface; the rest are the gates that lead to it, and every one
+    /// of them is required below to guard what it produces.
     private static let allowed: Set<String> = [
         "ProPurchaseSheet.swift",
         "RestorePurchasesButton.swift",
         "SettingsView.swift",
+        "StatisticsView.swift",
+        "ResultCardShareSheet.swift",
     ]
 
     func testNothingOutsideTheKnownSurfaceMentionsBuyingPro() throws {
@@ -69,15 +71,48 @@ final class ProSurfaceTests: XCTestCase {
         )
     }
 
-    /// The purchase surface must not be reachable from a second place that this
-    /// suite would then have to learn about. `MatchListView` presents Settings
-    /// and Statistics and is the obvious place for a paywall to grow.
-    func testTheOnlyPresenterOfThePurchaseSheetIsSettings() throws {
-        for file in try iOSSwiftFiles() where file.lastPathComponent != "SettingsView.swift" {
-            XCTAssertFalse(
-                try code(in: file).contains("ProPurchaseSheet()"),
-                "\(file.lastPathComponent) presents ProPurchaseSheet — the sheet "
-                    + "has no guard of its own because Settings was its only entry"
+    /// Every presenter of the sheet must be gated. `ProPurchaseSheet` itself
+    /// carries no guard — deliberately, since a guard there would be one line
+    /// standing between a dark build and a paywall — so its safety is entirely
+    /// that nothing unguarded can raise it.
+    ///
+    /// Two gates count, and they are not interchangeable. `FeatureFlags.proOnSale`
+    /// is the Settings section, which must vanish outright in a dark build.
+    /// `pro.isPro` is a feature gate, which is dark-safe for a different reason:
+    /// `isPro` is `ownsPro || !proOnSale`, so a dark build unlocks the feature
+    /// for everybody and the affordance never renders. Either is a correct
+    /// answer; neither is optional.
+    func testEveryPresenterOfThePurchaseSheetIsGated() throws {
+        for file in try iOSSwiftFiles() {
+            let source = try code(in: file)
+            guard source.contains("ProPurchaseSheet()") else { continue }
+            XCTAssertTrue(
+                source.contains("FeatureFlags.proOnSale") || source.contains("pro.isPro"),
+                "\(file.lastPathComponent) presents ProPurchaseSheet without "
+                    + "gating on FeatureFlags.proOnSale or pro.isPro — a dark "
+                    + "build would offer a purchase"
+            )
+        }
+    }
+
+    /// The three gates of the release, pinned to the files that own them, so
+    /// deleting one is a red suite rather than a quiet giveaway. Each reads
+    /// `pro.isPro` — never the flag — which is what makes all three disappear
+    /// together in a dark build without any of them mentioning one.
+    func testTheThreeProTouchpointsReadTheEntitlement() throws {
+        let gates = [
+            "StatisticsView.swift": "pro.isPro",
+            "ResultCardShareSheet.swift": "showsWatermark: !pro.isPro",
+            "SettingsView.swift": "isPro: pro.isPro",
+        ]
+        for (name, gate) in gates {
+            let file = try XCTUnwrap(
+                try iOSSwiftFiles().first { $0.lastPathComponent == name },
+                "\(name) is gone — the gate it held has gone with it"
+            )
+            XCTAssertTrue(
+                try code(in: file).contains(gate),
+                "\(name) no longer gates on `\(gate)` — its Pro feature is free"
             )
         }
     }

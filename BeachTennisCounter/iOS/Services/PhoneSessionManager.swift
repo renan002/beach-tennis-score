@@ -40,11 +40,40 @@ final class PhoneSessionManager: NSObject, ObservableObject {
         }
     }
 
-    /// The settings the watch consumes, as currently stored on the phone.
+    /// The `sportSetting` value Pro gates — Vários, the watch asking which sport
+    /// before each match. A storage key, never displayed and never translated.
+    nonisolated static let proOnlySportSetting = "multiple"
+
+    /// The sport setting that actually applies, which is not always the stored
+    /// one: Vários is a Pro feature, so without Pro this reports the default
+    /// instead.
+    ///
+    /// The gate sits at the point of *use* rather than only at the picker, and
+    /// deliberately does not rewrite storage. Someone who chose Vários in
+    /// 1.4/1.5 — while it was free — keeps that choice written down: switching
+    /// the flag on takes the behaviour away (the regression this release
+    /// accepted) and buying Pro hands it straight back with nothing to re-pick.
+    /// Gating the picker alone would have left exactly those users, the ones
+    /// the regression names, using a paid feature forever.
+    ///
+    /// Pure and static so both answers are testable — including the dark one,
+    /// where `isPro` is `true` for everybody and this is the identity.
+    nonisolated static func effectiveSportSetting(_ stored: String, isPro: Bool) -> String {
+        guard stored == proOnlySportSetting, !isPro else { return stored }
+        return WatchSettings.defaultSportSetting
+    }
+
+    /// The settings the watch consumes, as currently stored on the phone —
+    /// except for `sportSetting`, which is what the entitlement allows. The
+    /// watch is told the effective value because it cannot work one out: it
+    /// links no StoreKit and knows nothing about Pro (ADR 0004).
     var watchSettings: WatchSettings {
         WatchSettings(teamAColorHex: teamAColorHex,
                       teamBColorHex: teamBColorHex,
-                      sportSetting: sportSetting,
+                      sportSetting: Self.effectiveSportSetting(
+                          sportSetting,
+                          isPro: ProEntitlement.shared.isPro
+                      ),
                       teamAName: teamAName,
                       teamBName: teamBName,
                       healthMonitoringEnabled: healthMonitoringEnabled)

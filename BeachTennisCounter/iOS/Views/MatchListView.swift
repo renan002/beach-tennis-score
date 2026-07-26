@@ -64,6 +64,7 @@ struct MatchListView: View {
             }
             .sheet(isPresented: $showStatistics) {
                 StatisticsView()
+                    .environmentObject(pro)
             }
             .task { reloadQuarantines() }
         }

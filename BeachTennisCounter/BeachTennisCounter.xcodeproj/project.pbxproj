@@ -44,6 +44,7 @@
 		67103C2A175B4DA92518633A /* WatchSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E310D764A0970D265C75E09 /* WatchSettings.swift */; };
 		71D24E07EBDC009124B556AE /* ScoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0997213C193AD77CEACD376 /* ScoreView.swift */; };
 		734249C74C96DAB64F77F7EE /* LiveStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 191AACA24ACE1BF3823FBA7F /* LiveStoreTests.swift */; };
+		76589506EB9FB6A84497A2D6 /* ProGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3224B05D3CAA20BA56E33AD /* ProGateTests.swift */; };
 		77AE42A898482A62ECC20CA6 /* PointScoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C4F5BF1EE5C2D60E7F3EFD5 /* PointScoreTests.swift */; };
 		78C92880128A099B24A7CD48 /* MatchTypeSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1E89B8A918542FFB3F0389D /* MatchTypeSelectionView.swift */; };
 		78CD36AAB531F9C8D9FE8DD4 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0973F4D84A6A7F8646D3F5D2 /* HomeView.swift */; };
@@ -179,6 +180,7 @@
 		C4A4D3115E5DE217FA7F7D86 /* BeachTennisCounterWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BeachTennisCounterWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CCDF39FAF3B604ED50E84AFB /* CardShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardShape.swift; sourceTree = "<group>"; };
 		CF3635C57279568C64C27416 /* MatchSeeder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchSeeder.swift; sourceTree = "<group>"; };
+		D3224B05D3CAA20BA56E33AD /* ProGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProGateTests.swift; sourceTree = "<group>"; };
 		D541C4232813EBFCE41EDDEC /* HealthAuthStatusMessageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthAuthStatusMessageTests.swift; sourceTree = "<group>"; };
 		D62011185524F3A6907CE940 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		EA1ECDDE8CB62527D62213EE /* BeachTennisCounterWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BeachTennisCounterWatch.entitlements; sourceTree = "<group>"; };
@@ -286,6 +288,7 @@
 				68B2336A3635F40C8D56E97C /* MatchTypeLabelTests.swift */,
 				0C4F5BF1EE5C2D60E7F3EFD5 /* PointScoreTests.swift */,
 				9F87074912C3144D856BCA29 /* ProEntitlementTests.swift */,
+				D3224B05D3CAA20BA56E33AD /* ProGateTests.swift */,
 				0BD3C04D99BDFE89FEEAE396 /* ProSurfaceTests.swift */,
 				3480A90BCBEEA8CC3F6FB98F /* ResultCardTests.swift */,
 				004C173454FB9984F644F21E /* ResultCardTicketTests.swift */,
@@ -608,6 +611,7 @@
 				1409A1806C27458EAED5BA4A /* MatchTypeLabelTests.swift in Sources */,
 				77AE42A898482A62ECC20CA6 /* PointScoreTests.swift in Sources */,
 				92C97BFBF83130CB76B2D577 /* ProEntitlementTests.swift in Sources */,
+				76589506EB9FB6A84497A2D6 /* ProGateTests.swift in Sources */,
 				613458FC5DD60AFC2B854565 /* ProSurfaceTests.swift in Sources */,
 				D12A62A2338CB39D5AA0F5BD /* ResultCardTests.swift in Sources */,
 				22A4AD85C314F1C3CE92B36F /* ResultCardTicketTests.swift in Sources */,
