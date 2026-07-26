@@ -51,6 +51,12 @@ settings:
       BUNDLE_ID_SUFFIX: .dev
       APP_DISPLAY_NAME: Beach Dev
       APPICON_SUFFIX: "-Dev"
+      # `DEBUG` alone cannot express "dev flavor only" — XcodeGen defines it for
+      # every `debug`-type config, so plain `Debug` has it too. `DEV` is the
+      # condition that is true in exactly this configuration. Spelled out rather
+      # than `$(inherited) DEV` because this key overrides the project-level one
+      # XcodeGen writes, so there is nothing to inherit.
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG DEV
 
 targets:
   BeachTennisCounterTests:
