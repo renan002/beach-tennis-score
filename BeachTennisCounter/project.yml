@@ -65,6 +65,11 @@ targets:
     deploymentTarget: "26.0"
     sources:
       - path: Tests
+      # Carried into the test bundle so `ProEntitlementTests` can read the very
+      # file the schemes run against, and pin its product id to the one the app
+      # asks StoreKit for.
+      - path: Pro.storekit
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.renan.beachtennis.tests
@@ -168,6 +173,10 @@ schemes:
         BeachTennisCounterTests: [testing]
     run:
       config: Debug
+      # The local Pro product, so a simulator run can buy and restore with no
+      # App Store Connect record. Declared here rather than picked in Xcode's
+      # scheme editor, which `xcodegen generate` discards.
+      storeKitConfiguration: Pro.storekit
     test:
       config: Debug
       targets:
@@ -193,6 +202,7 @@ schemes:
         BeachTennisCounterTests: [testing]
     run:
       config: Dev
+      storeKitConfiguration: Pro.storekit
     test:
       config: Dev
       targets:

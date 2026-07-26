@@ -11,6 +11,7 @@ private let colorOptions: [(name: String, hex: String, color: Color)] = [
 
 struct SettingsView: View {
     @EnvironmentObject private var phoneSession: PhoneSessionManager
+    @EnvironmentObject private var pro: ProEntitlement
     @AppStorage("appTheme") private var appTheme: AppTheme = .system
     @AppStorage("sportSetting") private var sportSetting: String = "beachTennis"
     @Environment(\.dismiss) private var dismiss
@@ -18,6 +19,7 @@ struct SettingsView: View {
     @State private var syncedSettings: WatchSettings?
     @State private var quarantines: [QuarantinedStore] = []
     @State private var liveMatchIDs: Set<UUID> = []
+    @State private var showProSheet = false
 
     var body: some View {
         NavigationStack {
@@ -66,6 +68,8 @@ struct SettingsView: View {
                     .pickerStyle(.segmented)
                 }
 
+                proSection
+
                 Section("About") {
                     Link(destination: Self.privacyPolicyURL) {
                         HStack {
@@ -95,6 +99,10 @@ struct SettingsView: View {
                     }
                 }
             }
+            .sheet(isPresented: $showProSheet) {
+                ProPurchaseSheet()
+                    .environmentObject(pro)
+            }
             .task { reloadQuarantines() }
             .onAppear {
                 syncedSettings = phoneSession.watchSettings
@@ -111,6 +119,30 @@ struct SettingsView: View {
             }
         }
     }
+
+    // MARK: - Pro
+
+    /// The Pro section: what the unlock is worth today (nothing is gated yet),
+    /// and — the part this ticket owes the App Store — a Restore Purchases
+    /// action that a buyer on a new iPhone can find without having hit a gate.
+    @ViewBuilder
+    private var proSection: some View {
+        Section {
+            if pro.isPro {
+                LabeledContent("Pro", value: String(localized: "Unlocked"))
+            } else {
+                Button("Unlock Pro") { showProSheet = true }
+            }
+
+            RestorePurchasesButton()
+        } header: {
+            Text("Pro")
+        } footer: {
+            Text(ProPurchaseSheet.pitch(isPro: pro.isPro))
+        }
+    }
+
+    // MARK: - About
 
     /// The published privacy policy — App Store guideline 5.1.1 requires it to be
     /// reachable from inside the app, not only from the App Store listing.

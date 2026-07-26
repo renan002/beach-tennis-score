@@ -81,6 +81,7 @@ iOS/             ← iPhone companion (history + settings)
   Models/StoredMatch.swift             — @Model (SwiftData)
   Views/          MatchListView → MatchDetailView, SettingsView
   Services/PhoneSessionManager.swift   — @MainActor singleton, WCSession delegate
+  Services/ProEntitlement.swift        — @MainActor singleton, StoreKit 2 (iOS only)
 ```
 
 ### Data flow
@@ -88,6 +89,23 @@ iOS/             ← iPhone companion (history + settings)
 - **Scoring:** `ScoreView` holds `MatchState` + a `[MatchState]` undo stack. Every tap calls `ScoreEngine.awardPoint(to:state:)` — no mutation outside `ScoreEngine`.
 - **Watch → iPhone:** At match end `WatchSessionManager.sendMatchResult(_:duration:)` calls `WCSession.transferUserInfo`. `PhoneSessionManager.session(_:didReceiveUserInfo:)` decodes via `MatchResultPayload.from(_:)` and inserts a `StoredMatch` into SwiftData.
 - **iPhone → Watch (settings):** `PhoneSessionManager.pushSettingsToWatch()` builds a `WatchSettings` and calls `WCSession.updateApplicationContext(settings.toApplicationContext())`. Both watch receive paths (`activationDidCompleteWith` reading `receivedApplicationContext`, and `didReceiveApplicationContext`) decode via `WatchSettings.from(_:)` and apply the value. `WatchSettings` is the settings-path counterpart to `MatchResultPayload`: it owns the dictionary encode/decode, so a new watch-consumed setting is added in one place. The context is a full replacement — a missing key decodes to the type's default rather than leaving a stale value applied. Decode the `Sendable` `WatchSettings` in the `nonisolated` callback *before* any `Task { @MainActor in }`, per the Swift 6 `Sendable` rules.
+
+### Pro unlock (StoreKit)
+
+`ProEntitlement` is the only place StoreKit is touched: one non-consumable
+(`com.renan.beachtennis.pro`), `isPro` recomputed from
+`Transaction.currentEntitlements` at launch and on every `Transaction.updates`
+event. There is no persisted flag of our own and no receipt server — StoreKit is
+the source of truth, so any gate is a plain `isPro ? … : …` reading the injected
+observable. Keep it in `iOS/`: `Shared/` compiles into the watch target, which
+links no StoreKit and shows no purchase UI (ADR 0004). `ProEntitlementTests`
+enforces both that rule and the product id.
+
+`Pro.storekit` is the local StoreKit configuration; the `BeachTennisCounter` and
+`Beach Dev` schemes point their run action at it, so a purchase can be demoed in
+the simulator with no App Store Connect record. It only applies to runs launched
+from Xcode — an app installed with `simctl` sees no products, and the purchase
+sheet correctly reports Pro as unavailable.
 
 ### Beach Tennis scoring rules (encoded in ScoreEngine)
 

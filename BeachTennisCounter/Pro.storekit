@@ -1,0 +1,42 @@
+{
+  "identifier" : "5A1B2C3D",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "19.90",
+      "familyShareable" : false,
+      "internalID" : "6A0C1D2E",
+      "localizations" : [
+        {
+          "description" : "Statistics, watermark-free result cards, and the Multiple sport picker. One-time purchase.",
+          "displayName" : "Pro",
+          "locale" : "en_US"
+        },
+        {
+          "description" : "Estatísticas, Cartão de Resultado sem marca-d'água e a modalidade Vários. Compra única.",
+          "displayName" : "Pro",
+          "locale" : "pt_BR"
+        }
+      ],
+      "productID" : "com.renan.beachtennis.pro",
+      "referenceName" : "Pro (lifetime unlock)",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "6765569699",
+    "_developerTeamID" : "CU54PVDRHC",
+    "_lastSynchronizedDate" : 0,
+    "_locale" : "pt_BR",
+    "_storefront" : "BRA"
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

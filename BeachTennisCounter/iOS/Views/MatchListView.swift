@@ -3,6 +3,7 @@ import SwiftData
 
 struct MatchListView: View {
     @EnvironmentObject private var phoneSession: PhoneSessionManager
+    @EnvironmentObject private var pro: ProEntitlement
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \StoredMatch.date, order: .reverse) private var allMatches: [StoredMatch]
     @State private var showSettings = false
@@ -59,6 +60,7 @@ struct MatchListView: View {
             .sheet(isPresented: $showSettings, onDismiss: reloadQuarantines) {
                 SettingsView()
                     .environmentObject(phoneSession)
+                    .environmentObject(pro)
             }
             .sheet(isPresented: $showStatistics) {
                 StatisticsView()
