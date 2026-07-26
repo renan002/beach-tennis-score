@@ -9,8 +9,12 @@ import SwiftUI
 struct ProPurchaseSheet: View {
     /// The one-line pitch, shared with the Settings section's footer so the
     /// promise is worded once.
-    static func pitch(isPro: Bool) -> LocalizedStringKey {
-        isPro
+    ///
+    /// Takes `ownsPro`, not `isPro`: this is the *purchase* surface, so it
+    /// speaks to what the person actually bought. A dark build where `isPro`
+    /// is `true` for everyone must not thank everyone for supporting the app.
+    static func pitch(ownsPro: Bool) -> LocalizedStringKey {
+        ownsPro
             ? "Thanks for supporting the app."
             : "One purchase, yours forever. No subscription."
     }
@@ -25,7 +29,7 @@ struct ProPurchaseSheet: View {
                 VStack(spacing: 24) {
                     header
                     features
-                    if !pro.isPro { actions }
+                    if !pro.ownsPro { actions }
                 }
                 .padding(24)
                 .frame(maxWidth: .infinity)
@@ -55,12 +59,12 @@ struct ProPurchaseSheet: View {
 
     private var header: some View {
         VStack(spacing: 8) {
-            Image(systemName: pro.isPro ? "checkmark.seal.fill" : "star.circle.fill")
+            Image(systemName: pro.ownsPro ? "checkmark.seal.fill" : "star.circle.fill")
                 .font(.system(size: 56))
                 .foregroundStyle(.tint)
-            Text(pro.isPro ? "Pro unlocked" : "Unlock Pro")
+            Text(pro.ownsPro ? "Pro unlocked" : "Unlock Pro")
                 .font(.title2.bold())
-            Text(Self.pitch(isPro: pro.isPro))
+            Text(Self.pitch(ownsPro: pro.ownsPro))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

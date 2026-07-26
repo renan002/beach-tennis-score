@@ -52,6 +52,7 @@
 		93E5597DE2C32F79C230BBB7 /* MatchHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F54B8E19A416BAD074ED1CE9 /* MatchHistoryView.swift */; };
 		975EDFFD0B86A8352E0B0524 /* DevToolsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2452383CB0D07C028A93C80B /* DevToolsView.swift */; };
 		989396E3CA7A30F5747C2840 /* MatchState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F51DDD9F7DDD920BA32478B6 /* MatchState.swift */; };
+		999A27D803F2A1210CD410B4 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ABEFF5224D34981DF025362 /* FeatureFlags.swift */; };
 		A2D8CF0A8FF48649ED4C2E31 /* WatchSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83FAA734BDAE85A11D34EBC2 /* WatchSettingsTests.swift */; };
 		A36E17FF54692A7E34AF41AE /* MatchDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6384C90BFE76A48416288478 /* MatchDetailView.swift */; };
 		A8DD1E8C248E730B615C104E /* RestorePurchasesButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A23CE764F6C43C398987642 /* RestorePurchasesButton.swift */; };
@@ -136,6 +137,7 @@
 		3225078E6475BFD0C05BC383 /* MatchSeederTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchSeederTests.swift; sourceTree = "<group>"; };
 		3480A90BCBEEA8CC3F6FB98F /* ResultCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultCardTests.swift; sourceTree = "<group>"; };
 		3545F89785DBE10F5C029336 /* ResultCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultCardView.swift; sourceTree = "<group>"; };
+		3ABEFF5224D34981DF025362 /* FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureFlags.swift; sourceTree = "<group>"; };
 		3BB743BC5C0C98046825D4C0 /* WorkoutPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutPolicyTests.swift; sourceTree = "<group>"; };
 		3FC79BF2C5726FA5F03BCDEF /* ProPurchaseSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProPurchaseSheet.swift; sourceTree = "<group>"; };
 		41390DBE859A457CB1FE6D9D /* StoreRecoveryRestoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreRecoveryRestoreTests.swift; sourceTree = "<group>"; };
@@ -304,6 +306,7 @@
 				F607F579215BBD1758D83877 /* Assets.xcassets */,
 				9D28EC16CCCEA10A4E7D8BA1 /* BeachTennisApp.swift */,
 				F8E65AAF7C81FAA9FB62A1F2 /* BeachTennisCounter.entitlements */,
+				3ABEFF5224D34981DF025362 /* FeatureFlags.swift */,
 				AA336868DB80B42591F49495 /* Info.plist */,
 				8D254AB1FB6C6A1DA0C6D529 /* InfoPlist.strings */,
 				D62011185524F3A6907CE940 /* PrivacyInfo.xcprivacy */,
@@ -558,6 +561,7 @@
 				E780DAF383027DBE5F3111EF /* BeachTennisApp.swift in Sources */,
 				EAB2536E289E960EAA3A9686 /* CardShape.swift in Sources */,
 				975EDFFD0B86A8352E0B0524 /* DevToolsView.swift in Sources */,
+				999A27D803F2A1210CD410B4 /* FeatureFlags.swift in Sources */,
 				FCBE365F01B224013010D12D /* HealthSettingsSection.swift in Sources */,
 				632E5000D7145D27111E2305 /* LiveStore.swift in Sources */,
 				A36E17FF54692A7E34AF41AE /* MatchDetailView.swift in Sources */,
@@ -739,7 +743,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG DEV_FLAVOR";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG DEV_FLAVOR PRO_ON_SALE";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0;
 				WATCHOS_DEPLOYMENT_TARGET = 26.0;
@@ -877,7 +881,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG PRO_ON_SALE";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0;
 				WATCHOS_DEPLOYMENT_TARGET = 26.0;

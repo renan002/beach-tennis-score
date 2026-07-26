@@ -47,16 +47,26 @@ settings:
     APP_DISPLAY_NAME: Beach Tennis Score
     APPICON_SUFFIX: ""
   configs:
+    # `PRO_ON_SALE` backs `FeatureFlags.proOnSale` — the Pro unlock is built
+    # but dark in `Release`, so the purchase surface and every Pro gate are
+    # absent from shipped builds until this condition is added below and a
+    # release is cut. It is deliberately *absent* from `Release` rather than
+    # set to a false-ish value: a compilation condition is present or it is
+    # not, and `#if PRO_ON_SALE` reads the presence.
+    Debug:
+      # `DEBUG` is restated because setting this key replaces XcodeGen's
+      # automatic value for a debug-type config rather than adding to it —
+      # without it, `#if DEBUG` would silently go dark across the project.
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG PRO_ON_SALE
     Dev:
       BUNDLE_ID_SUFFIX: .dev
       APP_DISPLAY_NAME: Beach Dev
       APPICON_SUFFIX: "-Dev"
-      # Gates the `DEV` marker in Settings. Compile-time rather than a runtime
-      # bundle-id test, so the marker is physically absent from Debug and
-      # Release binaries and cannot leak into a screenshot or a Cartão.
-      # `DEBUG` is restated because setting this key replaces XcodeGen's
-      # automatic value for a debug-type config rather than adding to it.
-      SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG DEV_FLAVOR
+      # `DEV_FLAVOR` gates the `DEV` marker in Settings. Compile-time rather
+      # than a runtime bundle-id test, so the marker is physically absent from
+      # Debug and Release binaries and cannot leak into a screenshot or a
+      # Cartão. `DEBUG` is restated for the reason given under `Debug` above.
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG DEV_FLAVOR PRO_ON_SALE
 
 targets:
   BeachTennisCounterTests:

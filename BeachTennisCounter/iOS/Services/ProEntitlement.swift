@@ -4,11 +4,16 @@ import StoreKit
 /// The Pro unlock: one non-consumable lifetime purchase, iPhone-only.
 ///
 /// StoreKit is the sole source of truth — there is no flag of our own in
-/// `UserDefaults`, no receipt server, nothing to keep in sync. `isPro` is
+/// `UserDefaults`, no receipt server, nothing to keep in sync. `ownsPro` is
 /// recomputed from `Transaction.currentEntitlements` at launch and again
 /// whenever StoreKit reports a transaction, which is what makes a purchase
 /// (or a restore, or an Ask-to-Buy approval, or a refund) land live with no
 /// restart.
+///
+/// Two readings, deliberately distinct: `ownsPro` is what the store says, and
+/// `isPro` is what the app may do about it — they differ only while Pro is
+/// dark (`FeatureFlags.proOnSale` off), when nothing is for sale and every Pro
+/// feature is therefore free.
 ///
 /// Lives in `iOS/`, never `Shared/`: the watch target links no StoreKit and
 /// renders no purchase UI (ADR 0004). Injected like the session managers.
@@ -22,8 +27,34 @@ final class ProEntitlement: ObservableObject {
 
     static let shared = ProEntitlement()
 
-    /// The only thing any gate should ever read.
-    @Published private(set) var isPro = false
+    /// Whether this Apple Account actually owns the Pro product — the truthful
+    /// StoreKit reading, unaffected by whether Pro is on sale in this build.
+    ///
+    /// Read by the **purchase surface**, which needs the real answer to decide
+    /// between "Unlock Pro" and "Pro unlocked". No feature gate should read it:
+    /// gates want `isPro`.
+    @Published private(set) var ownsPro = false
+
+    /// Whether this build may use Pro features — the only thing any gate
+    /// should ever read.
+    ///
+    /// "You own it, **or** it isn't for sale." In a dark build (`Release`,
+    /// today) nothing is for sale, so this is `true` for everybody and every
+    /// Pro feature stays free — which is exactly the current behaviour, and is
+    /// why gates can be written now and shipped harmlessly.
+    ///
+    /// The consequence, accepted deliberately: while Pro is dark this cannot
+    /// be read as "this person paid". `ownsPro` is where that fact lives.
+    var isPro: Bool {
+        Self.isPro(ownsPro: ownsPro, proOnSale: FeatureFlags.proOnSale)
+    }
+
+    /// The rule behind `isPro`, as a pure function so both of its states are
+    /// testable from a `Debug` test bundle — including the dark one, which is
+    /// the state that actually ships and the one no local run exercises.
+    nonisolated static func isPro(ownsPro: Bool, proOnSale: Bool) -> Bool {
+        ownsPro || !proOnSale
+    }
 
     /// The store's product, once loaded — `nil` while loading, and on a device
     /// that cannot reach the store. The purchase sheet shows its localized
@@ -90,7 +121,7 @@ final class ProEntitlement: ObservableObject {
         Task { await loadProduct() }
     }
 
-    /// Recomputes `isPro` from what StoreKit currently grants this Apple
+    /// Recomputes `ownsPro` from what StoreKit currently grants this Apple
     /// Account. Unverified entitlements are ignored: a transaction that fails
     /// Apple's signature check is not an unlock.
     func refresh() async {
@@ -101,7 +132,7 @@ final class ProEntitlement: ObservableObject {
             guard transaction.revocationDate == nil else { continue }
             entitled = true
         }
-        isPro = entitled
+        ownsPro = entitled
     }
 
     @discardableResult
@@ -131,10 +162,13 @@ final class ProEntitlement: ObservableObject {
             switch try await product.purchase() {
             case .success(let verification):
                 await handle(verification)
-                // `handle` only flips `isPro` for a verified transaction, so
+                // `handle` only flips `ownsPro` for a verified transaction, so
                 // this reads the real outcome rather than assuming success.
                 // A purchase that fails Apple's signature check lands here.
-                return isPro
+                // `ownsPro`, never `isPro`: in a dark build `isPro` is `true`
+                // before the purchase even starts, and would report success
+                // for a transaction that never verified.
+                return ownsPro
                     ? .purchased
                     : .failed(Self.unavailableMessage)
             case .pending:
@@ -172,7 +206,10 @@ final class ProEntitlement: ObservableObject {
             return .failed(error.localizedDescription)
         }
         await refresh()
-        return isPro ? .restored : .nothingToRestore
+        // The truthful reading, for the same reason as in `purchase()`: a dark
+        // build must not tell someone their purchase was restored when the
+        // store reported nothing.
+        return ownsPro ? .restored : .nothingToRestore
     }
 
     /// Finishes a verified transaction and re-reads the entitlement. Finishing
