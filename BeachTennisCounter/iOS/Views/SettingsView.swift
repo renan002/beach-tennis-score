@@ -65,6 +65,12 @@ struct SettingsView: View {
                     }
                     .pickerStyle(.segmented)
                 }
+
+                // Last, so the dev flavor's extra section never pushes a real
+                // setting off the first screen. Absent from every other build.
+                #if DEV_FLAVOR
+                DevToolsSettingsSection()
+                #endif
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
