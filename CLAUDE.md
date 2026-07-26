@@ -42,6 +42,8 @@ Three: `Debug`, `Dev`, `Release` — `Dev` is a debug variant that installs alon
 | App icon | `AppIcon` | `AppIcon-Dev` |
 | `DEV` marker in Settings | absent | present |
 
+The table is the **flavor** axis — `Dev` against the other two. Not everything per-configuration splits that way: `PRO_ON_SALE` splits `Release` against `Debug` + `Dev` (see "Pro is dark in Release" below), so it gets no row here. A new configuration has to be considered against both axes; copying a row is not enough.
+
 Everything flavored derives from three settings in `project.yml` — `BUNDLE_ID_SUFFIX`, `APP_DISPLAY_NAME`, `APPICON_SUFFIX` — set per configuration in one place. Don't hardcode a flavored value anywhere else; the App Group in particular is read at runtime from the `AppGroupIdentifier` Info.plist key, which derives from the bundle id.
 
 `APP_DISPLAY_NAME` alone does **not** name the app. A localized `InfoPlist.strings` outranks `CFBundleDisplayName`, and `.strings` files get no build-setting expansion — so `scripts/flavor-localized-app-name.sh` rewrites the name in the built product as a post-build phase on both app targets. Verify a name change by reading the home screen on a pt-BR device, not `Info.plist`.
@@ -59,6 +61,22 @@ XcodeGen matches `settings.configs` keys by case-insensitive **substring** unles
 The `DEV` marker rides on the Settings version footer (`Versão 1.3.1 · DEV`), gated by `#if DEV_FLAVOR` — a compilation condition set only on the `Dev` configuration, so the string is physically absent from Debug and Release binaries. Settings is the **only** place it may appear: never the scoring screens, and never the Cartão de Resultado, which is an image made to be posted publicly. It is composed into the interpolated value rather than the copy, so the `Version %@` catalog key stays untouched and `DEV` reads the same in every locale.
 
 `scripts/validate-release-version.sh` refuses to cut a release whose bundle id carries a suffix. It resolves `BASE_BUNDLE_ID` + `BUNDLE_ID_SUFFIX` out of the **Release** configuration of the checked-in `project.pbxproj` — not `project.yml`, because the pbxproj is what Xcode archives — and fails loudly if it can no longer find what it walks, rather than silently vouching for nothing. `scripts/test-validate-release-version.sh` covers it and runs in CI on ubuntu; every one of its bundle-id cases fails if the guard is deleted.
+
+### Pro is dark in Release
+
+Pro is fully built but **not on sale** in shipped builds: the purchase surface and all three Pro gates sit behind `FeatureFlags.proOnSale`, backed by the `PRO_ON_SALE` compilation condition — defined on `Debug` and `Dev`, **absent** from `Release`. A dark build has no purchase affordance, makes no App Store traffic, and leaves every Pro feature free, which is exactly the pre-Pro behaviour. See ADR 0008; the flip procedure is `docs/pro-switch-on-checklist.md`.
+
+Rules that keep this working, all of them easy to break by accident:
+
+- `iOS/FeatureFlags.swift` holds the mechanism's **only** `#if`. Every consumer branches on a plain `Bool`, so the off state — the one that ships and that nobody runs locally — stays compiled and testable. Don't spell `PRO_ON_SALE` anywhere but `project.yml` and that file.
+- **Gates read `isPro`, never `FeatureFlags`.** `ProEntitlement` splits into `ownsPro` (StoreKit's answer, read only by the purchase surface) and `isPro = ownsPro || !proOnSale` (what the app may do, read by every gate). The flag has exactly three consumers; a fourth is a smell.
+- Setting `SWIFT_ACTIVE_COMPILATION_CONDITIONS` **replaces** XcodeGen's automatic value on a debug-type config, so `DEBUG` is restated on `Debug` and `Dev`. Drop it and `#if DEBUG` silently goes dark project-wide.
+
+CI gates it with `scripts/validate-release-is-dark.sh` in its own unconditional ubuntu job, **`release-is-dark`** — the check to require on `main`, since that merge is what triggers the build. It asserts that no configuration named `Release` defines `PRO_ON_SALE`, walking every configuration block, and fails loudly if it cannot find what it walks. `scripts/test-validate-release-is-dark.sh` covers it and runs in the same job. There is no bypass: the guard is deleted together with its test and its job in the same diff that flips the flag.
+
+### Where builds actually come from
+
+**Nothing in this repository archives or uploads a binary.** Distribution builds are produced by **Xcode Cloud**, triggered by a merge to `main`; its workflow — scheme, configuration, environment, custom build settings — lives entirely in App Store Connect, with no `ci_scripts/` and no trace here. GitHub Actions runs tests and the guard scripts, and that is all it does. So `project.yml` telling you `Release` is dark does not by itself tell you the *shipped* binary is dark — which configuration gets archived is not readable from inside this repo.
 
 ## Architecture
 

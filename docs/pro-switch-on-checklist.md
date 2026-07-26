@@ -10,7 +10,9 @@ several steps that are only obvious while you are holding all of it in your
 head, and because one of them will lock you out of merging if done in the wrong
 order.
 
-See ADR 0007 for the configuration mechanism this rides on, and
+See [ADR 0008](adr/0008-build-time-feature-flags-per-build-configuration.md)
+for the flag mechanism, ADR 0007 for the per-configuration machinery it rides
+on, and
 `scripts/validate-release-is-dark.sh` for the guard that stands in the way until
 you deliberately remove it.
 
