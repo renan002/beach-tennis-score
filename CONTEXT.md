@@ -180,6 +180,32 @@ media. Free for everyone, carrying a small app watermark; Pro removes the
 watermark. The watermark is the app's advertisement, not a defect.
 _Avoid_: screenshot, banner
 
+**On sale** / **not on sale**:
+Whether a given build sells Pro at all. Nothing to do with pricing or with a
+discount — it is the state of the `proOnSale` feature flag, fixed when the
+binary is compiled. Pro is currently **not on sale** in shipped builds.
+_Avoid_: enabled, launched, released (for the flag's state)
+
+**Dark**:
+Said of a build where Pro is not on sale: no purchase surface anywhere, no
+StoreKit traffic at all, and every Pro feature free to everybody. A dark build
+behaves exactly like the app did before Pro was written. `Release` is dark
+today; `Debug` and `Dev` are not. See ADR 0008.
+_Avoid_: disabled, off, hidden (as the noun for this state)
+
+**owns Pro** vs. **is Pro**:
+Two different questions, and the pair most easily misread. *Owns Pro* is what
+the App Store says — this Apple Account bought the product. *Is Pro* is what
+the app may do about it: owns Pro, **or** Pro is not on sale. They differ only
+in a dark build, where everybody is Pro and nobody owns Pro. Feature gates ask
+*is Pro*; only the purchase surface asks *owns Pro*.
+
+**Switching on**:
+The one-time event that makes Pro on sale: flipping the flag and cutting a
+release. It is never partial, never remote, and never reaches a build already
+installed. Procedure: `docs/pro-switch-on-checklist.md`.
+_Avoid_: rollout, ramp, enabling (all imply a dial this does not have)
+
 ### Store recovery
 
 **Store**:
