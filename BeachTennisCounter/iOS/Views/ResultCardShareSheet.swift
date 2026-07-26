@@ -16,19 +16,28 @@ struct ResultCardShareSheet: View {
     /// default rather than crashing the share flow. Not a `CardShape` directly:
     /// `@AppStorage` stores the raw `String`, which is also the storage key.
     @AppStorage("cartaoShape") private var storedShape = CardShape.default.rawValue
+    @EnvironmentObject private var pro: ProEntitlement
     @Environment(\.dismiss) private var dismiss
+    @State private var showProSheet = false
 
     private var shape: CardShape { CardShape.stored(storedShape) }
 
     /// The card model, built once from the stored match and shared by the
     /// preview and the share action so the two can never describe it differently.
-    private var card: ResultCard { ResultCard(match: match) }
+    ///
+    /// The watermark is the gate, and it is the only one the Cartão has: sharing
+    /// stays free for everybody, in both shapes, for every match — Pro buys a
+    /// cleaner card, not the ability to share one. Because the card is rebuilt
+    /// from the stored match on every render, a purchase strips the watermark
+    /// from matches played long before it, with nothing to migrate.
+    private var card: ResultCard { ResultCard(match: match, showsWatermark: !pro.isPro) }
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 24) {
                 preview
                 shapePicker
+                if !pro.isPro { unlockButton }
                 shareButton
             }
             .padding()
@@ -39,6 +48,24 @@ struct ResultCardShareSheet: View {
                     Button("Done") { dismiss() }
                 }
             }
+            .sheet(isPresented: $showProSheet) {
+                ProPurchaseSheet()
+                    .environmentObject(pro)
+            }
+        }
+    }
+
+    /// The watermark's tap-through. A button rather than only a tap target on
+    /// the watermark itself: the watermark renders at 8 pt inside a preview
+    /// that is scaled down again to fit, so as a hit target it would be both
+    /// impossible to hit and impossible to discover. The preview does carry the
+    /// tap as well, so tapping the mark works for anyone who tries it.
+    private var unlockButton: some View {
+        Button {
+            showProSheet = true
+        } label: {
+            Label("Remove the watermark with Pro", systemImage: "sparkles")
+                .font(.subheadline)
         }
     }
 
@@ -58,6 +85,10 @@ struct ResultCardShareSheet: View {
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .scaleEffect(scale)
             .frame(width: geo.size.width, height: geo.size.height)
+            // Tapping the mark leads to the purchase sheet. Only while the card
+            // carries one — with Pro (or in a dark build) the preview is an
+            // inert picture again.
+            .onTapGesture { if !pro.isPro { showProSheet = true } }
         }
         .animation(.default, value: shape)
     }

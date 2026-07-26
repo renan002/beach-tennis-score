@@ -25,10 +25,10 @@ struct SettingsView: View {
         NavigationStack {
             Form {
                 Section {
-                    Picker("Modality", selection: $sportSetting) {
+                    Picker("Modality", selection: sportBinding) {
                         Text("Beach Tennis").tag("beachTennis")
                         Text("Tennis").tag("tennis")
-                        Text("Multiple").tag("multiple")
+                        multipleOption
                     }
                     .pickerStyle(.menu)
                 } header: {
@@ -126,12 +126,12 @@ struct SettingsView: View {
     /// and — the part this ticket owes the App Store — a Restore Purchases
     /// action that a buyer on a new iPhone can find without having hit a gate.
     ///
-    /// **Absent entirely from a dark build**, Restore included. That is the whole
-    /// of "no purchase affordance anywhere": this section is the only entry to
-    /// `ProPurchaseSheet` — `showProSheet` cannot become `true` without the
-    /// button below — so the sheet needs no guard of its own, and neither does
-    /// `RestorePurchasesButton`. One guard, at the one place that can produce
-    /// the surface, matching the single guard in `ProEntitlement.start()`.
+    /// **Absent entirely from a dark build**, Restore included. That is the
+    /// section's half of "no purchase affordance anywhere", and it needs no
+    /// guard on `ProPurchaseSheet` itself: the other thing that can raise
+    /// `showProSheet` is the locked Vários option, which is unlocked for
+    /// everybody in a dark build because `isPro` is. Every purchase affordance
+    /// in the app is guarded where it is *produced*, never at the sheet.
     ///
     /// Hiding Restore rather than keeping it standing alone was decided in "Does
     /// the dark flag silence StoreKit entirely?": guideline 3.1.1 scopes the
@@ -177,8 +177,53 @@ struct SettingsView: View {
         liveMatchIDs = Set(ids)
     }
 
+    // MARK: - Modality
+
+    /// Vários, locked for free users: visible in the menu — the point of a
+    /// locked-but-visible option is that it advertises what Pro buys — with a
+    /// padlock rather than a checkmark's worth of silence.
+    @ViewBuilder
+    private var multipleOption: some View {
+        if pro.isPro {
+            Text("Multiple").tag(PhoneSessionManager.proOnlySportSetting)
+        } else {
+            Label("Multiple", systemImage: "lock.fill")
+                .tag(PhoneSessionManager.proOnlySportSetting)
+        }
+    }
+
+    /// The picker's selection, gated in both directions.
+    ///
+    /// Reading reports the *effective* setting, so a free user who chose Vários
+    /// back when it was free sees the sport the watch is actually going to
+    /// start rather than one the app is quietly ignoring. Writing refuses
+    /// Vários without Pro and opens the purchase sheet instead — the
+    /// tap-through — leaving the stored choice untouched, so a purchase later
+    /// restores it with nothing to re-pick.
+    ///
+    /// Note it reads `pro.isPro`, never the flag: in a dark build `isPro` is
+    /// `true` for everybody, so the lock, the padlock and the tap-through all
+    /// disappear on their own and Vários is freely selectable exactly as it is
+    /// today.
+    private var sportBinding: Binding<String> {
+        Binding(
+            get: {
+                PhoneSessionManager.effectiveSportSetting(sportSetting, isPro: pro.isPro)
+            },
+            set: { selected in
+                guard selected != PhoneSessionManager.proOnlySportSetting || pro.isPro else {
+                    showProSheet = true
+                    return
+                }
+                sportSetting = selected
+            }
+        )
+    }
+
     private var sportSettingFooter: String {
-        switch sportSetting {
+        // The effective value, matching the picker: promising that the watch
+        // will ask before each match would be a lie while Vários is locked.
+        switch PhoneSessionManager.effectiveSportSetting(sportSetting, isPro: pro.isPro) {
         case "tennis":    return String(localized: "The Watch will always start a Tennis match.")
         case "multiple":  return String(localized: "The Watch will ask which sport before each match.")
         default:          return String(localized: "The Watch will always start a Beach Tennis match.")

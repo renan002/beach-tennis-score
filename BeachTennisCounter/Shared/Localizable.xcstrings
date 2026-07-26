@@ -769,6 +769,16 @@
         }
       }
     },
+    "Remove the watermark with Pro": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remova a marca d'água com o Pro"
+          }
+        }
+      }
+    },
     "Restore": {
       "comment": "Glossary term (CONTEXT.md): merges quarantined matches into the live Match History. Never \"recover\" or \"import\".",
       "localizations": {
@@ -1010,6 +1020,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Estatísticas"
+          }
+        }
+      }
+    },
+    "Statistics are a Pro feature": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As Estatísticas são um recurso Pro"
           }
         }
       }

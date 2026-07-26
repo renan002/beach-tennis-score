@@ -5,10 +5,14 @@ import SwiftData
 /// thin shell around the pure `MatchStatistics` seam — the view formats and
 /// lays out; every number comes from the calculator.
 ///
-/// Ships ungated in this release; the Pro lock arrives in the gating ticket.
+/// Pro-gated: without Pro the numbers are there but blurred, behind a single
+/// tap to the purchase sheet. In a dark build `isPro` is `true` for everybody,
+/// so the whole screen is open exactly as it shipped in 1.4.
 struct StatisticsView: View {
+    @EnvironmentObject private var pro: ProEntitlement
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \StoredMatch.date, order: .reverse) private var matches: [StoredMatch]
+    @State private var showProSheet = false
 
     var body: some View {
         // Computed once per render — every section reads from this one value
@@ -16,10 +20,15 @@ struct StatisticsView: View {
         let stats = MatchStatistics(matches: matches)
         return NavigationStack {
             Group {
+                // The empty state is never gated: a teaser over "no statistics
+                // yet" would be selling a blur of nothing, and it is the one
+                // case where the screen has nothing to withhold.
                 if stats.isEmpty {
                     emptyState
-                } else {
+                } else if pro.isPro {
                     statsList(stats)
+                } else {
+                    lockedTeaser(stats)
                 }
             }
             .navigationTitle("Statistics")
@@ -29,7 +38,50 @@ struct StatisticsView: View {
                     Button("Done") { dismiss() }
                 }
             }
+            .sheet(isPresented: $showProSheet) {
+                ProPurchaseSheet()
+                    .environmentObject(pro)
+            }
         }
+    }
+
+    // MARK: - Locked teaser
+
+    /// The player's own numbers, blurred — the shape of the screen sells it far
+    /// better than a description of it would.
+    ///
+    /// `allowsHitTesting(false)` rather than `disabled`, so the list cannot be
+    /// scrolled or selected through the blur, and `accessibilityHidden` so
+    /// VoiceOver does not simply read out the values the blur is withholding.
+    private func lockedTeaser(_ stats: MatchStatistics) -> some View {
+        statsList(stats)
+            .blur(radius: 7)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+            .overlay { unlockCallout }
+    }
+
+    private var unlockCallout: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "lock.fill")
+                .font(.title)
+                .foregroundStyle(.tint)
+            Text("Statistics are a Pro feature")
+                .font(.headline)
+                .multilineTextAlignment(.center)
+            // The purchase sheet's own line for Statistics, reused verbatim:
+            // one catalog key, one promise to keep true.
+            Text("See what your Match History says about your play")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+            Button("Unlock Pro") { showProSheet = true }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+        }
+        .padding(24)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20))
+        .padding(24)
     }
 
     // MARK: - Empty state

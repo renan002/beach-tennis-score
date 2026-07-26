@@ -2,6 +2,10 @@ import SwiftUI
 
 struct MatchDetailView: View {
     @EnvironmentObject private var phoneSession: PhoneSessionManager
+    /// Held only to hand on to the share sheet, which gates the Cartão's
+    /// watermark on it. A sheet does not inherit the presenter's environment
+    /// objects, so every presentation in this app re-injects them explicitly.
+    @EnvironmentObject private var pro: ProEntitlement
     let match: StoredMatch
 
     @State private var isSharingCard = false
@@ -106,6 +110,7 @@ struct MatchDetailView: View {
                 teamAColor: Color(hex: phoneSession.teamAColorHex),
                 teamBColor: Color(hex: phoneSession.teamBColorHex)
             )
+            .environmentObject(pro)
         }
     }
 }
