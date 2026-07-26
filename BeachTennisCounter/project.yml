@@ -51,6 +51,12 @@ settings:
       BUNDLE_ID_SUFFIX: .dev
       APP_DISPLAY_NAME: Beach Dev
       APPICON_SUFFIX: "-Dev"
+      # Gates the `DEV` marker in Settings. Compile-time rather than a runtime
+      # bundle-id test, so the marker is physically absent from Debug and
+      # Release binaries and cannot leak into a screenshot or a Cartão.
+      # `DEBUG` is restated because setting this key replaces XcodeGen's
+      # automatic value for a debug-type config rather than adding to it.
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG DEV_FLAVOR
 
 targets:
   BeachTennisCounterTests:
