@@ -125,20 +125,36 @@ struct SettingsView: View {
     /// The Pro section: what the unlock is worth today (nothing is gated yet),
     /// and — the part this ticket owes the App Store — a Restore Purchases
     /// action that a buyer on a new iPhone can find without having hit a gate.
+    ///
+    /// **Absent entirely from a dark build**, Restore included. That is the whole
+    /// of "no purchase affordance anywhere": this section is the only entry to
+    /// `ProPurchaseSheet` — `showProSheet` cannot become `true` without the
+    /// button below — so the sheet needs no guard of its own, and neither does
+    /// `RestorePurchasesButton`. One guard, at the one place that can produce
+    /// the surface, matching the single guard in `ProEntitlement.start()`.
+    ///
+    /// Hiding Restore rather than keeping it standing alone was decided in "Does
+    /// the dark flag silence StoreKit entirely?": guideline 3.1.1 scopes the
+    /// Restore duty to *restorable* purchases, which a build selling nothing
+    /// does not have. It also completes the promise that a dark build makes no
+    /// App Store traffic — `AppStore.sync()` was the last thing a user could
+    /// still have triggered by hand.
     @ViewBuilder
     private var proSection: some View {
-        Section {
-            if pro.ownsPro {
-                LabeledContent("Pro", value: String(localized: "Unlocked"))
-            } else {
-                Button("Unlock Pro") { showProSheet = true }
-            }
+        if FeatureFlags.proOnSale {
+            Section {
+                if pro.ownsPro {
+                    LabeledContent("Pro", value: String(localized: "Unlocked"))
+                } else {
+                    Button("Unlock Pro") { showProSheet = true }
+                }
 
-            RestorePurchasesButton()
-        } header: {
-            Text("Pro")
-        } footer: {
-            Text(ProPurchaseSheet.pitch(ownsPro: pro.ownsPro))
+                RestorePurchasesButton()
+            } header: {
+                Text("Pro")
+            } footer: {
+                Text(ProPurchaseSheet.pitch(ownsPro: pro.ownsPro))
+            }
         }
     }
 
