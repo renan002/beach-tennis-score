@@ -15,6 +15,29 @@ jobs:
       - name: Test release version validation
         run: scripts/test-validate-release-version.sh
 
+  # Its own job, deliberately, rather than a step in `scripts` above: this is
+  # the check to require in the branch ruleset for `main`, and a required check
+  # names a job. Merging to `main` is what triggers the Xcode Cloud build that
+  # becomes a binary, so this is the last point at which shipping Pro on sale
+  # by accident can still be stopped.
+  #
+  # Unconditional and unfiltered on purpose. It takes seconds, and a job that
+  # skips itself on some paths is a poor thing to make required — the guard
+  # should either pass or fail on every pull request, never go missing.
+  #
+  # DELETE THIS JOB, with the two scripts it runs, in the commit that puts Pro
+  # on sale. See the switch-on checklist in
+  # docs/pro-switch-on-checklist.md.
+  release-is-dark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - name: Release must not put Pro on sale
+        run: scripts/validate-release-is-dark.sh
+      - name: Test the guard itself
+        run: scripts/test-validate-release-is-dark.sh
+
   test:
     runs-on: macos-26
     timeout-minutes: 45
