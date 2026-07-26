@@ -15,6 +15,10 @@ import StoreKit
 /// dark (`FeatureFlags.proOnSale` off), when nothing is for sale and every Pro
 /// feature is therefore free.
 ///
+/// A dark build never touches StoreKit at all — see `start()`. The type is
+/// fully implemented in both states regardless; turning Pro on is changing one
+/// value in `project.yml` and cutting a release, never writing code.
+///
 /// Lives in `iOS/`, never `Shared/`: the watch target links no StoreKit and
 /// renders no purchase UI (ADR 0004). Injected like the session managers.
 @MainActor
@@ -68,6 +72,13 @@ final class ProEntitlement: ObservableObject {
 
     private var updatesTask: Task<Void, Never>?
 
+    /// Whether the StoreKit machinery is running.
+    ///
+    /// `false` for the entire life of a dark build — the guard in `start()` is
+    /// the only reason it ever would be, which is what makes that guard
+    /// testable from a configuration where the flag is on.
+    var hasStarted: Bool { updatesTask != nil }
+
     /// Outcome of a purchase attempt, returned to whoever presented the sheet.
     /// `pending` is Ask to Buy: nothing is owed yet, and the entitlement will
     /// arrive later through the transaction listener.
@@ -103,14 +114,43 @@ final class ProEntitlement: ObservableObject {
         String(localized: "Pro is unavailable right now. Please try again later.")
     }
 
-    private init() {}
+    /// Internal rather than private so tests can build an instance that the app
+    /// host has not already started. `shared` is the only one the app ever
+    /// makes; a second live instance would mean two transaction listeners, so
+    /// treat this as test-only.
+    init() {}
 
     /// Starts the transaction listener and takes the first entitlement reading.
     /// Called once, at app launch, before any UI can ask about `isPro`.
     ///
     /// The listener is started *before* the first reading so a transaction that
     /// arrives during launch cannot slip between the two.
-    func start() {
+    ///
+    /// **Does nothing at all in a dark build.** Nothing is for sale, so a
+    /// shipped build makes no App Store network traffic whatsoever: no product
+    /// fetch, no entitlement read, no listener. This is the flag's *only*
+    /// runtime guard in this type — `purchase()`, `restore()` and
+    /// `loadProduct()` stay untouched because they are reached from purchase UI
+    /// that the flag removes, so when dark they are unreachable rather than
+    /// merely idle. Guarding them too would add branches no configuration ever
+    /// executes.
+    ///
+    /// The accepted consequence: `ownsPro` stays `false` for the whole dark
+    /// window, since the reading that would set it never happens. Harmless —
+    /// `isPro` is `true` for everyone when dark, and the only reader of
+    /// `ownsPro` is the purchase surface, which is gone.
+    ///
+    /// Nothing extra is needed for the flag flipping on to land cleanly: a
+    /// flag-on build is a new binary, and installing an app update terminates
+    /// the running app, so `start()` runs on a cold launch the first time it
+    /// ever runs.
+    ///
+    /// `proOnSale` is a parameter rather than a direct read so the dark path is
+    /// reachable from a `Debug` test bundle, where the condition is on — the
+    /// same reason `isPro` is backed by a pure function. Callers pass nothing;
+    /// the app entry point has no business knowing a flag exists.
+    func start(proOnSale: Bool = FeatureFlags.proOnSale) {
+        guard proOnSale else { return }
         guard updatesTask == nil else { return }
         updatesTask = Task { [weak self] in
             for await update in Transaction.updates {

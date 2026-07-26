@@ -25,7 +25,9 @@ struct BeachTennisApp: App {
                 // Starts the StoreKit transaction listener and takes the first
                 // entitlement reading. Launch-time and cheap: no sign-in, no
                 // network requirement — an offline launch simply keeps the
-                // entitlement StoreKit already cached.
+                // entitlement StoreKit already cached. In a dark build it does
+                // nothing at all; the flag is read inside `start()` so this
+                // call site stays unaware one exists.
                 .task { pro.start() }
                 .onAppear { applyTheme(appTheme) }
                 .onChange(of: appTheme) { _, theme in applyTheme(theme) }

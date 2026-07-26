@@ -70,6 +70,33 @@ final class ProEntitlementTests: XCTestCase {
         XCTAssertTrue(ProEntitlement.isPro(ownsPro: true, proOnSale: false))
     }
 
+    // MARK: - A dark build never touches StoreKit
+
+    /// The point of the dark build: a shipped 1.4/1.5 makes no App Store traffic
+    /// at all — no product fetch, no entitlement read, no transaction listener.
+    ///
+    /// Reachable from this bundle only because `start()` takes the flag as a
+    /// parameter; the bundle compiles under `Debug`, where `PRO_ON_SALE` is on,
+    /// so running the real thing could never exercise the dark path. Delete the
+    /// guard and this fails.
+    ///
+    /// Uses a fresh instance, not `shared`: this bundle is app-hosted, so
+    /// `BeachTennisApp` has already launched and started the singleton for real
+    /// by the time any test runs. Asserting on `shared` would read *its*
+    /// listener and fail no matter what the guard does. Nothing here ever calls
+    /// `start(proOnSale: true)`, so this instance stays inert and leaks no
+    /// `Transaction.updates` listener into the rest of the suite.
+    @MainActor
+    func testStartDoesNothingWhileProIsNotOnSale() {
+        let pro = ProEntitlement()
+        pro.start(proOnSale: false)
+        XCTAssertFalse(
+            pro.hasStarted,
+            "A dark build started the StoreKit machinery — it must make no "
+                + "store traffic at all"
+        )
+    }
+
     // MARK: - The wiring
 
     /// The rule above passes whether or not `PRO_ON_SALE` is ever wired up, so
