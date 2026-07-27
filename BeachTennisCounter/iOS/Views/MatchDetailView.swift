@@ -1,7 +1,14 @@
 import SwiftUI
 
 struct MatchDetailView: View {
+    @EnvironmentObject private var phoneSession: PhoneSessionManager
+    /// Held only to hand on to the share sheet, which gates the Cartão's
+    /// watermark on it. A sheet does not inherit the presenter's environment
+    /// objects, so every presentation in this app re-injects them explicitly.
+    @EnvironmentObject private var pro: ProEntitlement
     let match: StoredMatch
+
+    @State private var isSharingCard = false
 
     var body: some View {
         List {
@@ -18,16 +25,20 @@ struct MatchDetailView: View {
                     Text("Score")
                         .foregroundColor(.secondary)
                     Spacer()
-                    Text("A \(match.scoreDisplay) B")
+                    // Plain String, not a literal — a user-entered Team Name
+                    // must never go through String Catalog lookup.
+                    Text(match.scoreLineDisplay)
                         .font(.headline)
                 }
-                HStack {
-                    Text("Winner")
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    Text("Team \(match.winner.uppercased())")
-                        .font(.headline)
-                        .foregroundColor(.orange)
+                if !match.winnerDisplayName.isEmpty {
+                    HStack {
+                        Text("Winner")
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text(match.winnerDisplayName)
+                            .font(.headline)
+                            .foregroundColor(.orange)
+                    }
                 }
             }
 
@@ -43,6 +54,22 @@ struct MatchDetailView: View {
                         .foregroundColor(.secondary)
                     Spacer()
                     Text(match.durationDisplay)
+                }
+                if let avgHeartRate = match.avgHeartRateDisplay {
+                    HStack {
+                        Text("Avg Heart Rate")
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text(avgHeartRate)
+                    }
+                }
+                if let activeCalories = match.activeCaloriesDisplay {
+                    HStack {
+                        Text("Active Calories")
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text(activeCalories)
+                    }
                 }
             }
 
@@ -66,6 +93,25 @@ struct MatchDetailView: View {
         }
         .navigationTitle("Match Details")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                // The share sheet lets the player pick the Cartão's shape before
+                // sharing; the button itself just opens it.
+                Button {
+                    isSharingCard = true
+                } label: {
+                    Label("Share Result Card", systemImage: "square.and.arrow.up")
+                }
+            }
+        }
+        .sheet(isPresented: $isSharingCard) {
+            ResultCardShareSheet(
+                match: match,
+                teamAColor: Color(hex: phoneSession.teamAColorHex),
+                teamBColor: Color(hex: phoneSession.teamBColorHex)
+            )
+            .environmentObject(pro)
+        }
     }
 }
 

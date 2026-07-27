@@ -21,7 +21,8 @@ struct ServeSelectionView: View {
                     selectedServer = .a
                     navigateToScore = true
                 } label: {
-                    teamButton(color: sessionManager.teamAColor, label: "Team A")
+                    teamButton(color: sessionManager.teamAColor,
+                               label: displayName(sessionManager.teamAName, fallback: "Team A"))
                 }
                 .buttonStyle(.plain)
 
@@ -29,19 +30,31 @@ struct ServeSelectionView: View {
                     selectedServer = .b
                     navigateToScore = true
                 } label: {
-                    teamButton(color: sessionManager.teamBColor, label: "Team B")
+                    teamButton(color: sessionManager.teamBColor,
+                               label: displayName(sessionManager.teamBName, fallback: "Team B"))
                 }
                 .buttonStyle(.plain)
             }
         }
         .navigationBarHidden(true)
         .navigationDestination(isPresented: $navigateToScore) {
-            ScoreView(initialServer: selectedServer, matchType: matchType, isActive: $isActive)
+            ScoreView(initialServer: selectedServer,
+                      matchType: matchType,
+                      teamAName: sessionManager.teamAName,
+                      teamBName: sessionManager.teamBName,
+                      isActive: $isActive)
         }
     }
 
+    /// The synced team name, or the localized slot label when the name is empty.
+    /// The result is a resolved plain string so a user-entered name never goes
+    /// through String Catalog lookup — only the fallback literal is localized.
+    private func displayName(_ name: String, fallback: LocalizedStringResource) -> String {
+        name.isEmpty ? String(localized: fallback) : name
+    }
+
     @ViewBuilder
-    private func teamButton(color: Color, label: LocalizedStringKey) -> some View {
+    private func teamButton(color: Color, label: String) -> some View {
         RoundedRectangle(cornerRadius: 10)
             .fill(color)
             .frame(maxWidth: .infinity)

@@ -9,8 +9,12 @@ final class WatchSessionManager: NSObject, ObservableObject {
     @Published var teamAColor: Color = .red
     @Published var teamBColor: Color = .blue
     @Published var sportSetting: String = "beachTennis"
+    @Published var teamAName: String = WatchSettings.defaultTeamAName
+    @Published var teamBName: String = WatchSettings.defaultTeamBName
+    @Published var healthMonitoringEnabled: Bool = WatchSettings.defaultHealthMonitoringEnabled
 
     private nonisolated static let pendingResultKey = "pendingMatchResult"
+    private nonisolated static let lastReportedAuthKey = "lastReportedHealthAuthStatus"
 
     private override init() {
         super.init()
@@ -20,7 +24,12 @@ final class WatchSessionManager: NSObject, ObservableObject {
         }
     }
 
-    func sendMatchResult(_ state: MatchState, duration: TimeInterval) {
+    func sendMatchResult(
+        _ state: MatchState,
+        duration: TimeInterval,
+        activeCalories: Double? = nil,
+        avgHeartRate: Double? = nil
+    ) {
         guard let winner = state.winner else { return }
 
         let payload = MatchResultPayload(
@@ -34,7 +43,11 @@ final class WatchSessionManager: NSObject, ObservableObject {
             date: Date(),
             gameHistory: state.gameHistory,
             setHistory: state.setHistory,
-            matchType: state.matchType
+            matchType: state.matchType,
+            teamAName: state.teamAName,
+            teamBName: state.teamBName,
+            activeCalories: activeCalories,
+            avgHeartRate: avgHeartRate
         )
 
         guard WCSession.default.activationState == .activated else {
@@ -61,6 +74,34 @@ final class WatchSessionManager: NSObject, ObservableObject {
         teamAColor = Color(hex: settings.teamAColorHex) ?? .red
         teamBColor = Color(hex: settings.teamBColorHex) ?? .blue
         sportSetting = settings.sportSetting
+        teamAName = settings.teamAName
+        teamBName = settings.teamBName
+        healthMonitoringEnabled = settings.healthMonitoringEnabled
+    }
+
+    /// Pushes the watch's HealthKit authorization status to the phone, on change
+    /// only (the phone can't query it directly). The change gate is
+    /// `WorkoutPolicy.shouldReport` against the last value persisted here.
+    ///
+    /// The last-reported value is written **only after the context is accepted**.
+    /// Reporting is change-only, so recording a send that didn't happen would
+    /// strand the phone on a stale status until the watch's authorization changed
+    /// *again* — a deny that lands before `WCSession` finishes activating (a cold
+    /// launch straight into a Match) would leave the toggle enabled forever.
+    /// Leaving the key untouched instead makes the next Match start retry.
+    func reportHealthAuthStatus(_ status: HealthAuthStatus) {
+        let last = UserDefaults.standard.string(forKey: Self.lastReportedAuthKey)
+            .flatMap(HealthAuthStatus.init(rawValue:))
+        guard WorkoutPolicy.shouldReport(status: status, lastReported: last) else { return }
+        guard WCSession.default.activationState == .activated else { return }
+        do {
+            try WCSession.default.updateApplicationContext(
+                HealthAuthStatusMessage(status: status).toApplicationContext()
+            )
+            UserDefaults.standard.set(status.rawValue, forKey: Self.lastReportedAuthKey)
+        } catch {
+            // Not recorded — the next Match start reports this status again.
+        }
     }
 }
 

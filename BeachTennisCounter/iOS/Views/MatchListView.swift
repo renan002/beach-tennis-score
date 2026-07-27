@@ -3,9 +3,11 @@ import SwiftData
 
 struct MatchListView: View {
     @EnvironmentObject private var phoneSession: PhoneSessionManager
+    @EnvironmentObject private var pro: ProEntitlement
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \StoredMatch.date, order: .reverse) private var allMatches: [StoredMatch]
     @State private var showSettings = false
+    @State private var showStatistics = false
     @State private var filter: String = "all"
     @State private var quarantines: [QuarantinedStore] = []
 
@@ -42,6 +44,13 @@ struct MatchListView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
+                        showStatistics = true
+                    } label: {
+                        Image(systemName: "chart.bar.xaxis")
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
                         showSettings = true
                     } label: {
                         Image(systemName: "gearshape")
@@ -51,6 +60,11 @@ struct MatchListView: View {
             .sheet(isPresented: $showSettings, onDismiss: reloadQuarantines) {
                 SettingsView()
                     .environmentObject(phoneSession)
+                    .environmentObject(pro)
+            }
+            .sheet(isPresented: $showStatistics) {
+                StatisticsView()
+                    .environmentObject(pro)
             }
             .task { reloadQuarantines() }
         }
@@ -194,13 +208,19 @@ struct MatchRowView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
-                Text("A \(match.scoreDisplay) B")
+                // Plain String, not a literal — a user-entered Team Name must
+                // never go through String Catalog lookup.
+                Text(match.scoreLineDisplay)
                     .font(.headline)
             }
 
             Spacer()
 
-            winnerBadge
+            // No recognizable winner (a corrupt stored value) leaves nothing to
+            // name — drop the capsule rather than badge a bare "wins".
+            if !match.winnerDisplayName.isEmpty {
+                winnerBadge
+            }
         }
         .padding(.vertical, 4)
     }
@@ -219,7 +239,7 @@ struct MatchRowView: View {
     }
 
     private var winnerBadge: some View {
-        Text("Team \(match.winner.uppercased()) wins")
+        Text("\(match.winnerDisplayName) wins")
             .font(.caption.bold())
             .foregroundColor(.white)
             .padding(.horizontal, 8)

@@ -5,8 +5,9 @@ import UIKit
 @main
 struct BeachTennisApp: App {
     @StateObject private var phoneSession: PhoneSessionManager
+    @StateObject private var pro = ProEntitlement.shared
     private let container: ModelContainer
-    @AppStorage("appTheme") private var appTheme: String = "system"
+    @AppStorage("appTheme") private var appTheme: AppTheme = .system
 
     init() {
         let c = LiveStore.open(in: LiveStore.directory)
@@ -20,6 +21,14 @@ struct BeachTennisApp: App {
         WindowGroup {
             MatchListView()
                 .environmentObject(phoneSession)
+                .environmentObject(pro)
+                // Starts the StoreKit transaction listener and takes the first
+                // entitlement reading. Launch-time and cheap: no sign-in, no
+                // network requirement — an offline launch simply keeps the
+                // entitlement StoreKit already cached. In a dark build it does
+                // nothing at all; the flag is read inside `start()` so this
+                // call site stays unaware one exists.
+                .task { pro.start() }
                 .onAppear { applyTheme(appTheme) }
                 .onChange(of: appTheme) { _, theme in applyTheme(theme) }
         }
@@ -35,13 +44,8 @@ struct BeachTennisApp: App {
     /// sheets stuck on the old style. Writing `.unspecified` clears the override
     /// explicitly, and because it is set on the window it cascades to sheets too.
     @MainActor
-    private func applyTheme(_ theme: String) {
-        let style: UIUserInterfaceStyle
-        switch theme {
-        case "light": style = .light
-        case "dark":  style = .dark
-        default:      style = .unspecified
-        }
+    private func applyTheme(_ theme: AppTheme) {
+        let style = theme.interfaceStyle
         for scene in UIApplication.shared.connectedScenes {
             guard let windowScene = scene as? UIWindowScene else { continue }
             for window in windowScene.windows {

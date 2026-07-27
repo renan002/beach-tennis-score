@@ -4,6 +4,40 @@ on:
   pull_request:
 
 jobs:
+  # Release tooling is plain bash and needs no Xcode, so it runs on ubuntu
+  # ungated — it is quick, and the release bundle-id guard it covers is the one
+  # thing standing between a flavored build and the App Store.
+  scripts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - name: Test release version validation
+        run: scripts/test-validate-release-version.sh
+
+  # Its own job, deliberately, rather than a step in `scripts` above: this is
+  # the check to require in the branch ruleset for `main`, and a required check
+  # names a job. Merging to `main` is what triggers the Xcode Cloud build that
+  # becomes a binary, so this is the last point at which shipping Pro on sale
+  # by accident can still be stopped.
+  #
+  # Unconditional and unfiltered on purpose. It takes seconds, and a job that
+  # skips itself on some paths is a poor thing to make required — the guard
+  # should either pass or fail on every pull request, never go missing.
+  #
+  # DELETE THIS JOB, with the two scripts it runs, in the commit that puts Pro
+  # on sale. See the switch-on checklist in
+  # docs/pro-switch-on-checklist.md.
+  release-is-dark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - name: Release must not put Pro on sale
+        run: scripts/validate-release-is-dark.sh
+      - name: Test the guard itself
+        run: scripts/test-validate-release-is-dark.sh
+
   test:
     runs-on: macos-26
     timeout-minutes: 45
@@ -14,6 +48,8 @@ jobs:
 
       # App-file paths that gate the expensive build/test steps below.
       # Hand-maintained: add a new top-level app directory here (see ADR-0002).
+      # `scripts/` counts: it holds build phases and CI checks, so a change
+      # there can break a build without touching BeachTennisCounter/.
       - name: Check for app changes
         id: check
         run: |
@@ -22,7 +58,7 @@ jobs:
           while IFS= read -r file; do
             [ -z "$file" ] && continue
             case "$file" in
-              BeachTennisCounter/*|.github/workflows/ci.yml)
+              BeachTennisCounter/*|scripts/*|.github/workflows/ci.yml)
                 app_changed=true
                 break
                 ;;
@@ -41,6 +77,14 @@ jobs:
         run: |
           xcodebuild -version
           xcrun simctl list devices available | grep -i iphone | head -5
+
+      # Runs before the build/test steps: a broken flavor fails in seconds
+      # rather than after the full suite. The unit tests cannot catch this —
+      # the only configuration-sensitive test asserts that the App Group
+      # tracks the bundle id, which holds even when the bundle id is wrong.
+      - name: Validate bundle ids across configurations
+        if: steps.check.outputs.app_changed == 'true'
+        run: ./scripts/validate-bundle-ids.sh
 
       - name: Build watchOS target
         if: steps.check.outputs.app_changed == 'true'

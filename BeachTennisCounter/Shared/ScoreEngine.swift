@@ -51,7 +51,7 @@ enum ScoreEngine {
 
     private static func winBeachTennisGame(team: Team, state: inout MatchState) {
         let scoreDisplay = state.isGoldenPoint
-            ? "GP"
+            ? GameRecord.goldenPointDisplay
             : "\(state.pointA.display)–\(state.pointB.display)"
 
         if team == .a { state.setScoreA += 1 } else { state.setScoreB += 1 }

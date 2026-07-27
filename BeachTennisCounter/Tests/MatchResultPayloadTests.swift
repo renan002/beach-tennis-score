@@ -11,14 +11,20 @@ final class MatchResultPayloadTests: XCTestCase {
         date: Date = Date(timeIntervalSince1970: 1_000_000),
         gameHistory: [GameRecord] = [],
         setHistory: [SetRecord] = [],
-        matchType: MatchType = .beachTennis
+        matchType: MatchType = .beachTennis,
+        teamAName: String = "",
+        teamBName: String = "",
+        activeCalories: Double? = nil,
+        avgHeartRate: Double? = nil
     ) -> MatchResultPayload {
         MatchResultPayload(matchId: matchId,
                            setScoreA: setScoreA, setScoreB: setScoreB,
                            setsWonA: setsWonA, setsWonB: setsWonB,
                            winner: winner, duration: duration,
                            date: date, gameHistory: gameHistory,
-                           setHistory: setHistory, matchType: matchType)
+                           setHistory: setHistory, matchType: matchType,
+                           teamAName: teamAName, teamBName: teamBName,
+                           activeCalories: activeCalories, avgHeartRate: avgHeartRate)
     }
 
     // MARK: - Round-trip
@@ -89,6 +95,60 @@ final class MatchResultPayloadTests: XCTestCase {
         var dict = makePayload().toDictionary()
         dict[WatchMessageKey.matchId] = "not-a-uuid"
         XCTAssertNotNil(MatchResultPayload.from(dict))
+    }
+
+    // MARK: - Team Names
+
+    func test_roundtrip_teamNames() {
+        let payload = makePayload(teamAName: "Renan", teamBName: "Visitors")
+        let decoded = MatchResultPayload.from(payload.toDictionary())
+        XCTAssertEqual(decoded?.teamAName, "Renan")
+        XCTAssertEqual(decoded?.teamBName, "Visitors")
+    }
+
+    func test_from_missingTeamNames_decodeToEmptyStrings() {
+        // An old watch never wrote the name keys; the result must still decode
+        // (never nil), with names materializing empty rather than absent.
+        var dict = makePayload(teamAName: "Renan", teamBName: "Visitors").toDictionary()
+        dict.removeValue(forKey: WatchMessageKey.teamAName)
+        dict.removeValue(forKey: WatchMessageKey.teamBName)
+        let decoded = MatchResultPayload.from(dict)
+        XCTAssertNotNil(decoded)
+        XCTAssertEqual(decoded?.teamAName, "")
+        XCTAssertEqual(decoded?.teamBName, "")
+    }
+
+    func test_from_emptyTeamNames_roundTripEmpty() {
+        let decoded = MatchResultPayload.from(makePayload().toDictionary())
+        XCTAssertEqual(decoded?.teamAName, "")
+        XCTAssertEqual(decoded?.teamBName, "")
+    }
+
+    // MARK: - Workout stats
+
+    func test_roundtrip_workoutStats() {
+        let payload = makePayload(activeCalories: 245.6, avgHeartRate: 142.3)
+        let decoded = MatchResultPayload.from(payload.toDictionary())
+        XCTAssertEqual(decoded?.activeCalories ?? 0, 245.6, accuracy: 0.001)
+        XCTAssertEqual(decoded?.avgHeartRate ?? 0, 142.3, accuracy: 0.001)
+    }
+
+    func test_from_missingWorkoutStats_decodeToNil() {
+        // A denied / monitoring-off / old-watch payload omits the keys entirely;
+        // the result must still decode, with the stats materializing nil.
+        let dict = makePayload().toDictionary()
+        XCTAssertNil(dict[WatchMessageKey.activeCalories])
+        XCTAssertNil(dict[WatchMessageKey.avgHeartRate])
+        let decoded = MatchResultPayload.from(dict)
+        XCTAssertNotNil(decoded)
+        XCTAssertNil(decoded?.activeCalories)
+        XCTAssertNil(decoded?.avgHeartRate)
+    }
+
+    func test_toDictionary_omitsNilWorkoutStats() {
+        let dict = makePayload(activeCalories: nil, avgHeartRate: nil).toDictionary()
+        XCTAssertFalse(dict.keys.contains(WatchMessageKey.activeCalories))
+        XCTAssertFalse(dict.keys.contains(WatchMessageKey.avgHeartRate))
     }
 
     // MARK: - Codable round-trip (local persistence)

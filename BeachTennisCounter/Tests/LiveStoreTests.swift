@@ -28,6 +28,18 @@ final class LiveStoreTests: XCTestCase {
             .filter { $0.hasPrefix("quarantined-store-") }
     }
 
+    // MARK: - App Group id
+
+    /// The store's App Group must track the bundle id, so a flavored build gets
+    /// its own container instead of quietly resolving the production one (or
+    /// nothing at all). Hosted tests run inside the app, so `Bundle.main` here
+    /// is the built app bundle — this asserts on the shipped Info.plist.
+    func test_appGroupIdentifier_tracksTheBuildsBundleId() throws {
+        let bundleIdentifier = try XCTUnwrap(Bundle.main.bundleIdentifier)
+
+        XCTAssertEqual(LiveStore.appGroupIdentifier, "group.\(bundleIdentifier)")
+    }
+
     // MARK: - Fresh start
 
     func test_emptyDirectory_opensFreshEmptyStore_noQuarantine() throws {
@@ -63,6 +75,17 @@ final class LiveStoreTests: XCTestCase {
         XCTAssertEqual(matches.map(\.setsWonA), [0, 0])
         XCTAssertEqual(matches.map(\.setsWonB), [0, 0])
         XCTAssertEqual(matches.map(\.matchType), [.beachTennis, .beachTennis])
+
+        // A store written without the Team Name attributes migrates in place:
+        // its rows materialize empty names, never nil or a failed open.
+        XCTAssertEqual(matches.map(\.teamAName), ["", ""])
+        XCTAssertEqual(matches.map(\.teamBName), ["", ""])
+
+        // Likewise the workout stats: a match played before the feature existed
+        // materializes them absent, never as a fabricated 0 kcal / 0 bpm — the
+        // detail rows hide on nil, so this is what keeps old matches unchanged.
+        XCTAssertEqual(matches.map(\.activeCalories), [nil, nil])
+        XCTAssertEqual(matches.map(\.avgHeartRate), [nil, nil])
 
         // A store that opens is never quarantined.
         XCTAssertTrue(try quarantineDirs().isEmpty)

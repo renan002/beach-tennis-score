@@ -63,12 +63,7 @@ struct HomeView: View {
             }
             .navigationDestination(isPresented: $navigateToResume) {
                 if let match = resumableMatch {
-                    ScoreView(
-                        initialServer: match.servingTeam,
-                        matchType: match.matchType,
-                        restoredState: match,
-                        isActive: $navigateToResume
-                    )
+                    ScoreView(restoredState: match, isActive: $navigateToResume)
                 }
             }
         }

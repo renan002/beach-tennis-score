@@ -11,22 +11,24 @@ private let colorOptions: [(name: String, hex: String, color: Color)] = [
 
 struct SettingsView: View {
     @EnvironmentObject private var phoneSession: PhoneSessionManager
-    @AppStorage("appTheme") private var appTheme: String = "system"
+    @EnvironmentObject private var pro: ProEntitlement
+    @AppStorage("appTheme") private var appTheme: AppTheme = .system
     @AppStorage("sportSetting") private var sportSetting: String = "beachTennis"
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @State private var syncedSettings: WatchSettings?
     @State private var quarantines: [QuarantinedStore] = []
     @State private var liveMatchIDs: Set<UUID> = []
+    @State private var showProSheet = false
 
     var body: some View {
         NavigationStack {
             Form {
                 Section {
-                    Picker("Modality", selection: $sportSetting) {
+                    Picker("Modality", selection: sportBinding) {
                         Text("Beach Tennis").tag("beachTennis")
                         Text("Tennis").tag("tennis")
-                        Text("Multiple").tag("multiple")
+                        multipleOption
                     }
                     .pickerStyle(.menu)
                 } header: {
@@ -35,10 +37,19 @@ struct SettingsView: View {
                     Text(sportSettingFooter)
                 }
 
-                Section("Team Colors") {
-                    colorPicker(label: "Team A", hexBinding: $phoneSession.teamAColorHex)
-                    colorPicker(label: "Team B", hexBinding: $phoneSession.teamBColorHex)
+                Section("Teams") {
+                    teamRow(label: "Team A",
+                            nameBinding: $phoneSession.teamAName,
+                            hexBinding: $phoneSession.teamAColorHex)
+                    teamRow(label: "Team B",
+                            nameBinding: $phoneSession.teamBName,
+                            hexBinding: $phoneSession.teamBColorHex)
                 }
+
+                HealthSettingsSection(
+                    isOn: healthMonitoringBinding,
+                    isDenied: isHealthDenied
+                )
 
                 if !quarantines.isEmpty {
                     QuarantinedStoresSection(
@@ -50,12 +61,33 @@ struct SettingsView: View {
 
                 Section("Appearance") {
                     Picker("Theme", selection: $appTheme) {
-                        Text("System").tag("system")
-                        Text("Light").tag("light")
-                        Text("Dark").tag("dark")
+                        ForEach(AppTheme.allCases, id: \.self) { theme in
+                            Text(theme.displayName).tag(theme)
+                        }
                     }
                     .pickerStyle(.segmented)
                 }
+
+                proSection
+
+                Section("About") {
+                    Link(destination: Self.privacyPolicyURL) {
+                        HStack {
+                            Text("Privacy Policy")
+                            Spacer()
+                            // Not a chevron: this leaves the app for Safari, and
+                            // `Link` tints the whole label so the glyph reads as
+                            // part of the affordance rather than a disclosure.
+                            Image(systemName: "arrow.up.right.square")
+                        }
+                    }
+                }
+
+                // Last, so the dev flavor's extra section never pushes a real
+                // setting off the first screen. Absent from every other build.
+                #if DEV_FLAVOR
+                DevToolsSettingsSection()
+                #endif
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
@@ -66,6 +98,10 @@ struct SettingsView: View {
                         dismiss()
                     }
                 }
+            }
+            .sheet(isPresented: $showProSheet) {
+                ProPurchaseSheet()
+                    .environmentObject(pro)
             }
             .task { reloadQuarantines() }
             .onAppear {
@@ -84,30 +120,166 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: - Pro
+
+    /// The Pro section: what the unlock is worth today (nothing is gated yet),
+    /// and — the part this ticket owes the App Store — a Restore Purchases
+    /// action that a buyer on a new iPhone can find without having hit a gate.
+    ///
+    /// **Absent entirely from a dark build**, Restore included. That is the
+    /// section's half of "no purchase affordance anywhere", and it needs no
+    /// guard on `ProPurchaseSheet` itself: the other thing that can raise
+    /// `showProSheet` is the locked Vários option, which is unlocked for
+    /// everybody in a dark build because `isPro` is. Every purchase affordance
+    /// in the app is guarded where it is *produced*, never at the sheet.
+    ///
+    /// Hiding Restore rather than keeping it standing alone was decided in "Does
+    /// the dark flag silence StoreKit entirely?": guideline 3.1.1 scopes the
+    /// Restore duty to *restorable* purchases, which a build selling nothing
+    /// does not have. It also completes the promise that a dark build makes no
+    /// App Store traffic — `AppStore.sync()` was the last thing a user could
+    /// still have triggered by hand.
+    @ViewBuilder
+    private var proSection: some View {
+        if FeatureFlags.proOnSale {
+            Section {
+                if pro.ownsPro {
+                    LabeledContent("Pro", value: String(localized: "Unlocked"))
+                } else {
+                    Button("Unlock Pro") { showProSheet = true }
+                }
+
+                RestorePurchasesButton()
+            } header: {
+                Text("Pro")
+            } footer: {
+                Text(ProPurchaseSheet.pitch(ownsPro: pro.ownsPro))
+            }
+        }
+    }
+
+    // MARK: - About
+
+    /// The published privacy policy — App Store guideline 5.1.1 requires it to be
+    /// reachable from inside the app, not only from the App Store listing.
+    ///
+    /// GitHub Pages serves `privacy-policy.md` from the repo root of `main`, so
+    /// the document and the app ship from the same source: edit the Markdown and
+    /// this link follows. Force-unwrapped because a literal that fails to parse
+    /// is a typo to catch on first launch, not a condition to handle.
+    private static let privacyPolicyURL = URL(
+        string: "https://renan002.github.io/beach-tennis-score/privacy-policy"
+    )!
+
     private func reloadQuarantines() {
         quarantines = StoreRecovery.listQuarantinedStores(in: LiveStore.directory)
         let ids = (try? modelContext.fetch(FetchDescriptor<StoredMatch>()))?.map(\.id) ?? []
         liveMatchIDs = Set(ids)
     }
 
+    // MARK: - Modality
+
+    /// Vários, locked for free users: visible in the menu — the point of a
+    /// locked-but-visible option is that it advertises what Pro buys — with a
+    /// padlock rather than a checkmark's worth of silence.
+    @ViewBuilder
+    private var multipleOption: some View {
+        if pro.isPro {
+            Text("Multiple").tag(PhoneSessionManager.proOnlySportSetting)
+        } else {
+            Label("Multiple", systemImage: "lock.fill")
+                .tag(PhoneSessionManager.proOnlySportSetting)
+        }
+    }
+
+    /// The picker's selection, gated in both directions.
+    ///
+    /// Reading reports the *effective* setting, so a free user who chose Vários
+    /// back when it was free sees the sport the watch is actually going to
+    /// start rather than one the app is quietly ignoring. Writing refuses
+    /// Vários without Pro and opens the purchase sheet instead — the
+    /// tap-through — leaving the stored choice untouched, so a purchase later
+    /// restores it with nothing to re-pick.
+    ///
+    /// Note it reads `pro.isPro`, never the flag: in a dark build `isPro` is
+    /// `true` for everybody, so the lock, the padlock and the tap-through all
+    /// disappear on their own and Vários is freely selectable exactly as it is
+    /// today.
+    private var sportBinding: Binding<String> {
+        Binding(
+            get: {
+                PhoneSessionManager.effectiveSportSetting(sportSetting, isPro: pro.isPro)
+            },
+            set: { selected in
+                guard selected != PhoneSessionManager.proOnlySportSetting || pro.isPro else {
+                    showProSheet = true
+                    return
+                }
+                sportSetting = selected
+            }
+        )
+    }
+
     private var sportSettingFooter: String {
-        switch sportSetting {
+        // The effective value, matching the picker: promising that the watch
+        // will ask before each match would be a lie while Vários is locked.
+        switch PhoneSessionManager.effectiveSportSetting(sportSetting, isPro: pro.isPro) {
         case "tennis":    return String(localized: "The Watch will always start a Tennis match.")
         case "multiple":  return String(localized: "The Watch will ask which sport before each match.")
         default:          return String(localized: "The Watch will always start a Beach Tennis match.")
         }
     }
 
+    /// The version string for the Settings footer, carrying a `DEV` marker on
+    /// dev-flavor builds so a screenshot or a bug report says which app produced
+    /// it. Deliberately composed into the *interpolated value*, not the copy:
+    /// the `Version %@` catalog key is left untouched, and `DEV` — a build
+    /// identifier, not prose — stays untranslated in every locale.
+    ///
+    /// Settings is the only place this appears. It must never reach the scoring
+    /// screens or the Cartão de Resultado, which is an image made to be posted.
     private var appVersion: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
+        #if DEV_FLAVOR
+        return "\(version) · DEV"
+        #else
+        return version
+        #endif
+    }
+
+    /// Name length cap: keeps the watch serve buttons and history lines from
+    /// truncating. Counts grapheme clusters, so a 12-emoji name is still 12.
+    private static let nameMaxLength = 12
+
+    /// The watch last reported that Health access was denied on-watch.
+    private var isHealthDenied: Bool {
+        phoneSession.watchHealthAuthStatus == .denied
+    }
+
+    /// A display override, not an overwrite: while denied the toggle reads off and
+    /// is disabled, but the stored setting is left untouched — so on re-grant the
+    /// user's real choice auto-resumes. Otherwise it binds to the stored setting.
+    private var healthMonitoringBinding: Binding<Bool> {
+        if isHealthDenied {
+            return .constant(false)
+        }
+        return $phoneSession.healthMonitoringEnabled
     }
 
     @ViewBuilder
-    private func colorPicker(label: LocalizedStringKey, hexBinding: Binding<String>) -> some View {
+    private func teamRow(
+        label: LocalizedStringKey,
+        nameBinding: Binding<String>,
+        hexBinding: Binding<String>
+    ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(label)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+
+            TextField("Name", text: cappedName(nameBinding))
+                .textInputAutocapitalization(.words)
+                .autocorrectionDisabled()
 
             HStack(spacing: 12) {
                 ForEach(colorOptions, id: \.hex) { option in
@@ -129,7 +301,28 @@ struct SettingsView: View {
         .padding(.vertical, 4)
     }
 
+    /// Wraps a name binding so typed/pasted input is hard-capped at
+    /// `nameMaxLength` characters. Trimming happens later, on commit.
+    private func cappedName(_ source: Binding<String>) -> Binding<String> {
+        Binding(
+            get: { source.wrappedValue },
+            set: { source.wrappedValue = String($0.prefix(Self.nameMaxLength)) }
+        )
+    }
+
+    /// Trims committed names to their canonical stored form: surrounding
+    /// whitespace stripped, whitespace-only collapsing to empty. Runs at the
+    /// commit points (Done / onDisappear) rather than per-keystroke so the
+    /// field stays natural to type in.
+    private func commitNames() {
+        phoneSession.teamAName = phoneSession.teamAName
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        phoneSession.teamBName = phoneSession.teamBName
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     private func syncToWatchIfChanged() {
+        commitNames()
         let current = phoneSession.watchSettings
         guard current != syncedSettings else { return }
         phoneSession.pushSettingsToWatch()

@@ -19,6 +19,7 @@ DerivedData/
 
 # Build output
 build/
+build-device/
 
 # Swift Package Manager
 .build/

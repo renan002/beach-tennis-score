@@ -3,9 +3,9 @@ import WatchKit
 
 struct ScoreView: View {
     @EnvironmentObject private var sessionManager: WatchSessionManager
+    @EnvironmentObject private var workoutManager: WorkoutManager
     @Environment(\.dismiss) private var dismiss
 
-    let initialServer: Team
     let matchType: MatchType
     @Binding var isActive: Bool
 
@@ -15,21 +15,30 @@ struct ScoreView: View {
     @State private var showHistory = false
     @State private var showCancelAlert = false
 
-    init(initialServer: Team, matchType: MatchType, restoredState: MatchState? = nil, isActive: Binding<Bool>) {
-        self.initialServer = initialServer
-        self.matchType = restoredState?.matchType ?? matchType
+    /// Starts a fresh match, stamping the synced Team Names at match start.
+    init(
+        initialServer: Team,
+        matchType: MatchType,
+        teamAName: String = "",
+        teamBName: String = "",
+        isActive: Binding<Bool>
+    ) {
+        self.matchType = matchType
         self._isActive = isActive
-        if let restored = restoredState {
-            _state = State(initialValue: restored)
-        } else {
-            var s = MatchState()
-            s.matchType = matchType
-            s.servingTeam = initialServer
-            s.initialServer = initialServer
-            s.tiebreakFirstServer = initialServer
-            s.matchStartDate = Date()
-            _state = State(initialValue: s)
-        }
+        _state = State(initialValue: MatchState.newMatch(
+            matchType: matchType,
+            initialServer: initialServer,
+            teamAName: teamAName,
+            teamBName: teamBName
+        ))
+    }
+
+    /// Resumes a persisted match. The restored state carries its own stamped
+    /// names and serve wiring, so no fresh-match params apply here.
+    init(restoredState: MatchState, isActive: Binding<Bool>) {
+        self.matchType = restoredState.matchType
+        self._isActive = isActive
+        _state = State(initialValue: restoredState)
     }
 
     var body: some View {
@@ -45,11 +54,21 @@ struct ScoreView: View {
         .navigationBarHidden(true)
         .onAppear {
             MatchPersistence.save(state)
+            workoutManager.matchDidStart(monitoringEnabled: sessionManager.healthMonitoringEnabled)
         }
         .onChange(of: state.isMatchOver) { _, isOver in
             guard isOver else { return }
             showMatchOver = true
-            sessionManager.sendMatchResult(state, duration: Date().timeIntervalSince(state.matchStartDate))
+            // Snapshot stats synchronously first so the result send never waits on
+            // HealthKit, then end/finish the workout asynchronously.
+            let stats = workoutManager.snapshotStats()
+            sessionManager.sendMatchResult(
+                state,
+                duration: Date().timeIntervalSince(state.matchStartDate),
+                activeCalories: stats.activeCalories,
+                avgHeartRate: stats.avgHeartRate
+            )
+            workoutManager.endAndFinish()
         }
         .sheet(isPresented: $showHistory) {
             MatchHistoryView(history: state.gameHistory, matchType: matchType)
@@ -57,6 +76,9 @@ struct ScoreView: View {
         }
         .alert("Cancel Match?", isPresented: $showCancelAlert) {
             Button("End Match", role: .destructive) {
+                // Below ~2 min the workout is discarded (accidental start), above it
+                // is saved (real exercise); the manager applies the policy.
+                workoutManager.cancelWorkout(elapsed: Date().timeIntervalSince(state.matchStartDate))
                 MatchPersistence.clear()
                 isActive = false
             }
@@ -100,6 +122,20 @@ struct ScoreView: View {
                 .disabled(history.isEmpty)
                 .padding(.leading, 6)
                 Spacer()
+                // Live heart rate mirrors the undo arrow. Rendered only while a
+                // workout feeds a reading — absent (denied / off / no sample) it
+                // takes no space and the top bar looks exactly as it did before.
+                if let bpm = workoutManager.currentHeartRate {
+                    HStack(spacing: 2) {
+                        Image(systemName: "heart.fill")
+                            .foregroundStyle(.red)
+                        Text("\(Int(bpm.rounded()))")
+                            .foregroundStyle(.white)
+                            .monospacedDigit()
+                    }
+                    .font(.system(size: 13, weight: .medium))
+                    .padding(.trailing, 6)
+                }
             }
         }
     }
@@ -233,7 +269,7 @@ struct ScoreView: View {
                 .font(.headline)
                 .foregroundStyle(.white)
 
-            Text("\(state.winner?.displayName ?? "") wins")
+            Text("\(state.winner.map { state.teamName(for: $0) } ?? "") wins")
                 .font(.subheadline)
                 .foregroundStyle(.orange)
 
@@ -246,6 +282,14 @@ struct ScoreView: View {
                     .font(.title3.bold())
                     .foregroundStyle(.white)
             }
+
+            // One static line pointing to Estatísticas on the iPhone — shown to
+            // everyone, no entitlement awareness. The watch never links StoreKit
+            // and shows no purchase UI; this is its only Pro-adjacent touchpoint.
+            Text("See your stats on iPhone")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
 
             Button("Done") {
                 isActive = false

@@ -44,6 +44,11 @@ enum MatchType: String, Codable, Sendable, CaseIterable {
         case .tennis: return String(localized: "Games")
         }
     }
+
+    /// What a tennis match's sets are called. Beach tennis has no sets of its
+    /// own — it labels *games* "Sets" via `gamesSectionTitle` — so the two
+    /// sport's scoring vocabulary still lives in this one type.
+    static let setsSectionTitle = String(localized: "Sets")
 }
 
 enum PointScore: Int, Codable, Sendable, CaseIterable {
@@ -69,6 +74,12 @@ enum PointScore: Int, Codable, Sendable, CaseIterable {
 }
 
 struct GameRecord: Codable, Sendable {
+    /// The `gameScoreDisplay` a golden-point (beach tennis sudden death) game
+    /// records. The only Game Log signal that a game was decided at the golden
+    /// point, so `ScoreEngine` writes it and Estatísticas reads it — one literal
+    /// keeps the two from drifting apart.
+    static let goldenPointDisplay = "GP"
+
     let gameNumber: Int
     let setScoreA: Int
     let setScoreB: Int
@@ -122,6 +133,39 @@ struct MatchState: Codable, Sendable {
 
     var matchStartDate: Date = Date()
     var gameHistory: [GameRecord] = []
+
+    // Team Names in effect when this match was created. Empty means unnamed;
+    // display sites resolve through `teamName(for:)`, never `Team.displayName`
+    // directly, so the localized fallback stays the single source of truth.
+    var teamAName: String = ""
+    var teamBName: String = ""
+
+    /// Builds the starting state for a brand-new match, stamping the Team Names
+    /// in effect at match start. Names are copied by value, so a later Settings
+    /// rename never rewrites a match already under way or already stored —
+    /// history keeps the names it was played with.
+    static func newMatch(
+        matchType: MatchType,
+        initialServer: Team,
+        teamAName: String = "",
+        teamBName: String = ""
+    ) -> MatchState {
+        var s = MatchState()
+        s.matchType = matchType
+        s.servingTeam = initialServer
+        s.initialServer = initialServer
+        s.tiebreakFirstServer = initialServer
+        s.teamAName = teamAName
+        s.teamBName = teamBName
+        return s
+    }
+
+    /// The label to show for `team`: its Team Name when set, otherwise the
+    /// localized `Team.displayName` fallback.
+    func teamName(for team: Team) -> String {
+        let name = team == .a ? teamAName : teamBName
+        return name.isEmpty ? team.displayName : name
+    }
 
     func setScore(for team: Team) -> Int {
         team == .a ? setScoreA : setScoreB
