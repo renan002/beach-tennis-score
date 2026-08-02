@@ -29,9 +29,11 @@ lands in the same Match History.
 _Avoid_: scoreboard, counter (in user-facing pt-BR copy)
 
 **Team Name**:
-The user-set label attached to side A or B of a match; empty means unnamed, and
-the UI falls back to the localized "Team A"/"Team B". Stamped onto the match at
-its start, so renaming in Settings never rewrites a match already played.
+The user-set label attached to side A or B of a match; empty — or only
+whitespace — means unnamed, and the UI falls back to the localized "Team
+A"/"Team B". Capped at twelve characters, counted as the user sees them, so
+emoji count one each. Stamped onto the match at its start, so renaming in
+Settings never rewrites a match already played.
 _Avoid_: player name, team label
 
 **Match History**:

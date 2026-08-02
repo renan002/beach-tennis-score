@@ -33,6 +33,7 @@
 		35241BE0AF00D8DEF3997A7A /* MatchState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F51DDD9F7DDD920BA32478B6 /* MatchState.swift */; };
 		353C0529C1045A87F212F36D /* MatchStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ABE6B9702823D6767AB5A51 /* MatchStatistics.swift */; };
 		4291A25B5E810818C7555F75 /* MatchStateTeamNameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F051F216DBABF6C5F8D81CBE /* MatchStateTeamNameTests.swift */; };
+		482C9609359A50096D8BD5D7 /* TeamName.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEBFB89700BC5CCC8455F2CD /* TeamName.swift */; };
 		4947961FE0BFB634D9083982 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F607F579215BBD1758D83877 /* Assets.xcassets */; };
 		4A2A53C584B7DD59182CDDA7 /* WorkoutPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AC0E609B21CAC5A67228757 /* WorkoutPolicy.swift */; };
 		5024B6C1071D2BEE6CA04509 /* HealthAuthStatusMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541C4232813EBFCE41EDDEC /* HealthAuthStatusMessageTests.swift */; };
@@ -55,9 +56,11 @@
 		975EDFFD0B86A8352E0B0524 /* DevToolsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2452383CB0D07C028A93C80B /* DevToolsView.swift */; };
 		989396E3CA7A30F5747C2840 /* MatchState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F51DDD9F7DDD920BA32478B6 /* MatchState.swift */; };
 		999A27D803F2A1210CD410B4 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ABEFF5224D34981DF025362 /* FeatureFlags.swift */; };
+		9E89F63D171C9EF87A3880F9 /* TeamName.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEBFB89700BC5CCC8455F2CD /* TeamName.swift */; };
 		A2D8CF0A8FF48649ED4C2E31 /* WatchSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83FAA734BDAE85A11D34EBC2 /* WatchSettingsTests.swift */; };
 		A36E17FF54692A7E34AF41AE /* MatchDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6384C90BFE76A48416288478 /* MatchDetailView.swift */; };
 		A8DD1E8C248E730B615C104E /* RestorePurchasesButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A23CE764F6C43C398987642 /* RestorePurchasesButton.swift */; };
+		A8EDF767529500996EDFD98D /* TeamNameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A03285B636393ED0A07EF405 /* TeamNameTests.swift */; };
 		AAF610BE5D8703BC07CE0055 /* MatchSeederTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3225078E6475BFD0C05BC383 /* MatchSeederTests.swift */; };
 		AC4A4BCF92EEDE5F78A5D2A3 /* StoredMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA22216A62AA57F8538633B /* StoredMatch.swift */; };
 		ACC0EB8738F873C95817CDCE /* BeachTennisWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA27D8171AED929B5165A216 /* BeachTennisWatchApp.swift */; };
@@ -167,6 +170,7 @@
 		9D28EC16CCCEA10A4E7D8BA1 /* BeachTennisApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeachTennisApp.swift; sourceTree = "<group>"; };
 		9F815CA932C3F29E53938D4B /* WatchMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchMessage.swift; sourceTree = "<group>"; };
 		9F87074912C3144D856BCA29 /* ProEntitlementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProEntitlementTests.swift; sourceTree = "<group>"; };
+		A03285B636393ED0A07EF405 /* TeamNameTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamNameTests.swift; sourceTree = "<group>"; };
 		A1E89B8A918542FFB3F0389D /* MatchTypeSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchTypeSelectionView.swift; sourceTree = "<group>"; };
 		A331F1E9E5ED0040839215BA /* TennisScoreEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TennisScoreEngineTests.swift; sourceTree = "<group>"; };
 		A64CD23E997EF801E4A50E23 /* MatchListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchListView.swift; sourceTree = "<group>"; };
@@ -192,6 +196,7 @@
 		F8E65AAF7C81FAA9FB62A1F2 /* BeachTennisCounter.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BeachTennisCounter.entitlements; sourceTree = "<group>"; };
 		FA5BBE820E1F5224ECC19672 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		FC7808EE0B9A294D753A82E6 /* LegacyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyStore.swift; sourceTree = "<group>"; };
+		FEBFB89700BC5CCC8455F2CD /* TeamName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamName.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -266,6 +271,7 @@
 				21275F20964C30E0BE57431F /* MatchPersistence.swift */,
 				F51DDD9F7DDD920BA32478B6 /* MatchState.swift */,
 				67E5FFD85FDB63F1E4B704B7 /* ScoreEngine.swift */,
+				FEBFB89700BC5CCC8455F2CD /* TeamName.swift */,
 				9F815CA932C3F29E53938D4B /* WatchMessage.swift */,
 				0E310D764A0970D265C75E09 /* WatchSettings.swift */,
 				0AC0E609B21CAC5A67228757 /* WorkoutPolicy.swift */,
@@ -296,6 +302,7 @@
 				88C29C7EFF473AB896CCA2B8 /* StoredMatchDisplayTests.swift */,
 				41390DBE859A457CB1FE6D9D /* StoreRecoveryRestoreTests.swift */,
 				26496E4FEA0A7EC058601837 /* StoreRecoveryTests.swift */,
+				A03285B636393ED0A07EF405 /* TeamNameTests.swift */,
 				A331F1E9E5ED0040839215BA /* TennisScoreEngineTests.swift */,
 				83FAA734BDAE85A11D34EBC2 /* WatchSettingsTests.swift */,
 				3BB743BC5C0C98046825D4C0 /* WorkoutPolicyTests.swift */,
@@ -551,6 +558,7 @@
 				1244A696FA2200BBC7DA5CBE /* ScoreEngine.swift in Sources */,
 				71D24E07EBDC009124B556AE /* ScoreView.swift in Sources */,
 				C6DD6BBA15414E669DE7FE1E /* ServeSelectionView.swift in Sources */,
+				9E89F63D171C9EF87A3880F9 /* TeamName.swift in Sources */,
 				220DD4BF5CD96FEF418D738C /* WatchMessage.swift in Sources */,
 				29591432F72CE1EB4A9B60E3 /* WatchSessionManager.swift in Sources */,
 				67103C2A175B4DA92518633A /* WatchSettings.swift in Sources */,
@@ -589,6 +597,7 @@
 				F7A77F99920985E737186F23 /* StatisticsView.swift in Sources */,
 				564FFB929783F14E683261CB /* StoreRecovery.swift in Sources */,
 				AC4A4BCF92EEDE5F78A5D2A3 /* StoredMatch.swift in Sources */,
+				482C9609359A50096D8BD5D7 /* TeamName.swift in Sources */,
 				1A8E705F463BAAC8D7B8BD49 /* WatchMessage.swift in Sources */,
 				ADE596C62E51D48A4B98A776 /* WatchSettings.swift in Sources */,
 				4A2A53C584B7DD59182CDDA7 /* WorkoutPolicy.swift in Sources */,
@@ -619,6 +628,7 @@
 				B72701CF7686A78E82C00AB4 /* StoreRecoveryRestoreTests.swift in Sources */,
 				07A1FB876AC0C9E772BC2127 /* StoreRecoveryTests.swift in Sources */,
 				E3B10497313DE7597CF2C65A /* StoredMatchDisplayTests.swift in Sources */,
+				A8EDF767529500996EDFD98D /* TeamNameTests.swift in Sources */,
 				C556C77808433DF5CD0F1D8A /* TennisScoreEngineTests.swift in Sources */,
 				A2D8CF0A8FF48649ED4C2E31 /* WatchSettingsTests.swift in Sources */,
 				BFB327DC76387DC13DE47810 /* WorkoutPolicyTests.swift in Sources */,
