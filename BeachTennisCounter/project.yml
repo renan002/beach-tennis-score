@@ -31,8 +31,8 @@ configs:
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    MARKETING_VERSION: "1.3.1"
-    CURRENT_PROJECT_VERSION: "7"
+    MARKETING_VERSION: "1.4.0"
+    CURRENT_PROJECT_VERSION: "8"
     # Device builds need a team, and picking one in Xcode's Signing &
     # Capabilities tab writes it into the `.xcodeproj` — which `xcodegen
     # generate` then throws away. Declared here so it survives regeneration.
