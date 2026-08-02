@@ -93,6 +93,14 @@ final class StoredMatch {
     var setHistory: [SetRecord] { (try? JSONDecoder().decode([SetRecord].self, from: setHistoryData)) ?? [] }
     var winnerTeam: Team? { Team(rawValue: winner) }
 
+    /// The Match History sport filter, applied. A `nil` type means All — every
+    /// other case compares `MatchType` values, never the persisted token, so a
+    /// mistyped sport string can't silently empty the screen.
+    static func filtered(_ matches: [StoredMatch], by type: MatchType?) -> [StoredMatch] {
+        guard let type else { return matches }
+        return matches.filter { $0.matchType == type }
+    }
+
     /// True when the match is scored in sets — a tennis match with at least one
     /// set on the board. Beach tennis never is, and a tennis match abandoned
     /// inside its first set has no set to show, so both fall back to games.
