@@ -33,8 +33,24 @@ final class ProtoTrucoMatch {
         return nil
     }
 
+    /// A finished match takes no more mãos — the watch stops scoring the moment
+    /// `isMatchOver` goes up, and a truco screen that sails past 12 is the same
+    /// bug. Correcting a past mão can un-finish it, which is why this guards on
+    /// the current winner rather than on a stored flag.
     func add(_ team: Int, _ value: Int) {
+        guard winner == nil else { return }
         log.append(ProtoManche(team: team, value: value))
+    }
+
+    /// Running totals after each mão, both duplas on every row: the dupla that
+    /// did not score carries its own number down the column instead of leaving
+    /// a hole, so either column can be read straight down as a score.
+    var ledger: [(manche: ProtoManche, totals: [Int])] {
+        var totals = [0, 0]
+        return log.map { manche in
+            totals[manche.team] += manche.value
+            return (manche, totals)
+        }
     }
 
     func undo() { if !log.isEmpty { log.removeLast() } }
@@ -351,11 +367,11 @@ struct ProtoPlacarD: View {
     private var historyList: some View {
         ScrollView {
             LazyVStack(spacing: 0) {
-                ForEach(Array(match.log.enumerated()), id: \.element.id) { index, manche in
+                ForEach(Array(match.ledger.enumerated()), id: \.element.manche.id) { index, row in
                     HStack(spacing: 0) {
-                        cell(index: index, manche: manche, team: 0)
+                        cell(index: index, row: row, team: 0)
                         Divider()
-                        cell(index: index, manche: manche, team: 1)
+                        cell(index: index, row: row, team: 1)
                     }
                     .frame(height: 46)
                     Divider()
@@ -377,13 +393,19 @@ struct ProtoPlacarD: View {
         .overlay {
             Divider().frame(maxWidth: 1, maxHeight: .infinity)
         }
+        .overlay {
+            if match.winner != nil { matchOverCard }
+        }
     }
 
-    /// One half of a ledger row: the value if this dupla won the mão, empty
-    /// otherwise. Tapping a written value opens the correction menu.
-    private func cell(index: Int, manche: ProtoManche, team: Int) -> some View {
-        Group {
-            if manche.team == team {
+    /// One half of a ledger row: both duplas show their running total, but only
+    /// the one that scored is written in its own colour and carries the
+    /// correction menu — the other is a carried-down copy, so it reads as
+    /// unchanged rather than as a fresh mark.
+    private func cell(index: Int, row: (manche: ProtoManche, totals: [Int]), team: Int) -> some View {
+        let scored = row.manche.team == team
+        return Group {
+            if scored {
                 Menu {
                     ForEach(match.values, id: \.self) { value in
                         Button("\(value)") { match.log[index].value = value }
@@ -391,17 +413,49 @@ struct ProtoPlacarD: View {
                     Divider()
                     Button("Apagar", role: .destructive) { match.log.remove(at: index) }
                 } label: {
-                    Text("\(manche.value)")
-                        .font(.title3.weight(.bold).monospacedDigit())
-                        .foregroundStyle(team == 0 ? .blue : .red)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .contentShape(.rect)
+                    label(row.totals[team], scored: true, team: team)
                 }
             } else {
-                Color.clear
+                label(row.totals[team], scored: false, team: team)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func label(_ total: Int, scored: Bool, team: Int) -> some View {
+        Text("\(total)")
+            .font(.title3.weight(scored ? .bold : .regular).monospacedDigit())
+            .foregroundStyle(scored ? (team == 0 ? Color.blue : Color.red) : Color.secondary)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(.rect)
+    }
+
+    /// Same principle as the watch's match-over overlay: a card over the score
+    /// that ends the match, rather than a screen that keeps counting past the
+    /// target. Sits over the history so the ledger stays half-visible behind it.
+    private var matchOverCard: some View {
+        let winner = match.winner ?? 0
+        return VStack(spacing: 10) {
+            Text("Fim de jogo")
+                .font(.headline)
+
+            Text("\(match.names[winner]) venceu")
+                .font(.subheadline)
+                .foregroundStyle(winner == 0 ? .blue : .red)
+
+            Text("\(match.score(0)) – \(match.score(1))")
+                .font(.title3.bold().monospacedDigit())
+
+            Button("Nova partida") { match.reset() }
+                .buttonStyle(.borderedProminent)
+        }
+        .padding(24)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(.ultraThinMaterial)
+                .shadow(radius: 12)
+        )
+        .padding()
     }
 
     private var valueBar: some View {
