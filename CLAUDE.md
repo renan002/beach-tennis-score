@@ -86,6 +86,7 @@ The project has two targets sharing a `Shared/` layer:
 Shared/          ← compiled into both targets
   MatchState.swift    — all data models (Team, PointScore, GameRecord, MatchState)
   ScoreEngine.swift   — pure scoring logic, no UI imports
+  MatchInProgress.swift — the Match being scored: state, Undo Stack, effect ordering
   WatchMessage.swift  — WatchConnectivity payload constants and MatchResultPayload
   Localizable.xcstrings — pt-BR String Catalog; the only strings table in the project
 
@@ -104,7 +105,7 @@ iOS/             ← iPhone companion (history + settings)
 
 ### Data flow
 
-- **Scoring:** `ScoreView` holds `MatchState` + a `[MatchState]` undo stack. Every tap calls `ScoreEngine.awardPoint(to:state:)` — no mutation outside `ScoreEngine`.
+- **Scoring:** `ScoreView` holds a `MatchInProgress`, which owns the `MatchState` and the Undo Stack and is the only caller of `ScoreEngine` — no mutation outside `ScoreEngine`. Every interaction (`start`, `awardPoint`, `undo`, `cancel`) returns an ordered `[MatchInProgress.Effect]`; the screen's `perform(_:)` carries them out synchronously and decides nothing. That is what makes the ordering testable: the watch target is reachable by no test in this project, so anything sequenced inline in the screen is untestable by construction. Ordering that matters lives in the module and is pinned by `MatchInProgressTests` — above all the terminal one, where `.sendResult` precedes `.endWorkout` because the screen snapshots the workout stats as it performs the send.
 - **Watch → iPhone:** At match end `WatchSessionManager.sendMatchResult(_:duration:)` calls `WCSession.transferUserInfo`. `PhoneSessionManager.session(_:didReceiveUserInfo:)` decodes via `MatchResultPayload.from(_:)` and inserts a `StoredMatch` into SwiftData.
 - **iPhone → Watch (settings):** `PhoneSessionManager.pushSettingsToWatch()` builds a `WatchSettings` and calls `WCSession.updateApplicationContext(settings.toApplicationContext())`. Both watch receive paths (`activationDidCompleteWith` reading `receivedApplicationContext`, and `didReceiveApplicationContext`) decode via `WatchSettings.from(_:)` and apply the value. `WatchSettings` is the settings-path counterpart to `MatchResultPayload`: it owns the dictionary encode/decode, so a new watch-consumed setting is added in one place. The context is a full replacement — a missing key decodes to the type's default rather than leaving a stale value applied. Decode the `Sendable` `WatchSettings` in the `nonisolated` callback *before* any `Task { @MainActor in }`, per the Swift 6 `Sendable` rules.
 
