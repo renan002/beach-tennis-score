@@ -77,7 +77,7 @@ struct ProtoPlacarGallery: View {
     @State private var variant = 0
 
     // D first: it is the mix the review asked for, so it is what opens.
-    private let names = ["D — Placar + caderno", "A — Mesa", "B — Placar", "C — Caderno"]
+    private let names = ["D — Placar + caderno (escolhida)", "A — Mesa", "B — Placar", "C — Caderno"]
 
     var body: some View {
         Group {
@@ -126,7 +126,7 @@ struct PrototypesToolView: View {
                 NavigationLink {
                     ProtoPlacarGallery()
                 } label: {
-                    Label("Placar de truco — 4 variants", systemImage: "suit.spade")
+                    Label("Placar de truco — D escolhida", systemImage: "suit.spade")
                 }
             } header: {
                 Text("Issue #126")

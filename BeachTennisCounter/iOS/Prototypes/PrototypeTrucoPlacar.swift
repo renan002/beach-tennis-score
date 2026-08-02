@@ -7,7 +7,11 @@ import SwiftUI
 //   B — Placar: two columns side by side, value chosen first on a standing bar.
 //   C — Caderno: small scores, the Game Log is the screen, entries editable.
 //   D — Placar + caderno: B's columns and standing value bar, with C's mão
-//       history in between. The mix asked for after seeing all three.
+//       history in between. The mix asked for after seeing all three.  ← ESCOLHIDA
+//
+// **Variant D is the decided shape** for the truco score screen on iPhone.
+// A, B and C stay here because this branch is the primary source for that
+// decision — they do not come along when the real screen is written.
 
 #if DEV_FLAVOR
 
@@ -304,6 +308,8 @@ struct ProtoPlacarC: View {
 
 // MARK: - D — Placar + caderno
 
+/// ESCOLHIDA — this is the screen the real truco placar is written from.
+///
 /// The mix: B's scoreboard and standing "Valor da mão" bar, with C's mão
 /// history sitting between them.
 ///
