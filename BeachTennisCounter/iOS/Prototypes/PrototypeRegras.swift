@@ -232,7 +232,7 @@ struct ProtoRegrasD: View {
             } footer: {
                 Text(lib.isDirty
                      ? "Regras alteradas a partir de um preset."
-                     : "Mudar qualquer ajuste vira Personalizado.")
+                     : "Altere qualquer valor para criar uma regra personalizada")
             }
         }
         .alert("Nome das regras", isPresented: $showSave) {
