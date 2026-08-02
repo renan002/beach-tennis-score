@@ -10,14 +10,16 @@ import Foundation
 /// project, so an ordering written inline there is an ordering nobody can pin.
 ///
 /// The load-bearing order is the terminal one — the result send comes *before*
-/// the workout teardown, because the send carries the workout's stats snapshot
-/// and a torn-down builder has none to give.
+/// the workout teardown, because the screen snapshots the workout's stats as it
+/// performs the send, and a torn-down builder has none to give.
 struct MatchInProgress {
 
     /// Something the screen must do. Effects that need no payload read the
     /// module's `state` at the moment they are performed.
     enum Effect: Equatable {
-        /// Save the Match in progress so a mid-Match termination costs no points.
+        /// Save the Match in progress so a mid-Match termination costs no
+        /// points. Emitted for the terminal point too: `MatchPersistence.save`
+        /// clears a finished Match rather than leaving it resumable.
         case persist
         /// Drop the saved Match — nothing is left to resume.
         case clearPersisted
