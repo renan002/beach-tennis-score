@@ -87,7 +87,12 @@ private struct ProtoStakeChrome<Square: View, Extra: View>: View {
             }
             .padding(.horizontal, 6)
         }
-        .navigationBarHidden(true)
+        // The nav bar stays: hiding it, the way the real ScoreView does, also
+        // takes the back chevron with it and strands you in the variant. The
+        // real screen can afford that because it has its own exit; a prototype
+        // you are meant to flip through cannot.
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
@@ -103,20 +108,24 @@ struct ProtoStakeA: View {
 
     var body: some View {
         ProtoStakeChrome(match: match, hint: "Toque = 1 · segure = valor") { team in
-            Button {
-                match.add(team, 1)
-            } label: {
-                Text(names[team])
-                    .font(.system(size: 15, weight: .semibold))
-                    .frame(maxWidth: .infinity, minHeight: 56)
-                    .background(RoundedRectangle(cornerRadius: 10).fill(squareBackground(team)))
-                    .foregroundStyle(.white)
-            }
-            .buttonStyle(.plain)
-            .onLongPressGesture(minimumDuration: 0.4) {
-                WKInterfaceDevice.current().play(.start)
-                pickerTeam = team
-            }
+            // Not a Button: a Button consumes the press, so the long press
+            // attached to it never fires. Tap and long press have to sit on the
+            // same plain view for SwiftUI to arbitrate between them — which is
+            // the whole gesture under test, so getting this wrong would have
+            // answered question 2 with a bug.
+            Text(names[team])
+                .font(.system(size: 15, weight: .semibold))
+                .frame(maxWidth: .infinity, minHeight: 56)
+                .background(RoundedRectangle(cornerRadius: 10).fill(squareBackground(team)))
+                .foregroundStyle(.white)
+                .contentShape(.rect)
+                .onTapGesture {
+                    match.add(team, 1)
+                }
+                .onLongPressGesture(minimumDuration: 0.4) {
+                    WKInterfaceDevice.current().play(.start)
+                    pickerTeam = team
+                }
         } extra: {
             EmptyView()
         }
