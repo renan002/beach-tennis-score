@@ -161,10 +161,10 @@ struct MatchState: Codable, Sendable, Equatable {
     }
 
     /// The label to show for `team`: its Team Name when set, otherwise the
-    /// localized `Team.displayName` fallback.
+    /// localized `Team.displayName` fallback. Forwards to `TeamName`, which
+    /// states the rule for every display site.
     func teamName(for team: Team) -> String {
-        let name = team == .a ? teamAName : teamBName
-        return name.isEmpty ? team.displayName : name
+        TeamName.resolved(team == .a ? teamAName : teamBName, for: team)
     }
 
     func setScore(for team: Team) -> Int {
