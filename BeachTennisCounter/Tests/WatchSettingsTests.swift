@@ -6,7 +6,7 @@ final class WatchSettingsTests: XCTestCase {
     private func makeSettings(
         teamAColorHex: String = "E74C3C",
         teamBColorHex: String = "5B8DEF",
-        sportSetting: String = "beachTennis",
+        sportSetting: SportSetting = .beachTennis,
         teamAName: String = "",
         teamBName: String = "",
         healthMonitoringEnabled: Bool = true
@@ -29,9 +29,9 @@ final class WatchSettingsTests: XCTestCase {
     }
 
     func test_roundtrip_sportSetting() {
-        let settings = makeSettings(sportSetting: "tennis")
+        let settings = makeSettings(sportSetting: .tennis)
         let decoded = WatchSettings.from(settings.toApplicationContext())
-        XCTAssertEqual(decoded.sportSetting, "tennis")
+        XCTAssertEqual(decoded.sportSetting, .tennis)
     }
 
     func test_roundtrip_teamNames() {
@@ -44,7 +44,7 @@ final class WatchSettingsTests: XCTestCase {
     func test_roundtrip_preservesWholeValue() {
         let settings = makeSettings(teamAColorHex: "E67E22",
                                     teamBColorHex: "2ECC71",
-                                    sportSetting: "multiple")
+                                    sportSetting: .multiple)
         let decoded = WatchSettings.from(settings.toApplicationContext())
         XCTAssertEqual(decoded, settings)
     }
@@ -54,7 +54,7 @@ final class WatchSettingsTests: XCTestCase {
     func test_toApplicationContext_usesSharedKeys() {
         let context = makeSettings(teamAColorHex: "AABBCC",
                                    teamBColorHex: "DDEEFF",
-                                   sportSetting: "tennis",
+                                   sportSetting: .tennis,
                                    teamAName: "Ana",
                                    teamBName: "Bia").toApplicationContext()
         XCTAssertEqual(context[WatchMessageKey.teamAColor] as? String, "AABBCC")
@@ -72,15 +72,22 @@ final class WatchSettingsTests: XCTestCase {
             WatchMessageKey.teamAColor: "2ECC71",
             WatchMessageKey.teamBColor: "9B59B6"
         ])
-        XCTAssertEqual(decoded.sportSetting, "beachTennis")
+        XCTAssertEqual(decoded.sportSetting, .beachTennis)
         XCTAssertEqual(decoded.teamAColorHex, "2ECC71")
+    }
+
+    /// The context carries the sport as a bare token, so a value from a future
+    /// build — or a garbled one — has to land somewhere. It lands on the default.
+    func test_from_unrecognizedSportToken_usesDefaultSport() {
+        let decoded = WatchSettings.from([WatchMessageKey.sportSetting: "pingPong"])
+        XCTAssertEqual(decoded.sportSetting, WatchSettings.defaultSportSetting)
     }
 
     func test_from_missingColors_usesDefaultColors() {
         let decoded = WatchSettings.from([WatchMessageKey.sportSetting: "tennis"])
         XCTAssertEqual(decoded.teamAColorHex, "E74C3C")
         XCTAssertEqual(decoded.teamBColorHex, "5B8DEF")
-        XCTAssertEqual(decoded.sportSetting, "tennis")
+        XCTAssertEqual(decoded.sportSetting, .tennis)
     }
 
     func test_from_wrongValueType_usesDefault() {

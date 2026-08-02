@@ -69,16 +69,14 @@ struct HomeView: View {
         }
     }
 
+    /// One branch, on the setting itself: a setting that names a sport starts
+    /// it, and the one that doesn't — Vários — asks first.
     private func handleNewMatch() {
-        switch sessionManager.sportSetting {
-        case "tennis":
-            selectedMatchType = .tennis
+        if let sport = sessionManager.sportSetting.startSport {
+            selectedMatchType = sport
             navigateToSetup = true
-        case "multiple":
+        } else {
             navigateToTypeSelection = true
-        default:
-            selectedMatchType = .beachTennis
-            navigateToSetup = true
         }
     }
 }

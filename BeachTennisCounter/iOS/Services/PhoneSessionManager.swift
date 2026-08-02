@@ -9,7 +9,10 @@ final class PhoneSessionManager: NSObject, ObservableObject {
 
     @AppStorage("teamAColorHex") var teamAColorHex: String = WatchSettings.defaultTeamAColorHex
     @AppStorage("teamBColorHex") var teamBColorHex: String = WatchSettings.defaultTeamBColorHex
-    @AppStorage("sportSetting") var sportSetting: String = WatchSettings.defaultSportSetting
+    /// Persisted as its raw token — `@AppStorage` stores a `RawRepresentable`
+    /// by its raw value, and hands back the default for anything it can't
+    /// decode, which is the same fallback `SportSetting(storedToken:)` applies.
+    @AppStorage("sportSetting") var sportSetting: SportSetting = WatchSettings.defaultSportSetting
     @AppStorage("teamAName") var teamAName: String = WatchSettings.defaultTeamAName
     @AppStorage("teamBName") var teamBName: String = WatchSettings.defaultTeamBName
     @AppStorage("healthMonitoringEnabled") var healthMonitoringEnabled: Bool = WatchSettings.defaultHealthMonitoringEnabled
@@ -40,9 +43,9 @@ final class PhoneSessionManager: NSObject, ObservableObject {
         }
     }
 
-    /// The `sportSetting` value Pro gates — Vários, the watch asking which sport
-    /// before each match. A storage key, never displayed and never translated.
-    nonisolated static let proOnlySportSetting = "multiple"
+    /// The setting Pro gates — Vários, the watch asking which sport before each
+    /// match.
+    nonisolated static let proOnlySportSetting = SportSetting.multiple
 
     /// The sport setting that actually applies, which is not always the stored
     /// one: Vários is a Pro feature, so without Pro this reports the default
@@ -58,7 +61,7 @@ final class PhoneSessionManager: NSObject, ObservableObject {
     ///
     /// Pure and static so both answers are testable — including the dark one,
     /// where `isPro` is `true` for everybody and this is the identity.
-    nonisolated static func effectiveSportSetting(_ stored: String, isPro: Bool) -> String {
+    nonisolated static func effectiveSportSetting(_ stored: SportSetting, isPro: Bool) -> SportSetting {
         guard stored == proOnlySportSetting, !isPro else { return stored }
         return WatchSettings.defaultSportSetting
     }
