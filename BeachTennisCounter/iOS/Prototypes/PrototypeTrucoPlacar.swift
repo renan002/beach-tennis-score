@@ -341,34 +341,28 @@ struct ProtoPlacarD: View {
         .buttonStyle(.plain)
     }
 
+    /// The napkin ledger: one column per dupla, directly under the score it
+    /// belongs to, so the mãos read as two vertical stacks instead of rows that
+    /// have to name a team. Oldest at the top — the way it is actually written —
+    /// with the scroll anchored to the bottom so the newest mão is on screen.
+    ///
+    /// Cost of the shape: swipe-to-delete goes away (a cell is too narrow), so
+    /// deleting moved into the same menu that edits the value.
     private var historyList: some View {
-        List {
-            ForEach(Array(match.log.enumerated().reversed()), id: \.element.id) { index, manche in
-                HStack {
-                    Text("Mão \(index + 1)")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    Text(match.names[manche.team])
-                        .font(.body.weight(.medium))
-                        .foregroundStyle(manche.team == 0 ? .blue : .red)
-                    Menu("\(manche.value)") {
-                        ForEach(match.values, id: \.self) { value in
-                            Button("\(value)") { match.log[index].value = value }
-                        }
+        ScrollView {
+            LazyVStack(spacing: 0) {
+                ForEach(Array(match.log.enumerated()), id: \.element.id) { index, manche in
+                    HStack(spacing: 0) {
+                        cell(index: index, manche: manche, team: 0)
+                        Divider()
+                        cell(index: index, manche: manche, team: 1)
                     }
-                    .font(.body.weight(.bold).monospacedDigit())
-                    .frame(width: 44)
+                    .frame(height: 46)
+                    Divider()
                 }
-                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 12))
-            }
-            .onDelete { offsets in
-                // The list is reversed; map back before deleting.
-                let real = offsets.map { match.log.count - 1 - $0 }
-                for i in real.sorted(by: >) { match.log.remove(at: i) }
             }
         }
-        .listStyle(.plain)
+        .defaultScrollAnchor(.bottom)
         .overlay {
             if match.log.isEmpty {
                 ContentUnavailableView(
@@ -378,6 +372,36 @@ struct ProtoPlacarD: View {
                 )
             }
         }
+        // The centre rule runs the whole height, so the two columns stay
+        // readable as columns even where there is nothing written in them.
+        .overlay {
+            Divider().frame(maxWidth: 1, maxHeight: .infinity)
+        }
+    }
+
+    /// One half of a ledger row: the value if this dupla won the mão, empty
+    /// otherwise. Tapping a written value opens the correction menu.
+    private func cell(index: Int, manche: ProtoManche, team: Int) -> some View {
+        Group {
+            if manche.team == team {
+                Menu {
+                    ForEach(match.values, id: \.self) { value in
+                        Button("\(value)") { match.log[index].value = value }
+                    }
+                    Divider()
+                    Button("Apagar", role: .destructive) { match.log.remove(at: index) }
+                } label: {
+                    Text("\(manche.value)")
+                        .font(.title3.weight(.bold).monospacedDigit())
+                        .foregroundStyle(team == 0 ? .blue : .red)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .contentShape(.rect)
+                }
+            } else {
+                Color.clear
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var valueBar: some View {
