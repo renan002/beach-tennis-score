@@ -22,7 +22,7 @@ struct ServeSelectionView: View {
                     navigateToScore = true
                 } label: {
                     teamButton(color: sessionManager.teamAColor,
-                               label: displayName(sessionManager.teamAName, fallback: "Team A"))
+                               label: TeamName.resolve(sessionManager.teamAName, for: .a))
                 }
                 .buttonStyle(.plain)
 
@@ -31,7 +31,7 @@ struct ServeSelectionView: View {
                     navigateToScore = true
                 } label: {
                     teamButton(color: sessionManager.teamBColor,
-                               label: displayName(sessionManager.teamBName, fallback: "Team B"))
+                               label: TeamName.resolve(sessionManager.teamBName, for: .b))
                 }
                 .buttonStyle(.plain)
             }
@@ -44,13 +44,6 @@ struct ServeSelectionView: View {
                       teamBName: sessionManager.teamBName,
                       isActive: $isActive)
         }
-    }
-
-    /// The synced team name, or the localized slot label when the name is empty.
-    /// The result is a resolved plain string so a user-entered name never goes
-    /// through String Catalog lookup — only the fallback literal is localized.
-    private func displayName(_ name: String, fallback: LocalizedStringResource) -> String {
-        name.isEmpty ? String(localized: fallback) : name
     }
 
     @ViewBuilder

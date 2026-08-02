@@ -142,6 +142,10 @@ sheet correctly reports Pro as unavailable.
 
 - **iOS only:** `Color.toHex()` uses `UIColor` — lives in `PhoneSessionManager.swift`.
 - **watchOS only:** `Color(hex:)` decode-only — lives in `WatchSessionManager.swift`. No `toHex()` on watch.
+- **Both:** the *parsing* is `Shared/HexColor.swift` (components, no SwiftUI import, unit-tested). Each
+  platform's `Color(hex:)` keeps its own failure convention on top — the watch's is failable because it
+  decodes synced values that can arrive garbled, the phone's falls back to black because it decodes its
+  own literals. Don't collapse the two initializers into one; do parse through `HexColor`.
 
 ## Localization
 

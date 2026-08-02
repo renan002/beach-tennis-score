@@ -8,7 +8,7 @@ final class WatchSessionManager: NSObject, ObservableObject {
 
     @Published var teamAColor: Color = .red
     @Published var teamBColor: Color = .blue
-    @Published var sportSetting: String = "beachTennis"
+    @Published var sportSetting: SportSetting = .default
     @Published var teamAName: String = WatchSettings.defaultTeamAName
     @Published var teamBName: String = WatchSettings.defaultTeamBName
     @Published var healthMonitoringEnabled: Bool = WatchSettings.defaultHealthMonitoringEnabled
@@ -73,7 +73,7 @@ final class WatchSessionManager: NSObject, ObservableObject {
     private func apply(_ settings: WatchSettings) {
         teamAColor = Color(hex: settings.teamAColorHex) ?? .red
         teamBColor = Color(hex: settings.teamBColorHex) ?? .blue
-        sportSetting = settings.sportSetting
+        sportSetting = SportSetting.stored(settings.sportSetting)
         teamAName = settings.teamAName
         teamBName = settings.teamBName
         healthMonitoringEnabled = settings.healthMonitoringEnabled
@@ -134,13 +134,12 @@ extension WatchSessionManager: WCSessionDelegate {
 // MARK: - Color hex helper (watch-side: decode only)
 
 extension Color {
+    /// Failable on purpose: this decodes values synced from the phone, which can
+    /// arrive garbled, and the caller falls back to the default red/blue rather
+    /// than to a colour of this initializer's choosing. The parsing itself is
+    /// `HexColor`, shared with the phone's non-failable initializer.
     init?(hex: String) {
-        var hex = hex.trimmingCharacters(in: .whitespacesAndNewlines)
-        if hex.hasPrefix("#") { hex.removeFirst() }
-        guard hex.count == 6, let value = UInt64(hex, radix: 16) else { return nil }
-        let r = Double((value >> 16) & 0xFF) / 255
-        let g = Double((value >> 8) & 0xFF) / 255
-        let b = Double(value & 0xFF) / 255
-        self.init(red: r, green: g, blue: b)
+        guard let rgb = HexColor.components(hex) else { return nil }
+        self.init(red: rgb.red, green: rgb.green, blue: rgb.blue)
     }
 }

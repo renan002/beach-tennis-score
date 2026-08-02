@@ -8,15 +8,15 @@ struct MatchListView: View {
     @Query(sort: \StoredMatch.date, order: .reverse) private var allMatches: [StoredMatch]
     @State private var showSettings = false
     @State private var showStatistics = false
-    @State private var filter: String = "all"
+    /// The sport filter, `nil` meaning All. A `MatchType?` rather than a token
+    /// of its own: the sports are already a type, and a hand-written literal
+    /// compared against a stored one silently renders an empty history.
+    @State private var filter: MatchType?
     @State private var quarantines: [QuarantinedStore] = []
 
     private var matches: [StoredMatch] {
-        switch filter {
-        case "beachTennis": return allMatches.filter { $0.matchTypeRaw == "beachTennis" }
-        case "tennis":      return allMatches.filter { $0.matchTypeRaw == "tennis" }
-        default:            return allMatches
-        }
+        guard let filter else { return allMatches }
+        return allMatches.filter { $0.matchType == filter }
     }
 
     var body: some View {
@@ -113,15 +113,18 @@ struct MatchListView: View {
 
     private var filterPicker: some View {
         Menu {
-            Button { filter = "all" } label: {
-                Label("All", systemImage: filter == "all" ? "checkmark" : "")
+            Button { filter = nil } label: {
+                Label("All", systemImage: filter == nil ? "checkmark" : "")
             }
             Divider()
-            Button { filter = "beachTennis" } label: {
-                Label("Beach Tennis", systemImage: filter == "beachTennis" ? "checkmark" : "")
-            }
-            Button { filter = "tennis" } label: {
-                Label("Tennis", systemImage: filter == "tennis" ? "checkmark" : "")
+            ForEach(MatchType.allCases, id: \.self) { type in
+                Button { filter = type } label: {
+                    Label {
+                        Text(type.displayName)
+                    } icon: {
+                        Image(systemName: filter == type ? "checkmark" : "")
+                    }
+                }
             }
         } label: {
             HStack(spacing: 4) {
@@ -133,11 +136,7 @@ struct MatchListView: View {
     }
 
     private var filterLabel: String {
-        switch filter {
-        case "beachTennis": return String(localized: "Beach Tennis")
-        case "tennis":      return String(localized: "Tennis")
-        default:            return String(localized: "All")
-        }
+        filter?.displayName ?? String(localized: "All")
     }
 
     private var watchNotInstalledBanner: some View {

@@ -69,16 +69,14 @@ struct HomeView: View {
         }
     }
 
+    /// One branch: either the Sport setting names the sport to start — straight
+    /// to serve selection — or it doesn't (Vários) and the watch asks first.
     private func handleNewMatch() {
-        switch sessionManager.sportSetting {
-        case "tennis":
-            selectedMatchType = .tennis
-            navigateToSetup = true
-        case "multiple":
+        guard let matchType = sessionManager.sportSetting.startingMatchType else {
             navigateToTypeSelection = true
-        default:
-            selectedMatchType = .beachTennis
-            navigateToSetup = true
+            return
         }
+        selectedMatchType = matchType
+        navigateToSetup = true
     }
 }

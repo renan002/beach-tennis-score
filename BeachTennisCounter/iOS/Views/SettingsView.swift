@@ -13,7 +13,7 @@ struct SettingsView: View {
     @EnvironmentObject private var phoneSession: PhoneSessionManager
     @EnvironmentObject private var pro: ProEntitlement
     @AppStorage("appTheme") private var appTheme: AppTheme = .system
-    @AppStorage("sportSetting") private var sportSetting: String = "beachTennis"
+    @AppStorage("sportSetting") private var sportSetting: String = WatchSettings.defaultSportSetting
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @State private var syncedSettings: WatchSettings?
@@ -26,15 +26,18 @@ struct SettingsView: View {
             Form {
                 Section {
                     Picker("Modality", selection: sportBinding) {
-                        Text("Beach Tennis").tag("beachTennis")
-                        Text("Tennis").tag("tennis")
-                        multipleOption
+                        ForEach(SportSetting.allCases, id: \.self) { setting in
+                            sportOption(setting)
+                        }
                     }
                     .pickerStyle(.menu)
                 } header: {
                     Text("Sport")
                 } footer: {
-                    Text(sportSettingFooter)
+                    // The effective setting's own copy, matching the picker:
+                    // promising that the watch will ask before each match would
+                    // be a lie while Vários is locked.
+                    Text(sportBinding.wrappedValue.settingsFooter)
                 }
 
                 Section("Teams") {
@@ -179,16 +182,17 @@ struct SettingsView: View {
 
     // MARK: - Modality
 
-    /// Vários, locked for free users: visible in the menu — the point of a
-    /// locked-but-visible option is that it advertises what Pro buys — with a
-    /// padlock rather than a checkmark's worth of silence.
+    /// One row of the Sport picker. Every option is its case's own display name;
+    /// Vários alone can be locked, and when it is it carries a padlock rather
+    /// than a checkmark's worth of silence — the point of a locked-but-visible
+    /// option is that it advertises what Pro buys.
     @ViewBuilder
-    private var multipleOption: some View {
-        if pro.isPro {
-            Text("Multiple").tag(PhoneSessionManager.proOnlySportSetting)
+    private func sportOption(_ setting: SportSetting) -> some View {
+        if setting == .multiple, !pro.isPro {
+            Label { Text(setting.displayName) } icon: { Image(systemName: "lock.fill") }
+                .tag(setting)
         } else {
-            Label("Multiple", systemImage: "lock.fill")
-                .tag(PhoneSessionManager.proOnlySportSetting)
+            Text(setting.displayName).tag(setting)
         }
     }
 
@@ -205,29 +209,21 @@ struct SettingsView: View {
     /// `true` for everybody, so the lock, the padlock and the tap-through all
     /// disappear on their own and Vários is freely selectable exactly as it is
     /// today.
-    private var sportBinding: Binding<String> {
+    private var sportBinding: Binding<SportSetting> {
         Binding(
             get: {
-                PhoneSessionManager.effectiveSportSetting(sportSetting, isPro: pro.isPro)
+                SportSetting.stored(
+                    PhoneSessionManager.effectiveSportSetting(sportSetting, isPro: pro.isPro)
+                )
             },
             set: { selected in
-                guard selected != PhoneSessionManager.proOnlySportSetting || pro.isPro else {
+                guard selected != .multiple || pro.isPro else {
                     showProSheet = true
                     return
                 }
-                sportSetting = selected
+                sportSetting = selected.rawValue
             }
         )
-    }
-
-    private var sportSettingFooter: String {
-        // The effective value, matching the picker: promising that the watch
-        // will ask before each match would be a lie while Vários is locked.
-        switch PhoneSessionManager.effectiveSportSetting(sportSetting, isPro: pro.isPro) {
-        case "tennis":    return String(localized: "The Watch will always start a Tennis match.")
-        case "multiple":  return String(localized: "The Watch will ask which sport before each match.")
-        default:          return String(localized: "The Watch will always start a Beach Tennis match.")
-        }
     }
 
     /// The version string for the Settings footer, carrying a `DEV` marker on
@@ -246,10 +242,6 @@ struct SettingsView: View {
         return version
         #endif
     }
-
-    /// Name length cap: keeps the watch serve buttons and history lines from
-    /// truncating. Counts grapheme clusters, so a 12-emoji name is still 12.
-    private static let nameMaxLength = 12
 
     /// The watch last reported that Health access was denied on-watch.
     private var isHealthDenied: Bool {
@@ -301,24 +293,21 @@ struct SettingsView: View {
         .padding(.vertical, 4)
     }
 
-    /// Wraps a name binding so typed/pasted input is hard-capped at
-    /// `nameMaxLength` characters. Trimming happens later, on commit.
+    /// Wraps a name binding so typed/pasted input is hard-capped. The cap
+    /// itself — its length and its grapheme-cluster counting — is `TeamName`'s.
     private func cappedName(_ source: Binding<String>) -> Binding<String> {
         Binding(
             get: { source.wrappedValue },
-            set: { source.wrappedValue = String($0.prefix(Self.nameMaxLength)) }
+            set: { source.wrappedValue = TeamName.capped($0) }
         )
     }
 
-    /// Trims committed names to their canonical stored form: surrounding
-    /// whitespace stripped, whitespace-only collapsing to empty. Runs at the
-    /// commit points (Done / onDisappear) rather than per-keystroke so the
-    /// field stays natural to type in.
+    /// Puts committed names into their canonical stored form. Runs at the commit
+    /// points (Done / onDisappear) rather than per-keystroke so the field stays
+    /// natural to type in.
     private func commitNames() {
-        phoneSession.teamAName = phoneSession.teamAName
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        phoneSession.teamBName = phoneSession.teamBName
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        phoneSession.teamAName = TeamName.committed(phoneSession.teamAName)
+        phoneSession.teamBName = TeamName.committed(phoneSession.teamBName)
     }
 
     private func syncToWatchIfChanged() {

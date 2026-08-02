@@ -9,7 +9,8 @@ import Foundation
 struct WatchSettings: Sendable, Equatable {
     static let defaultTeamAColorHex = "E74C3C"
     static let defaultTeamBColorHex = "5B8DEF"
-    static let defaultSportSetting = "beachTennis"
+    /// The wire default, spelled by the type that owns the tokens.
+    static let defaultSportSetting = SportSetting.default.rawValue
     /// Default team names are empty — the watch serve buttons fall back to the
     /// localized "Team A"/"Team B" literals when a name is empty.
     static let defaultTeamAName = ""
