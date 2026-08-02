@@ -29,9 +29,19 @@ final class ProtoStakeMatch {
         entries.filter { $0.team == team }.reduce(0) { $0 + $1.value }
     }
 
+    /// `target` was only ever drawn in the top bar — nothing enforced it, so the
+    /// score sailed past 12. Same bug the iPhone placar had, same fix: derived
+    /// from the score, so correcting a mão down un-finishes the match.
+    var winner: Int? {
+        for team in 0...1 where score(team) >= target { return team }
+        return nil
+    }
+
     func add(_ team: Int, _ value: Int) {
+        guard winner == nil else { return }
         entries.append((team, value))
         WKInterfaceDevice.current().play(value == 1 ? .click : .success)
+        if winner != nil { WKInterfaceDevice.current().play(.notification) }
     }
 
     func undo() { if !entries.isEmpty { entries.removeLast() } }
@@ -86,6 +96,9 @@ private struct ProtoStakeChrome<Square: View, Extra: View>: View {
                     .multilineTextAlignment(.center)
             }
             .padding(.horizontal, 6)
+            .overlay {
+                if match.winner != nil { matchOver }
+            }
         }
         // The nav bar stays: hiding it, the way the real ScoreView does, also
         // takes the back chevron with it and strands you in the variant. The
@@ -93,6 +106,30 @@ private struct ProtoStakeChrome<Square: View, Extra: View>: View {
         // you are meant to flip through cannot.
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    /// The real ScoreView's match-over card, shrunk: it covers the squares, so
+    /// a stray tap after the last mão cannot score.
+    private var matchOver: some View {
+        let winner = match.winner ?? 0
+        return VStack(spacing: 6) {
+            Text("Fim de jogo")
+                .font(.system(size: 14, weight: .semibold))
+            Text("\(names[winner]) venceu")
+                .font(.system(size: 12))
+                .foregroundStyle(winner == 0 ? .blue : .red)
+            Text("\(match.score(0)) – \(match.score(1))")
+                .font(.system(size: 20, weight: .bold, design: .rounded))
+            HStack(spacing: 6) {
+                Button("Desfazer") { match.undo() }
+                Button("Nova") { match.reset() }
+            }
+            .font(.system(size: 12))
+            .buttonStyle(.bordered)
+        }
+        .padding(10)
+        .background(RoundedRectangle(cornerRadius: 14).fill(.ultraThinMaterial))
+        .padding(.horizontal, 4)
     }
 }
 
