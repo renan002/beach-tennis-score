@@ -297,8 +297,13 @@ struct ScoreView: View {
     // MARK: - Actions
 
     private func awardPoint(to team: Team) {
-        perform(match.awardPoint(to: team))
-        showMatchOver = match.state.isMatchOver
+        let effects = match.awardPoint(to: team)
+        // Raised before the effects run, as it was when this was an observer on
+        // the match-over flag: the overlay never waits on the stats snapshot.
+        if state.isMatchOver {
+            showMatchOver = true
+        }
+        perform(effects)
     }
 
     private func undoLast() {
@@ -311,6 +316,10 @@ struct ScoreView: View {
     /// This screen decides nothing here — the ordering that matters (the stats
     /// snapshot riding on the send, before the workout is torn down) is the
     /// module's, and is tested there.
+    ///
+    /// Synchronous and in order, deliberately: `.persist` saves whatever the
+    /// module holds *now*, so an effect made async here would silently save a
+    /// later state than the one it was emitted for.
     private func perform(_ effects: [MatchInProgress.Effect]) {
         for effect in effects {
             switch effect {
