@@ -54,6 +54,9 @@ struct ProtoRuleset: Identifiable, Equatable {
         }
     }
 
+    /// The ladders the shipped Presets use — the closed-ladder answer to #141.
+    static let knownLadders: [[Int]] = [[3, 6, 9, 12], [4, 6, 10, 12], [2, 3, 4]]
+
     static func presets(_ sport: ProtoSport) -> [ProtoRuleset] {
         switch sport {
         case .pingPong:
@@ -101,32 +104,52 @@ struct ProtoRuleset: Identifiable, Equatable {
 @Observable
 final class ProtoLibrary {
     var sport: ProtoSport = .truco
-    var draft: ProtoRuleset = ProtoRuleset.presets(.truco)[0]
-    var saved: [ProtoRuleset] = ProtoRuleset.customs(.truco)
+    var draft: ProtoRuleset
+    var saved: [ProtoRuleset]
+    // Stored, not computed: `ProtoRuleset.presets(_:)` mints fresh ids on every
+    // call, so identity only survives if the list is built once.
+    private var presetList: [ProtoRuleset]
 
-    var presets: [ProtoRuleset] { ProtoRuleset.presets(sport) }
+    init() {
+        let initial = ProtoRuleset.presets(.truco)
+        presetList = initial
+        saved = ProtoRuleset.customs(.truco)
+        draft = initial[0]
+        appliedID = initial[0].id
+    }
+
+    /// Which Ruleset was last applied. Selection by knob equality alone cannot
+    /// tell a saved copy from the Preset it was copied from — the double
+    /// checkmark seen in Variant A — so identity is tracked separately.
+    var appliedID: UUID?
+
+    var presets: [ProtoRuleset] { presetList }
+
+    var all: [ProtoRuleset] { presetList + saved }
+
+    /// The Ruleset the draft still *is*: the applied one, and only while its
+    /// knobs have not moved. Nil means Personalizado.
+    var applied: ProtoRuleset? {
+        guard let match = all.first(where: { $0.id == appliedID }) else { return nil }
+        return match.sameKnobs(as: draft, sport) ? match : nil
+    }
 
     /// The name to show for the current draft: a Preset's name while its knobs
     /// are untouched, otherwise "Personalizado".
-    var draftLabel: String {
-        if let match = (presets + saved).first(where: { $0.sameKnobs(as: draft, sport) }) {
-            return match.name
-        }
-        return "Personalizado"
-    }
+    var draftLabel: String { applied?.name ?? "Personalizado" }
 
-    var isDirty: Bool { draftLabel == "Personalizado" }
+    var isDirty: Bool { applied == nil }
 
     func switchSport(_ new: ProtoSport) {
         sport = new
-        draft = ProtoRuleset.presets(new)[0]
+        presetList = ProtoRuleset.presets(new)
         saved = ProtoRuleset.customs(new)
+        apply(presetList[0])
     }
 
     func apply(_ ruleset: ProtoRuleset) {
-        var copy = ruleset
-        copy.id = UUID()
-        draft = copy
+        draft = ruleset
+        appliedID = ruleset.id
     }
 
     func save(as name: String) {
@@ -135,6 +158,7 @@ final class ProtoLibrary {
         copy.name = name
         copy.isPreset = false
         saved.append(copy)
+        appliedID = copy.id
     }
 
     func delete(_ ruleset: ProtoRuleset) {
@@ -155,7 +179,7 @@ struct ProtoSwitcher: View {
             Button { index = (index - 1 + names.count) % names.count } label: {
                 Image(systemName: "chevron.left")
             }
-            Text("\(letter) — \(names[index])")
+            Text(names[index])
                 .font(.footnote.weight(.semibold).monospaced())
                 .lineLimit(1)
             Button { index = (index + 1) % names.count } label: {
@@ -167,10 +191,6 @@ struct ProtoSwitcher: View {
         .padding(.vertical, 10)
         .background(Capsule().fill(.yellow).shadow(radius: 8))
         .buttonStyle(.plain)
-    }
-
-    private var letter: String {
-        String(UnicodeScalar(UInt8(65 + index)))
     }
 }
 

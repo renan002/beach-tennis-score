@@ -71,7 +71,7 @@ struct ProtoRegrasA: View {
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
-                if ruleset.sameKnobs(as: lib.draft, lib.sport) {
+                if lib.applied?.id == ruleset.id {
                     Image(systemName: "checkmark").foregroundStyle(.tint)
                 }
             }
@@ -106,23 +106,162 @@ struct ProtoKnobs: View {
                 Text("1").tag(1)
                 Text("2").tag(2)
             }
-            // The open question of #141 rendered as the closed-ladder option:
-            // four fixed rungs. Swap for a free list to feel the other answer.
-            LabeledContent("Escalada") {
-                HStack(spacing: 6) {
-                    ForEach(Array(lib.draft.ladder.enumerated()), id: \.offset) { i, value in
-                        Stepper("\(value)", value: Binding(
-                            get: { lib.draft.ladder[i] },
-                            set: { lib.draft.ladder[i] = $0 }
-                        ), in: 1...24)
-                        .labelsHidden()
-                        .overlay(alignment: .leading) {
-                            Text("\(value)").font(.caption.monospacedDigit()).offset(x: -14)
+            // #141, both answers side by side. The **closed** ladder is one
+            // `.menu` row like every other knob. The **free** list cannot be a
+            // row at all — n Steppers do not fit on one line — so it is a
+            // second screen. That cost is the finding, not a layout accident.
+            Picker("Escalada", selection: ladder) {
+                ForEach(ProtoRuleset.knownLadders, id: \.self) { rungs in
+                    Text(rungs.map(String.init).joined(separator: " · ")).tag(rungs)
+                }
+                if !ProtoRuleset.knownLadders.contains(lib.draft.ladder) {
+                    Text(lib.draft.ladder.map(String.init).joined(separator: " · "))
+                        .tag(lib.draft.ladder)
+                }
+            }
+            .pickerStyle(.menu)
+
+            NavigationLink {
+                ProtoLadderEditor(lib: lib)
+            } label: {
+                Text("Escalada personalizada")
+            }
+        }
+    }
+
+    private var ladder: Binding<[Int]> {
+        Binding(get: { lib.draft.ladder }, set: { lib.draft.ladder = $0 })
+    }
+}
+
+/// The free-list answer to #141: rungs are rows, so there can be any number of
+/// them and each gets a full-width Stepper. Reachable only from Ajustes —
+/// which is the point. A free list costs a screen.
+struct ProtoLadderEditor: View {
+    @Bindable var lib: ProtoLibrary
+
+    var body: some View {
+        List {
+            Section {
+                ForEach(Array(lib.draft.ladder.enumerated()), id: \.offset) { index, value in
+                    Stepper(value: Binding(
+                        get: { lib.draft.ladder.indices.contains(index) ? lib.draft.ladder[index] : value },
+                        set: { if lib.draft.ladder.indices.contains(index) { lib.draft.ladder[index] = $0 } }
+                    ), in: 1...24) {
+                        HStack {
+                            Text("Degrau \(index + 1)")
+                            Spacer()
+                            Text("\(value)")
+                                .font(.body.monospacedDigit().weight(.semibold))
                         }
                     }
                 }
+                .onDelete { lib.draft.ladder.remove(atOffsets: $0) }
+
+                Button("Adicionar degrau") {
+                    lib.draft.ladder.append((lib.draft.ladder.last ?? 1) + 1)
+                }
+                .disabled(lib.draft.ladder.count >= 8)
+            } footer: {
+                Text("Cada degrau é quanto a mão passa a valer depois de mais um truco. Deslize para apagar.")
             }
         }
+        .navigationTitle("Escalada")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+// MARK: - D — Menu
+
+/// A's Ajustes section kept intact, with the preset *list* collapsed into one
+/// `.menu` Picker — the same shape `Modalidade` already has on the Settings
+/// screen. Costs one row instead of six, and the picker's own checkmark
+/// replaces the hand-rolled one.
+///
+/// The trade the list was paying for: you no longer read every Ruleset's
+/// summary at a glance. The footer buys part of it back by spelling out the
+/// selected one.
+struct ProtoRegrasD: View {
+    @Bindable var lib: ProtoLibrary
+    @State private var saveName = ""
+    @State private var showSave = false
+    @State private var renaming: ProtoRuleset?
+
+    var body: some View {
+        Form {
+            Section {
+                Picker("Regras", selection: selection) {
+                    // Sections inside a .menu Picker keep Presets and saved
+                    // Rulesets apart without costing a row on the screen.
+                    Section("Presets") {
+                        ForEach(lib.presets) { Text($0.name).tag(Optional($0.id)) }
+                    }
+                    if !lib.saved.isEmpty {
+                        Section("Minhas regras") {
+                            ForEach(lib.saved) { Text($0.name).tag(Optional($0.id)) }
+                        }
+                    }
+                    if lib.isDirty {
+                        // Only offered while it is true — a "Personalizado" you
+                        // can *choose* would mean nothing.
+                        Text("Personalizado").tag(UUID?.none)
+                    }
+                }
+                .pickerStyle(.menu)
+            } footer: {
+                // No section header: it would repeat the row's own label, the
+                // way "Sport / Modality" does not.
+                Text(lib.draft.summary(lib.sport))
+            }
+
+            Section("Ajustes") {
+                ProtoKnobs(lib: lib)
+            }
+
+            Section {
+                if lib.isDirty {
+                    Button("Salvar como…") { showSave = true }
+                }
+                if let applied = lib.applied, !applied.isPreset {
+                    Button("Renomear") { renaming = applied; saveName = applied.name }
+                    Button("Apagar", role: .destructive) {
+                        lib.delete(applied)
+                        lib.apply(lib.presets[0])
+                    }
+                }
+            } footer: {
+                Text(lib.isDirty
+                     ? "Regras alteradas a partir de um preset."
+                     : "Mudar qualquer ajuste vira Personalizado.")
+            }
+        }
+        .alert("Nome das regras", isPresented: $showSave) {
+            TextField("Truco do Zé", text: $saveName)
+            Button("Salvar") { lib.save(as: saveName.isEmpty ? "Sem nome" : saveName); saveName = "" }
+            Button("Cancelar", role: .cancel) {}
+        }
+        .alert("Renomear", isPresented: Binding(get: { renaming != nil }, set: { if !$0 { renaming = nil } })) {
+            TextField("Nome", text: $saveName)
+            Button("Salvar") {
+                if let target = renaming, let i = lib.saved.firstIndex(where: { $0.id == target.id }) {
+                    lib.saved[i].name = saveName.isEmpty ? "Sem nome" : saveName
+                }
+                renaming = nil
+            }
+            Button("Cancelar", role: .cancel) { renaming = nil }
+        }
+    }
+
+    /// Nil is Personalizado, and selecting it is a no-op: the draft already is
+    /// whatever the knobs say.
+    private var selection: Binding<UUID?> {
+        Binding(
+            get: { lib.applied?.id },
+            set: { newValue in
+                guard let id = newValue, let ruleset = lib.all.first(where: { $0.id == id }) else { return }
+                lib.apply(ruleset)
+            }
+        )
     }
 }
 
@@ -199,7 +338,7 @@ struct ProtoRegrasB: View {
     }
 
     private func card(_ ruleset: ProtoRuleset) -> some View {
-        let selected = ruleset.sameKnobs(as: lib.draft, lib.sport)
+        let selected = lib.applied?.id == ruleset.id
         return Button {
             lib.apply(ruleset)
         } label: {
@@ -252,7 +391,7 @@ struct ProtoRegrasC: View {
                         ForEach(lib.presets + lib.saved) { ruleset in
                             Button(ruleset.name) { lib.apply(ruleset) }
                                 .buttonStyle(.bordered)
-                                .tint(ruleset.sameKnobs(as: lib.draft, lib.sport) ? .accentColor : .gray)
+                                .tint(lib.applied?.id == ruleset.id ? .accentColor : .gray)
                         }
                     }
                     .padding(.horizontal)

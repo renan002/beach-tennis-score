@@ -14,7 +14,8 @@ struct ProtoRegrasGallery: View {
     @State private var lib = ProtoLibrary()
     @State private var variant = 0
 
-    private let names = ["Lista", "Galeria", "Frase"]
+    // D first: it is the direction the review asked for, so it is what opens.
+    private let names = ["D — Menu", "A — Lista", "B — Galeria", "C — Frase"]
 
     var body: some View {
         VStack(spacing: 0) {
@@ -30,8 +31,9 @@ struct ProtoRegrasGallery: View {
 
             Group {
                 switch variant {
-                case 0: ProtoRegrasA(lib: lib)
-                case 1: ProtoRegrasB(lib: lib)
+                case 0: ProtoRegrasD(lib: lib)
+                case 1: ProtoRegrasA(lib: lib)
+                case 2: ProtoRegrasB(lib: lib)
                 default: ProtoRegrasC(lib: lib)
                 }
             }
@@ -51,7 +53,7 @@ struct ProtoPlacarGallery: View {
     @State private var match = ProtoTrucoMatch()
     @State private var variant = 0
 
-    private let names = ["Mesa", "Placar", "Caderno"]
+    private let names = ["A — Mesa", "B — Placar", "C — Caderno"]
 
     var body: some View {
         Group {
