@@ -18,12 +18,15 @@ import SwiftData
 /// its own "More" list.
 enum DevTool: String, CaseIterable, Identifiable, Hashable {
     case seeder = "Seeder"
+    // PROTOTYPE — issue #126. Leaves with the prototype branch.
+    case prototypes = "Prototypes"
 
     var id: String { rawValue }
 
     var icon: String {
         switch self {
         case .seeder: return "wand.and.stars"
+        case .prototypes: return "scribble.variable"
         }
     }
 }
@@ -35,6 +38,9 @@ struct DevToolsView: View {
         TabView(selection: $tool) {
             Tab(DevTool.seeder.rawValue, systemImage: DevTool.seeder.icon, value: DevTool.seeder) {
                 SeederToolView()
+            }
+            Tab(DevTool.prototypes.rawValue, systemImage: DevTool.prototypes.icon, value: DevTool.prototypes) {
+                NavigationStack { PrototypesToolView() }
             }
         }
         .tabBarMinimizeBehavior(.onScrollDown)

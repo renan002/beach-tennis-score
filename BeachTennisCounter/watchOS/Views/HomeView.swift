@@ -47,6 +47,18 @@ struct HomeView: View {
                         .buttonStyle(.bordered)
                         .tint(.orange)
                     }
+
+                    // PROTOTYPE — issue #126. Leaves with the prototype branch.
+                    #if DEV_FLAVOR
+                    NavigationLink {
+                        ProtoStakeGallery()
+                    } label: {
+                        Label("Proto #126", systemImage: "scribble.variable")
+                            .font(.caption2)
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.yellow)
+                    #endif
                 }
             }
             .navigationBarHidden(true)
