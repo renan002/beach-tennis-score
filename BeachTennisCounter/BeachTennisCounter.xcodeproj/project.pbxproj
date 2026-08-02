@@ -44,6 +44,7 @@
 		5454CCA9D6D19291CF4BE52B /* SportSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 165486187497B2731E40231E /* SportSetting.swift */; };
 		564FFB929783F14E683261CB /* StoreRecovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC40D6416C38F7B65B653DD8 /* StoreRecovery.swift */; };
 		58344D784381E039E0675796 /* SportSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 165486187497B2731E40231E /* SportSetting.swift */; };
+		588C9DF2A275CC16312CC057 /* PrototypeRegrasShells.swift in Sources */ = {isa = PBXBuildFile; fileRef = 152E6C4D548D620C6FE12543 /* PrototypeRegrasShells.swift */; };
 		5B6F69490F861256230C277A /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 53AC24C14225AFDAE7BC7BFD /* Localizable.xcstrings */; };
 		5EAC507F8BA00D007CB17A4F /* WorkoutPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AC0E609B21CAC5A67228757 /* WorkoutPolicy.swift */; };
 		613458FC5DD60AFC2B854565 /* ProSurfaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BD3C04D99BDFE89FEEAE396 /* ProSurfaceTests.swift */; };
@@ -146,6 +147,7 @@
 		0E310D764A0970D265C75E09 /* WatchSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSettings.swift; sourceTree = "<group>"; };
 		0E80BA71634453CD2D2CA927 /* ResultCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultCard.swift; sourceTree = "<group>"; };
 		13AA66F45FAD189C14A658F3 /* ProEntitlement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProEntitlement.swift; sourceTree = "<group>"; };
+		152E6C4D548D620C6FE12543 /* PrototypeRegrasShells.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeRegrasShells.swift; sourceTree = "<group>"; };
 		165486187497B2731E40231E /* SportSetting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SportSetting.swift; sourceTree = "<group>"; };
 		191AACA24ACE1BF3823FBA7F /* LiveStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStoreTests.swift; sourceTree = "<group>"; };
 		1D2079D2D2B1621F0A22237B /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -413,6 +415,7 @@
 				50D8DDD8A056BF0971ED55F4 /* PrototypeGallery.swift */,
 				FA0D5AB5C7F8D16253069E7F /* PrototypeModel.swift */,
 				6DB523A382259EE82A6F927F /* PrototypeRegras.swift */,
+				152E6C4D548D620C6FE12543 /* PrototypeRegrasShells.swift */,
 				E8900E7596AA7D8AC7FA99D9 /* PrototypeTrucoPlacar.swift */,
 			);
 			path = Prototypes;
@@ -651,6 +654,7 @@
 				BA18F26C583FB3F1D6D19D58 /* PrototypeGallery.swift in Sources */,
 				C7D83BDD41EB913C35EFB73D /* PrototypeModel.swift in Sources */,
 				182F2176816CE225B514F40A /* PrototypeRegras.swift in Sources */,
+				588C9DF2A275CC16312CC057 /* PrototypeRegrasShells.swift in Sources */,
 				E9D7FC701BF19A2334D830A6 /* PrototypeTrucoPlacar.swift in Sources */,
 				D2CA7E2CD05F51014173004E /* QuarantinedStoresSection.swift in Sources */,
 				A8DD1E8C248E730B615C104E /* RestorePurchasesButton.swift in Sources */,

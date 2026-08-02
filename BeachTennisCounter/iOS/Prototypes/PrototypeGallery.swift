@@ -8,10 +8,36 @@ import SwiftUI
 
 #if DEV_FLAVOR
 
-/// Question 1 — the Regras screen. Sport picker sits *above* the switcher: it is
-/// context every variant shares, not part of what is being judged.
+/// Question 1, sport axis — how the four sports of #61 hang off Regras. The
+/// body is Variant D in all three, so only the shell is under judgement.
+struct ProtoRegrasShellGallery: View {
+    @State private var store = ProtoRegrasStore()
+    @State private var variant = 0
+
+    private let names = ["S2 — Lista", "S1 — Abas", "S3 — Menu"]
+
+    var body: some View {
+        Group {
+            switch variant {
+            case 0: ProtoRegrasS2(store: store)
+            case 1: ProtoRegrasS1(store: store)
+            default: ProtoRegrasS3(store: store)
+            }
+        }
+        .overlay(alignment: .bottom) {
+            ProtoSwitcher(names: names, index: $variant)
+                .padding(.bottom, 12)
+        }
+        .navigationTitle("Regras")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+/// Question 1, body axis — the density comparison from the first pass. Only the
+/// two editable sports, because a frozen sport has no knobs to be dense about.
 struct ProtoRegrasGallery: View {
-    @State private var lib = ProtoLibrary()
+    @State private var store = ProtoRegrasStore()
+    @State private var sport: ProtoSport = .truco
     @State private var variant = 0
 
     // D first: it is the direction the review asked for, so it is what opens.
@@ -19,11 +45,8 @@ struct ProtoRegrasGallery: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Picker("Esporte", selection: Binding(
-                get: { lib.sport },
-                set: { lib.switchSport($0) }
-            )) {
-                ForEach(ProtoSport.allCases) { Text($0.rawValue).tag($0) }
+            Picker("Esporte", selection: $sport) {
+                ForEach(ProtoSport.editable) { Text($0.rawValue).tag($0) }
             }
             .pickerStyle(.segmented)
             .padding(.horizontal)
@@ -31,10 +54,10 @@ struct ProtoRegrasGallery: View {
 
             Group {
                 switch variant {
-                case 0: ProtoRegrasD(lib: lib)
-                case 1: ProtoRegrasA(lib: lib)
-                case 2: ProtoRegrasB(lib: lib)
-                default: ProtoRegrasC(lib: lib)
+                case 0: ProtoRegrasD(lib: store.library(sport))
+                case 1: ProtoRegrasA(lib: store.library(sport))
+                case 2: ProtoRegrasB(lib: store.library(sport))
+                default: ProtoRegrasC(lib: store.library(sport))
                 }
             }
             .overlay(alignment: .bottom) {
@@ -42,7 +65,7 @@ struct ProtoRegrasGallery: View {
                     .padding(.bottom, 12)
             }
         }
-        .navigationTitle("Regras")
+        .navigationTitle("Regras — corpo")
         .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -89,9 +112,14 @@ struct PrototypesToolView: View {
         List {
             Section {
                 NavigationLink {
+                    ProtoRegrasShellGallery()
+                } label: {
+                    Label("Regras: 4 esportes — 3 shells", systemImage: "square.grid.2x2")
+                }
+                NavigationLink {
                     ProtoRegrasGallery()
                 } label: {
-                    Label("Regras — 3 variants", systemImage: "slider.horizontal.3")
+                    Label("Regras: corpo — 4 variants", systemImage: "slider.horizontal.3")
                 }
                 NavigationLink {
                     ProtoPlacarGallery()

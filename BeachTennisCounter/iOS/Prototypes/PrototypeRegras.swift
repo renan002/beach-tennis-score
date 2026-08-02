@@ -86,6 +86,10 @@ struct ProtoKnobs: View {
 
     var body: some View {
         switch lib.sport {
+        case .beachTennis, .tennis:
+            // Frozen: no knobs. Callers route these sports away from here, but
+            // the case has to exist and saying it beats an empty branch.
+            LabeledContent("Regras", value: lib.draft.summary(lib.sport))
         case .pingPong:
             Picker("Pontos por set", selection: $lib.draft.pointsPerSet) {
                 Text("11").tag(11)
@@ -188,6 +192,34 @@ struct ProtoRegrasD: View {
     @State private var renaming: ProtoRuleset?
 
     var body: some View {
+        if lib.sport.isEditable {
+            editable
+        } else {
+            frozen
+        }
+    }
+
+    /// Beach tennis and tennis: the Ruleset exists, is stamped onto every match,
+    /// and cannot be changed. Saying so beats an empty editor or a missing
+    /// screen — both of which read as "not built yet".
+    private var frozen: some View {
+        Form {
+            Section {
+                LabeledContent("Regras", value: lib.draftLabel)
+            } footer: {
+                Text(lib.draft.summary(lib.sport))
+            }
+
+            Section {
+                Label("Regras oficiais, não editáveis", systemImage: "lock")
+                    .foregroundStyle(.secondary)
+            } footer: {
+                Text("Truco e ping pong têm regras ajustáveis.")
+            }
+        }
+    }
+
+    private var editable: some View {
         Form {
             Section {
                 Picker("Regras", selection: selection) {
@@ -422,6 +454,8 @@ struct ProtoRegrasC: View {
     @ViewBuilder
     private var sentence: some View {
         switch lib.sport {
+        case .beachTennis, .tennis:
+            Text(lib.draft.summary(lib.sport))
         case .pingPong:
             VStack(alignment: .leading, spacing: 4) {
                 inline("Sets de ", chip("\(lib.draft.pointsPerSet)") {

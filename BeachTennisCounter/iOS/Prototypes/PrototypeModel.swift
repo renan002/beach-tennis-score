@@ -11,11 +11,37 @@ import SwiftUI
 
 // MARK: - Throwaway domain
 
+/// All four sports of #61, in the order the app would list them — including the
+/// two whose Rulesets are **frozen**. Prototyping the sport axis with only the
+/// two editable sports is what hid the problem the first time round.
 enum ProtoSport: String, CaseIterable, Identifiable {
+    case beachTennis = "Beach Tennis"
+    case tennis = "Tennis"
     case pingPong = "Ping pong"
     case truco = "Truco"
 
     var id: String { rawValue }
+
+    /// Beach tennis and tennis ship frozen built-in Rulesets that reproduce
+    /// today's behaviour exactly (#61). They have Regras — they just have
+    /// nothing to change.
+    var isEditable: Bool {
+        switch self {
+        case .beachTennis, .tennis: return false
+        case .pingPong, .truco: return true
+        }
+    }
+
+    static var editable: [ProtoSport] { allCases.filter(\.isEditable) }
+
+    var icon: String {
+        switch self {
+        case .beachTennis: return "beach.umbrella"
+        case .tennis: return "figure.tennis"
+        case .pingPong: return "figure.table.tennis"
+        case .truco: return "suit.spade.fill"
+        }
+    }
 }
 
 enum ProtoServe: String, CaseIterable, Identifiable {
@@ -47,6 +73,10 @@ struct ProtoRuleset: Identifiable, Equatable {
     /// summary line by Variant B.
     func summary(_ sport: ProtoSport) -> String {
         switch sport {
+        case .beachTennis:
+            return "6 sets · ponto de ouro no 40-40 · super tiebreak no 6-6"
+        case .tennis:
+            return "melhor de 3 sets · tiebreak no 6-6"
         case .pingPong:
             return "\(pointsPerSet) pontos · melhor de \(bestOf) · saque \(serve.rawValue.lowercased())"
         case .truco:
@@ -59,6 +89,10 @@ struct ProtoRuleset: Identifiable, Equatable {
 
     static func presets(_ sport: ProtoSport) -> [ProtoRuleset] {
         switch sport {
+        case .beachTennis:
+            return [ProtoRuleset(name: "Padrão", isPreset: true)]
+        case .tennis:
+            return [ProtoRuleset(name: "Padrão", isPreset: true)]
         case .pingPong:
             return [
                 ProtoRuleset(name: "Oficial", isPreset: true, pointsPerSet: 11, bestOf: 5, serve: .every2),
@@ -78,6 +112,8 @@ struct ProtoRuleset: Identifiable, Equatable {
     /// library hides exactly the density question #126 asks.
     static func customs(_ sport: ProtoSport) -> [ProtoRuleset] {
         switch sport {
+        case .beachTennis, .tennis:
+            return []
         case .pingPong:
             return [ProtoRuleset(name: "Escritório", pointsPerSet: 21, bestOf: 1, serve: .rally)]
         case .truco:
@@ -92,6 +128,8 @@ struct ProtoRuleset: Identifiable, Equatable {
     /// "Personalizado" the moment a knob moves.
     func sameKnobs(as other: ProtoRuleset, _ sport: ProtoSport) -> Bool {
         switch sport {
+        case .beachTennis, .tennis:
+            return true
         case .pingPong:
             return pointsPerSet == other.pointsPerSet && bestOf == other.bestOf && serve == other.serve
         case .truco:
@@ -100,20 +138,26 @@ struct ProtoRuleset: Identifiable, Equatable {
     }
 }
 
-/// Shared, in-memory library. No persistence, on purpose (prototype rule 3).
+/// One sport's library. In-memory, no persistence (prototype rule 3).
+///
+/// The sport is fixed at init: each sport keeps its **own** active Ruleset, and
+/// a library that could change sport under you was hiding that. #61 syncs the
+/// active Ruleset of every sport to the watch, so per-sport state is the real
+/// shape, not a prototype convenience.
 @Observable
 final class ProtoLibrary {
-    var sport: ProtoSport = .truco
+    let sport: ProtoSport
     var draft: ProtoRuleset
     var saved: [ProtoRuleset]
     // Stored, not computed: `ProtoRuleset.presets(_:)` mints fresh ids on every
     // call, so identity only survives if the list is built once.
     private var presetList: [ProtoRuleset]
 
-    init() {
-        let initial = ProtoRuleset.presets(.truco)
+    init(sport: ProtoSport) {
+        self.sport = sport
+        let initial = ProtoRuleset.presets(sport)
         presetList = initial
-        saved = ProtoRuleset.customs(.truco)
+        saved = ProtoRuleset.customs(sport)
         draft = initial[0]
         appliedID = initial[0].id
     }
@@ -140,13 +184,6 @@ final class ProtoLibrary {
 
     var isDirty: Bool { applied == nil }
 
-    func switchSport(_ new: ProtoSport) {
-        sport = new
-        presetList = ProtoRuleset.presets(new)
-        saved = ProtoRuleset.customs(new)
-        apply(presetList[0])
-    }
-
     func apply(_ ruleset: ProtoRuleset) {
         draft = ruleset
         appliedID = ruleset.id
@@ -163,6 +200,23 @@ final class ProtoLibrary {
 
     func delete(_ ruleset: ProtoRuleset) {
         saved.removeAll { $0.id == ruleset.id }
+    }
+}
+
+/// Every sport's library at once — what the Regras screen actually sits on,
+/// whichever shell wins.
+@Observable
+final class ProtoRegrasStore {
+    private var libraries: [String: ProtoLibrary] = [:]
+
+    init() {
+        for sport in ProtoSport.allCases {
+            libraries[sport.id] = ProtoLibrary(sport: sport)
+        }
+    }
+
+    func library(_ sport: ProtoSport) -> ProtoLibrary {
+        libraries[sport.id]!
     }
 }
 
