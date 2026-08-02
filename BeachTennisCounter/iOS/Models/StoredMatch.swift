@@ -113,13 +113,11 @@ final class StoredMatch {
     }
 
     /// The label for `team`: its stored Team Name, or the localized
-    /// "Team A"/"Team B" fallback when the name is empty. Resolved to a plain
-    /// String here so a user-entered name never reaches the String Catalog —
-    /// only the fallback literal is localized. Mirrors
-    /// `MatchState.teamName(for:)` on the scoring side.
+    /// "Team A"/"Team B" fallback when the name is empty. Forwards to
+    /// `TeamName`, the same rule `MatchState.teamName(for:)` uses on the
+    /// scoring side.
     func teamName(for team: Team) -> String {
-        let name = team == .a ? teamAName : teamBName
-        return name.isEmpty ? team.displayName : name
+        TeamName.resolved(team == .a ? teamAName : teamBName, for: team)
     }
 
     /// The score flanked by the Team Names — "Renan 6 – 3 Visitors".

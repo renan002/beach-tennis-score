@@ -29,9 +29,11 @@ lands in the same Match History.
 _Avoid_: scoreboard, counter (in user-facing pt-BR copy)
 
 **Team Name**:
-The user-set label attached to side A or B of a match; empty means unnamed, and
-the UI falls back to the localized "Team A"/"Team B". Stamped onto the match at
-its start, so renaming in Settings never rewrites a match already played.
+The user-set label attached to side A or B of a match; empty — or only
+whitespace — means unnamed, and the UI falls back to the localized "Team
+A"/"Team B". Capped at twelve characters, counted as the user sees them, so
+emoji count one each. Stamped onto the match at its start, so renaming in
+Settings never rewrites a match already played.
 _Avoid_: player name, team label
 
 **Match History**:
@@ -45,9 +47,16 @@ The sequence of games played within one match, recording who won each game and
 at what score. Belongs to a single match and is meaningless outside it.
 _Avoid_: history, game history
 
+**Match In Progress**:
+The match currently being scored on the watch: its state, its Undo Stack, and
+the effects each interaction produces. Ends when the match ends or is cancelled.
+_Avoid_: current match, active match, session
+
 **Undo Stack**:
 The earlier states of the match currently being scored, kept only so a player
-can take back a point they entered by mistake. Discarded when the match ends.
+can take back a point they entered by mistake. Discarded when the match ends or
+is resumed — a match resumed after the app was killed offers nothing to take
+back.
 _Avoid_: history
 
 ### Scoring units
