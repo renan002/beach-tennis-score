@@ -244,10 +244,6 @@ struct SettingsView: View {
         #endif
     }
 
-    /// Name length cap: keeps the watch serve buttons and history lines from
-    /// truncating. Counts grapheme clusters, so a 12-emoji name is still 12.
-    private static let nameMaxLength = 12
-
     /// The watch last reported that Health access was denied on-watch.
     private var isHealthDenied: Bool {
         phoneSession.watchHealthAuthStatus == .denied
@@ -298,24 +294,21 @@ struct SettingsView: View {
         .padding(.vertical, 4)
     }
 
-    /// Wraps a name binding so typed/pasted input is hard-capped at
-    /// `nameMaxLength` characters. Trimming happens later, on commit.
+    /// Wraps a name binding so typed/pasted input is hard-capped, per
+    /// `TeamName.capped`. Trimming happens later, on commit.
     private func cappedName(_ source: Binding<String>) -> Binding<String> {
         Binding(
             get: { source.wrappedValue },
-            set: { source.wrappedValue = String($0.prefix(Self.nameMaxLength)) }
+            set: { source.wrappedValue = TeamName.capped($0) }
         )
     }
 
-    /// Trims committed names to their canonical stored form: surrounding
-    /// whitespace stripped, whitespace-only collapsing to empty. Runs at the
-    /// commit points (Done / onDisappear) rather than per-keystroke so the
-    /// field stays natural to type in.
+    /// Puts committed names into their canonical stored form. Runs at the commit
+    /// points (Done / onDisappear) rather than per-keystroke so the field stays
+    /// natural to type in.
     private func commitNames() {
-        phoneSession.teamAName = phoneSession.teamAName
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        phoneSession.teamBName = phoneSession.teamBName
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        phoneSession.teamAName = TeamName.committed(phoneSession.teamAName)
+        phoneSession.teamBName = TeamName.committed(phoneSession.teamBName)
     }
 
     private func syncToWatchIfChanged() {
