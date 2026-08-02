@@ -45,9 +45,16 @@ The sequence of games played within one match, recording who won each game and
 at what score. Belongs to a single match and is meaningless outside it.
 _Avoid_: history, game history
 
+**Match In Progress**:
+The match currently being scored on the watch: its state, its Undo Stack, and
+the effects each interaction produces. Ends when the match ends or is cancelled.
+_Avoid_: current match, active match, session
+
 **Undo Stack**:
 The earlier states of the match currently being scored, kept only so a player
-can take back a point they entered by mistake. Discarded when the match ends.
+can take back a point they entered by mistake. Discarded when the match ends or
+is resumed — a match resumed after the app was killed offers nothing to take
+back.
 _Avoid_: history
 
 ### Scoring units

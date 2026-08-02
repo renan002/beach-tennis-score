@@ -73,7 +73,7 @@ enum PointScore: Int, Codable, Sendable, CaseIterable {
     }
 }
 
-struct GameRecord: Codable, Sendable {
+struct GameRecord: Codable, Sendable, Equatable {
     /// The `gameScoreDisplay` a golden-point (beach tennis sudden death) game
     /// records. The only Game Log signal that a game was decided at the golden
     /// point, so `ScoreEngine` writes it and Estatísticas reads it — one literal
@@ -88,7 +88,7 @@ struct GameRecord: Codable, Sendable {
     var gameScoreDisplay: String?
 }
 
-struct SetRecord: Codable, Sendable {
+struct SetRecord: Codable, Sendable, Equatable {
     let setNumber: Int
     let gamesA: Int
     let gamesB: Int
@@ -96,7 +96,7 @@ struct SetRecord: Codable, Sendable {
     let isTiebreak: Bool
 }
 
-struct MatchState: Codable, Sendable {
+struct MatchState: Codable, Sendable, Equatable {
     var matchType: MatchType = .beachTennis
 
     // Current set / beach tennis games
