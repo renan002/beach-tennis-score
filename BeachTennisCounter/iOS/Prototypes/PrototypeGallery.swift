@@ -114,12 +114,12 @@ struct PrototypesToolView: View {
                 NavigationLink {
                     ProtoRegrasShellGallery()
                 } label: {
-                    Label("Regras: 4 esportes — 3 shells", systemImage: "square.grid.2x2")
+                    Label("Regras: esportes — S2 escolhida", systemImage: "square.grid.2x2")
                 }
                 NavigationLink {
                     ProtoRegrasGallery()
                 } label: {
-                    Label("Regras: corpo — 4 variants", systemImage: "slider.horizontal.3")
+                    Label("Regras: corpo — D escolhida", systemImage: "slider.horizontal.3")
                 }
                 NavigationLink {
                     ProtoPlacarGallery()

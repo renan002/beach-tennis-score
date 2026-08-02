@@ -2,11 +2,15 @@ import SwiftUI
 
 // PROTOTYPE — throwaway. Issue #126, question 1: "Regras cabe numa tela?"
 //
-// Three structurally different answers. They disagree about where the knobs
+// Four structurally different answers. They disagree about where the knobs
 // live, not about colours:
 //   A — Lista: presets, salvos and knobs all on one scrolling Form.
 //   B — Galeria: cards on top, read-only summary below, knobs in a sheet.
 //   C — Frase: the Ruleset is one editable sentence; every knob is an inline menu.
+//   D — Menu: A's Ajustes, with the preset list collapsed to one row.  ← ESCOLHIDA
+//
+// **Variant D, inside shell S2** (see PrototypeRegrasShells.swift) is the
+// decided shape. A, B and C stay as the primary source for that decision.
 
 #if DEV_FLAVOR
 
@@ -185,6 +189,7 @@ struct ProtoLadderEditor: View {
 /// The trade the list was paying for: you no longer read every Ruleset's
 /// summary at a glance. The footer buys part of it back by spelling out the
 /// selected one.
+/// ESCOLHIDA — this is the body the real Regras screen is written from.
 struct ProtoRegrasD: View {
     @Bindable var lib: ProtoLibrary
     @State private var saveName = ""

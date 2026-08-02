@@ -9,8 +9,12 @@ import SwiftUI
 //
 // Three shells, same body (Variant D) inside each:
 //   S1 — Abas: a TabView, one tab per sport.
-//   S2 — Lista: Regras is a list of sports; each pushes its own screen.
+//   S2 — Lista: Regras is a list of sports; each pushes its own screen.  ← ESCOLHIDA
 //   S3 — Menu: one screen, sport chosen by a `.menu` row above the Ruleset row.
+//
+// **S2 + Variant D is the decided shape** for the Regras screen. S1 and S3
+// stay here because this branch is the primary source for the decision — they
+// do not come along when the real screen is written.
 
 #if DEV_FLAVOR
 
