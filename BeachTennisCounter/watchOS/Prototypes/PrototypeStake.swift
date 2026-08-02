@@ -9,11 +9,15 @@ import WatchKit
 // so the gesture is judged, not the layout.
 //
 //   A — Toque = +1, toque longo = seletor. The design #61 proposes.
-//   B — Coroa digital escolhe o valor, toque credita. No long press at all.
+//   B — Coroa digital escolhe o valor, toque credita. No long press at all.  ← ESCOLHIDA
 //   C — Toque = +1 sempre; a última entrada vira um chip promovível.
 //
 // Run this ON THE WRIST, wrong hand, arm moving. The simulator cannot answer
 // this question; it can only show that the views draw.
+//
+// **Variant B is the decided shape.** Judged on the wrist, which is the only
+// place this question could be answered — and it went against what #61's spec
+// had written down, so the spec was edited rather than the finding.
 
 #if DEV_FLAVOR
 
@@ -194,6 +198,7 @@ struct ProtoStakeA: View {
 
 // MARK: - B — Coroa digital escolhe o valor
 
+/// ESCOLHIDA — this is the interaction the real truco ScoreView is written from.
 struct ProtoStakeB: View {
     @State private var match = ProtoStakeMatch()
     @State private var rung: Double = 0
@@ -308,7 +313,7 @@ struct ProtoStakeGallery: View {
     var body: some View {
         List {
             NavigationLink("A — toque longo") { ProtoStakeA() }
-            NavigationLink("B — coroa digital") { ProtoStakeB() }
+            NavigationLink("B — coroa digital (escolhida)") { ProtoStakeB() }
             NavigationLink("C — chip corrige") { ProtoStakeC() }
         }
         .navigationTitle("#126")
