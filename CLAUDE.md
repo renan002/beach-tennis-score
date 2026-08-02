@@ -140,8 +140,11 @@ sheet correctly reports Pro as unavailable.
 
 ### Platform split for Color helpers
 
+- **Shared:** `HexColor.components(_:)` is the only place a hex string is parsed — Foundation only, no `Color`, so the parsing is testable. The watch layer is reachable by no test, so a decode written there is a decode nobody can assert on; that is why the parsing moved and the `Color` wrappers stayed.
 - **iOS only:** `Color.toHex()` uses `UIColor` — lives in `PhoneSessionManager.swift`.
 - **watchOS only:** `Color(hex:)` decode-only — lives in `WatchSessionManager.swift`. No `toHex()` on watch.
+
+Both `Color(hex:)` initializers wrap `HexColor` and keep **different failure conventions on purpose**: the watch's is failable because it decodes colours synced from the phone, which can arrive garbled, and its two call sites fall back to red and blue; the phone's is non-failable, falling back to black, because it decodes its own literals and its own stored values. Don't unify them — the duplication is two lines and the divergence is the point.
 
 ## Localization
 
