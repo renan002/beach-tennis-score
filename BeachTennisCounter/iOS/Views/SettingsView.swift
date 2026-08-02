@@ -13,7 +13,7 @@ struct SettingsView: View {
     @EnvironmentObject private var phoneSession: PhoneSessionManager
     @EnvironmentObject private var pro: ProEntitlement
     @AppStorage("appTheme") private var appTheme: AppTheme = .system
-    @AppStorage("sportSetting") private var sportSetting: String = "beachTennis"
+    @AppStorage("sportSetting") private var sportSetting: String = WatchSettings.defaultSportSetting.rawValue
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @State private var syncedSettings: WatchSettings?
@@ -26,15 +26,18 @@ struct SettingsView: View {
             Form {
                 Section {
                     Picker("Modality", selection: sportBinding) {
-                        Text("Beach Tennis").tag("beachTennis")
-                        Text("Tennis").tag("tennis")
-                        multipleOption
+                        ForEach(SportSetting.allCases, id: \.self) { setting in
+                            sportOption(setting)
+                        }
                     }
                     .pickerStyle(.menu)
                 } header: {
                     Text("Sport")
                 } footer: {
-                    Text(sportSettingFooter)
+                    // The effective setting, matching the picker: promising that
+                    // the watch will ask before each match would be a lie while
+                    // Vários is locked.
+                    Text(effectiveSportSetting.settingsFooter)
                 }
 
                 Section("Teams") {
@@ -179,16 +182,16 @@ struct SettingsView: View {
 
     // MARK: - Modality
 
-    /// Vários, locked for free users: visible in the menu — the point of a
+    /// One row per setting, all of them named by the type. Vários is locked for
+    /// free users: it stays visible in the menu — the point of a
     /// locked-but-visible option is that it advertises what Pro buys — with a
     /// padlock rather than a checkmark's worth of silence.
     @ViewBuilder
-    private var multipleOption: some View {
-        if pro.isPro {
-            Text("Multiple").tag(PhoneSessionManager.proOnlySportSetting)
+    private func sportOption(_ setting: SportSetting) -> some View {
+        if setting == PhoneSessionManager.proOnlySportSetting && !pro.isPro {
+            Label(setting.displayName, systemImage: "lock.fill").tag(setting)
         } else {
-            Label("Multiple", systemImage: "lock.fill")
-                .tag(PhoneSessionManager.proOnlySportSetting)
+            Text(setting.displayName).tag(setting)
         }
     }
 
@@ -205,29 +208,23 @@ struct SettingsView: View {
     /// `true` for everybody, so the lock, the padlock and the tap-through all
     /// disappear on their own and Vários is freely selectable exactly as it is
     /// today.
-    private var sportBinding: Binding<String> {
+    private var sportBinding: Binding<SportSetting> {
         Binding(
-            get: {
-                PhoneSessionManager.effectiveSportSetting(sportSetting, isPro: pro.isPro)
-            },
+            get: { effectiveSportSetting },
             set: { selected in
                 guard selected != PhoneSessionManager.proOnlySportSetting || pro.isPro else {
                     showProSheet = true
                     return
                 }
-                sportSetting = selected
+                sportSetting = selected.rawValue
             }
         )
     }
 
-    private var sportSettingFooter: String {
-        // The effective value, matching the picker: promising that the watch
-        // will ask before each match would be a lie while Vários is locked.
-        switch PhoneSessionManager.effectiveSportSetting(sportSetting, isPro: pro.isPro) {
-        case "tennis":    return String(localized: "The Watch will always start a Tennis match.")
-        case "multiple":  return String(localized: "The Watch will ask which sport before each match.")
-        default:          return String(localized: "The Watch will always start a Beach Tennis match.")
-        }
+    /// The setting that actually applies — the stored one unless Pro is gating
+    /// it. Storage stays a raw token; everything read off it is the type.
+    private var effectiveSportSetting: SportSetting {
+        PhoneSessionManager.effectiveSportSetting(sportSetting, isPro: pro.isPro)
     }
 
     /// The version string for the Settings footer, carrying a `DEV` marker on

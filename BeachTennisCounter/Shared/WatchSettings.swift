@@ -9,7 +9,7 @@ import Foundation
 struct WatchSettings: Sendable, Equatable {
     static let defaultTeamAColorHex = "E74C3C"
     static let defaultTeamBColorHex = "5B8DEF"
-    static let defaultSportSetting = "beachTennis"
+    static let defaultSportSetting = SportSetting.default
     /// Default team names are empty — the watch serve buttons fall back to the
     /// localized "Team A"/"Team B" literals when a name is empty.
     static let defaultTeamAName = ""
@@ -18,7 +18,7 @@ struct WatchSettings: Sendable, Equatable {
 
     let teamAColorHex: String
     let teamBColorHex: String
-    let sportSetting: String
+    let sportSetting: SportSetting
     let teamAName: String
     let teamBName: String
     let healthMonitoringEnabled: Bool
@@ -26,7 +26,7 @@ struct WatchSettings: Sendable, Equatable {
     init(
         teamAColorHex: String,
         teamBColorHex: String,
-        sportSetting: String,
+        sportSetting: SportSetting,
         teamAName: String = defaultTeamAName,
         teamBName: String = defaultTeamBName,
         healthMonitoringEnabled: Bool = defaultHealthMonitoringEnabled
@@ -43,7 +43,7 @@ struct WatchSettings: Sendable, Equatable {
         [
             WatchMessageKey.teamAColor: teamAColorHex,
             WatchMessageKey.teamBColor: teamBColorHex,
-            WatchMessageKey.sportSetting: sportSetting,
+            WatchMessageKey.sportSetting: sportSetting.rawValue,
             WatchMessageKey.teamAName: teamAName,
             WatchMessageKey.teamBName: teamBName,
             WatchMessageKey.healthMonitoring: healthMonitoringEnabled
@@ -57,7 +57,8 @@ struct WatchSettings: Sendable, Equatable {
         WatchSettings(
             teamAColorHex: dict[WatchMessageKey.teamAColor] as? String ?? defaultTeamAColorHex,
             teamBColorHex: dict[WatchMessageKey.teamBColor] as? String ?? defaultTeamBColorHex,
-            sportSetting: dict[WatchMessageKey.sportSetting] as? String ?? defaultSportSetting,
+            sportSetting: (dict[WatchMessageKey.sportSetting] as? String)
+                .map(SportSetting.init(storedToken:)) ?? defaultSportSetting,
             teamAName: dict[WatchMessageKey.teamAName] as? String ?? defaultTeamAName,
             teamBName: dict[WatchMessageKey.teamBName] as? String ?? defaultTeamBName,
             healthMonitoringEnabled: dict[WatchMessageKey.healthMonitoring] as? Bool ?? defaultHealthMonitoringEnabled

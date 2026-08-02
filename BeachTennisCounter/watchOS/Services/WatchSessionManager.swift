@@ -8,7 +8,7 @@ final class WatchSessionManager: NSObject, ObservableObject {
 
     @Published var teamAColor: Color = .red
     @Published var teamBColor: Color = .blue
-    @Published var sportSetting: String = "beachTennis"
+    @Published var sportSetting: SportSetting = WatchSettings.defaultSportSetting
     @Published var teamAName: String = WatchSettings.defaultTeamAName
     @Published var teamBName: String = WatchSettings.defaultTeamBName
     @Published var healthMonitoringEnabled: Bool = WatchSettings.defaultHealthMonitoringEnabled
