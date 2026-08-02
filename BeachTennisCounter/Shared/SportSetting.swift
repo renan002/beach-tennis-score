@@ -10,7 +10,7 @@ import Foundation
 /// The raw values are storage keys: they are written to `UserDefaults` on the
 /// phone and travel to the watch in the application context. Shipped builds
 /// persisted them, so they are never localized and never renamed.
-enum SportSetting: String, Codable, Sendable, CaseIterable {
+enum SportSetting: String, Sendable, CaseIterable {
     case beachTennis = "beachTennis"
     case tennis = "tennis"
     /// Vários — the watch asks which sport before each match instead of playing

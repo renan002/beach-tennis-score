@@ -9,7 +9,10 @@ final class PhoneSessionManager: NSObject, ObservableObject {
 
     @AppStorage("teamAColorHex") var teamAColorHex: String = WatchSettings.defaultTeamAColorHex
     @AppStorage("teamBColorHex") var teamBColorHex: String = WatchSettings.defaultTeamBColorHex
-    @AppStorage("sportSetting") var sportSetting: String = WatchSettings.defaultSportSetting.rawValue
+    /// Persisted as its raw token — `@AppStorage` stores a `RawRepresentable`
+    /// by its raw value, and hands back the default for anything it can't
+    /// decode, which is the same fallback `SportSetting(storedToken:)` applies.
+    @AppStorage("sportSetting") var sportSetting: SportSetting = WatchSettings.defaultSportSetting
     @AppStorage("teamAName") var teamAName: String = WatchSettings.defaultTeamAName
     @AppStorage("teamBName") var teamBName: String = WatchSettings.defaultTeamBName
     @AppStorage("healthMonitoringEnabled") var healthMonitoringEnabled: Bool = WatchSettings.defaultHealthMonitoringEnabled
@@ -58,9 +61,8 @@ final class PhoneSessionManager: NSObject, ObservableObject {
     ///
     /// Pure and static so both answers are testable — including the dark one,
     /// where `isPro` is `true` for everybody and this is the identity.
-    nonisolated static func effectiveSportSetting(_ stored: String, isPro: Bool) -> SportSetting {
-        let setting = SportSetting(storedToken: stored)
-        guard setting == proOnlySportSetting, !isPro else { return setting }
+    nonisolated static func effectiveSportSetting(_ stored: SportSetting, isPro: Bool) -> SportSetting {
+        guard stored == proOnlySportSetting, !isPro else { return stored }
         return WatchSettings.defaultSportSetting
     }
 

@@ -13,7 +13,7 @@ struct SettingsView: View {
     @EnvironmentObject private var phoneSession: PhoneSessionManager
     @EnvironmentObject private var pro: ProEntitlement
     @AppStorage("appTheme") private var appTheme: AppTheme = .system
-    @AppStorage("sportSetting") private var sportSetting: String = WatchSettings.defaultSportSetting.rawValue
+    @AppStorage("sportSetting") private var sportSetting: SportSetting = WatchSettings.defaultSportSetting
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @State private var syncedSettings: WatchSettings?
@@ -216,7 +216,7 @@ struct SettingsView: View {
                     showProSheet = true
                     return
                 }
-                sportSetting = selected.rawValue
+                sportSetting = selected
             }
         )
     }

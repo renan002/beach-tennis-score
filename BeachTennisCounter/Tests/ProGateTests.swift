@@ -14,7 +14,7 @@ final class ProGateTests: XCTestCase {
 
     func testMultipleIsAllowedWithPro() {
         XCTAssertEqual(
-            PhoneSessionManager.effectiveSportSetting(multiple.rawValue, isPro: true),
+            PhoneSessionManager.effectiveSportSetting(multiple, isPro: true),
             multiple
         )
     }
@@ -25,7 +25,7 @@ final class ProGateTests: XCTestCase {
     /// paid behaviour. The watch is told the default instead.
     func testMultipleFallsBackToTheDefaultWithoutPro() {
         XCTAssertEqual(
-            PhoneSessionManager.effectiveSportSetting(multiple.rawValue, isPro: false),
+            PhoneSessionManager.effectiveSportSetting(multiple, isPro: false),
             WatchSettings.defaultSportSetting
         )
     }
@@ -37,7 +37,7 @@ final class ProGateTests: XCTestCase {
         for sport in [SportSetting.beachTennis, .tennis] {
             for isPro in [true, false] {
                 XCTAssertEqual(
-                    PhoneSessionManager.effectiveSportSetting(sport.rawValue, isPro: isPro),
+                    PhoneSessionManager.effectiveSportSetting(sport, isPro: isPro),
                     sport,
                     "\(sport) was rewritten with isPro=\(isPro) — only Vários is gated"
                 )
@@ -45,17 +45,10 @@ final class ProGateTests: XCTestCase {
         }
     }
 
-    /// An unrecognised stored token is the default, in both entitlement states:
-    /// the gate decodes through `SportSetting`, which is where that fallback
-    /// lives, so the gate itself decides nothing extra about unknown values.
-    func testAnUnknownSettingIsTheDefault() {
-        for isPro in [true, false] {
-            XCTAssertEqual(
-                PhoneSessionManager.effectiveSportSetting("pingPong", isPro: isPro),
-                WatchSettings.defaultSportSetting
-            )
-        }
-    }
+    // An unrecognised stored token no longer reaches this gate: the value is a
+    // `SportSetting`, decoded at the storage and wire boundaries, so there is
+    // no unknown case left to decide about. `SportSettingTests` covers that
+    // fallback, and `WatchSettingsTests` covers it on the wire.
 
     /// The gated setting is the one the picker persists and the watch reads —
     /// a storage key, never displayed and never translated. `SportSettingTests`
