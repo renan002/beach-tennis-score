@@ -76,13 +76,15 @@ struct ProtoPlacarGallery: View {
     @State private var match = ProtoTrucoMatch()
     @State private var variant = 0
 
-    private let names = ["A — Mesa", "B — Placar", "C — Caderno"]
+    // D first: it is the mix the review asked for, so it is what opens.
+    private let names = ["D — Placar + caderno", "A — Mesa", "B — Placar", "C — Caderno"]
 
     var body: some View {
         Group {
             switch variant {
-            case 0: ProtoPlacarA(match: match)
-            case 1: ProtoPlacarB(match: match)
+            case 0: ProtoPlacarD(match: match)
+            case 1: ProtoPlacarA(match: match)
+            case 2: ProtoPlacarB(match: match)
             default: ProtoPlacarC(match: match)
             }
         }
@@ -124,7 +126,7 @@ struct PrototypesToolView: View {
                 NavigationLink {
                     ProtoPlacarGallery()
                 } label: {
-                    Label("Placar de truco — 3 variants", systemImage: "suit.spade")
+                    Label("Placar de truco — 4 variants", systemImage: "suit.spade")
                 }
             } header: {
                 Text("Issue #126")

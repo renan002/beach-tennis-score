@@ -6,6 +6,8 @@ import SwiftUI
 //   A — Mesa: screen split in half, opponent's half rotated 180°, tap anywhere.
 //   B — Placar: two columns side by side, value chosen first on a standing bar.
 //   C — Caderno: small scores, the Game Log is the screen, entries editable.
+//   D — Placar + caderno: B's columns and standing value bar, with C's mão
+//       history in between. The mix asked for after seeing all three.
 
 #if DEV_FLAVOR
 
@@ -281,6 +283,143 @@ struct ProtoPlacarC: View {
         } primaryAction: {
             withAnimation { match.add(team, match.ruleset.base) }
         }
+    }
+}
+
+// MARK: - D — Placar + caderno
+
+/// The mix: B's scoreboard and standing "Valor da mão" bar, with C's mão
+/// history sitting between them.
+///
+/// The thing to judge is whether the middle earns its space. B gave the whole
+/// screen to two numbers; C gave it to the log. Here they split it, so the
+/// numbers are smaller than B's and the log shows fewer rows than C's — the
+/// question is whether both are still doing their job at that size.
+///
+/// The value bar stays B's: no hidden gesture anywhere on this screen, value
+/// first and then the team. Editing a past mão stays C's Menu, so the argument
+/// ("quem fez aquela de seis?") is still settled without undoing forward.
+struct ProtoPlacarD: View {
+    @Bindable var match: ProtoTrucoMatch
+    @State private var pending: Int = 1
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 2) {
+                column(team: 0, color: .blue)
+                column(team: 1, color: .red)
+            }
+            .frame(height: 190)
+
+            historyList
+
+            valueBar
+        }
+        .onAppear { pending = match.ruleset.base }
+    }
+
+    /// Tapping a column credits whatever the bar has selected, then the bar
+    /// snaps back to the base value — a mão of 1 is the common case and should
+    /// never be left armed at 12 by accident.
+    private func column(team: Int, color: Color) -> some View {
+        Button {
+            withAnimation { match.add(team, pending) }
+            pending = match.ruleset.base
+        } label: {
+            VStack(spacing: 2) {
+                Text(match.names[team])
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.85))
+                Text("\(match.score(team))")
+                    .font(.system(size: 82, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .contentTransition(.numericText())
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(color.opacity(0.85))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var historyList: some View {
+        List {
+            ForEach(Array(match.log.enumerated().reversed()), id: \.element.id) { index, manche in
+                HStack {
+                    Text("Mão \(index + 1)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text(match.names[manche.team])
+                        .font(.body.weight(.medium))
+                        .foregroundStyle(manche.team == 0 ? .blue : .red)
+                    Menu("\(manche.value)") {
+                        ForEach(match.values, id: \.self) { value in
+                            Button("\(value)") { match.log[index].value = value }
+                        }
+                    }
+                    .font(.body.weight(.bold).monospacedDigit())
+                    .frame(width: 44)
+                }
+                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 12))
+            }
+            .onDelete { offsets in
+                // The list is reversed; map back before deleting.
+                let real = offsets.map { match.log.count - 1 - $0 }
+                for i in real.sorted(by: >) { match.log.remove(at: i) }
+            }
+        }
+        .listStyle(.plain)
+        .overlay {
+            if match.log.isEmpty {
+                ContentUnavailableView(
+                    "Nenhuma mão",
+                    systemImage: "list.bullet",
+                    description: Text("Escolha o valor abaixo e toque na dupla.")
+                )
+            }
+        }
+    }
+
+    private var valueBar: some View {
+        VStack(spacing: 12) {
+            Text("Valor da mão")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+
+            HStack(spacing: 8) {
+                ForEach(match.values, id: \.self) { value in
+                    Button {
+                        pending = value
+                    } label: {
+                        Text("\(value)")
+                            .font(.title2.weight(.bold).monospacedDigit())
+                            .frame(maxWidth: .infinity, minHeight: 54)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(pending == value ? AnyShapeStyle(.tint) : AnyShapeStyle(.quaternary))
+                            )
+                            .foregroundStyle(pending == value ? .white : .primary)
+                    }
+                }
+            }
+
+            HStack {
+                Button("Desfazer") { match.undo() }
+                    .disabled(match.log.isEmpty)
+                Spacer()
+                Text("Jogo até \(match.ruleset.target)")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Button("Zerar") { match.reset() }
+            }
+            .font(.footnote)
+            // Clear of the variant switcher, which floats over the bottom edge.
+            // Prototype scaffolding only — the real screen would end here.
+            .padding(.bottom, 88)
+        }
+        .padding([.horizontal, .top])
+        .background(.thinMaterial)
     }
 }
 
