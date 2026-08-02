@@ -9,11 +9,16 @@ struct ScoreView: View {
     let matchType: MatchType
     @Binding var isActive: Bool
 
-    @State private var state: MatchState
-    @State private var history: [MatchState] = []
+    /// The Match being scored. It owns the state, the Undo Stack and the order
+    /// the effects below run in; this screen only carries them out.
+    @State private var match: MatchInProgress
+
+    // Presentation only — none of this is Match state.
     @State private var showMatchOver = false
     @State private var showHistory = false
     @State private var showCancelAlert = false
+
+    private var state: MatchState { match.state }
 
     /// Starts a fresh match, stamping the synced Team Names at match start.
     init(
@@ -25,20 +30,21 @@ struct ScoreView: View {
     ) {
         self.matchType = matchType
         self._isActive = isActive
-        _state = State(initialValue: MatchState.newMatch(
+        _match = State(initialValue: MatchInProgress(state: MatchState.newMatch(
             matchType: matchType,
             initialServer: initialServer,
             teamAName: teamAName,
             teamBName: teamBName
-        ))
+        )))
     }
 
     /// Resumes a persisted match. The restored state carries its own stamped
-    /// names and serve wiring, so no fresh-match params apply here.
+    /// names and serve wiring, so no fresh-match params apply here — and it
+    /// brings no Undo Stack, so the point played before the app died stays.
     init(restoredState: MatchState, isActive: Binding<Bool>) {
         self.matchType = restoredState.matchType
         self._isActive = isActive
-        _state = State(initialValue: restoredState)
+        _match = State(initialValue: MatchInProgress(state: restoredState))
     }
 
     var body: some View {
@@ -53,22 +59,7 @@ struct ScoreView: View {
         }
         .navigationBarHidden(true)
         .onAppear {
-            MatchPersistence.save(state)
-            workoutManager.matchDidStart(monitoringEnabled: sessionManager.healthMonitoringEnabled)
-        }
-        .onChange(of: state.isMatchOver) { _, isOver in
-            guard isOver else { return }
-            showMatchOver = true
-            // Snapshot stats synchronously first so the result send never waits on
-            // HealthKit, then end/finish the workout asynchronously.
-            let stats = workoutManager.snapshotStats()
-            sessionManager.sendMatchResult(
-                state,
-                duration: Date().timeIntervalSince(state.matchStartDate),
-                activeCalories: stats.activeCalories,
-                avgHeartRate: stats.avgHeartRate
-            )
-            workoutManager.endAndFinish()
+            perform(match.start())
         }
         .sheet(isPresented: $showHistory) {
             MatchHistoryView(history: state.gameHistory, matchType: matchType)
@@ -76,10 +67,7 @@ struct ScoreView: View {
         }
         .alert("Cancel Match?", isPresented: $showCancelAlert) {
             Button("End Match", role: .destructive) {
-                // Below ~2 min the workout is discarded (accidental start), above it
-                // is saved (real exercise); the manager applies the policy.
-                workoutManager.cancelWorkout(elapsed: Date().timeIntervalSince(state.matchStartDate))
-                MatchPersistence.clear()
+                perform(match.cancel())
                 isActive = false
             }
             Button("Keep Playing", role: .cancel) {}
@@ -116,10 +104,10 @@ struct ScoreView: View {
                 Button(action: undoLast) {
                     Image(systemName: "arrow.uturn.backward")
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(history.isEmpty ? .gray : .white)
+                        .foregroundStyle(match.canUndo ? .white : .gray)
                 }
                 .buttonStyle(.plain)
-                .disabled(history.isEmpty)
+                .disabled(!match.canUndo)
                 .padding(.leading, 6)
                 Spacer()
                 // Live heart rate mirrors the undo arrow. Rendered only while a
@@ -309,16 +297,58 @@ struct ScoreView: View {
     // MARK: - Actions
 
     private func awardPoint(to team: Team) {
-        history.append(state)
-        ScoreEngine.awardPoint(to: team, state: &state)
-        MatchPersistence.save(state)
-        WKInterfaceDevice.current().play(.click)
+        perform(match.awardPoint(to: team))
+        showMatchOver = match.state.isMatchOver
     }
 
     private func undoLast() {
-        guard let previous = history.popLast() else { return }
-        state = previous
-        MatchPersistence.save(state)
-        WKInterfaceDevice.current().play(.click)
+        perform(match.undo())
+    }
+
+    // MARK: - Effects
+
+    /// Carries out what an interaction returned, in the order it returned it.
+    /// This screen decides nothing here — the ordering that matters (the stats
+    /// snapshot riding on the send, before the workout is torn down) is the
+    /// module's, and is tested there.
+    private func perform(_ effects: [MatchInProgress.Effect]) {
+        for effect in effects {
+            switch effect {
+            case .persist:
+                MatchPersistence.save(match.state)
+
+            case .clearPersisted:
+                MatchPersistence.clear()
+
+            case .haptic:
+                WKInterfaceDevice.current().play(.click)
+
+            case .startWorkout:
+                // The monitoring flag is watch-session state, not Match state,
+                // so the screen supplies it here.
+                workoutManager.matchDidStart(
+                    monitoringEnabled: sessionManager.healthMonitoringEnabled
+                )
+
+            case .sendResult(let finished, let duration):
+                // Snapshot synchronously so the send never waits on HealthKit —
+                // and so it happens while the builder still has stats to give.
+                let stats = workoutManager.snapshotStats()
+                sessionManager.sendMatchResult(
+                    finished,
+                    duration: duration,
+                    activeCalories: stats.activeCalories,
+                    avgHeartRate: stats.avgHeartRate
+                )
+
+            case .endWorkout:
+                workoutManager.endAndFinish()
+
+            case .cancelWorkout(let elapsed):
+                // Below ~2 min the workout is discarded (accidental start), above
+                // it is saved (real exercise); the manager applies the policy.
+                workoutManager.cancelWorkout(elapsed: elapsed)
+            }
+        }
     }
 }
