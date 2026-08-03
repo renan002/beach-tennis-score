@@ -79,6 +79,11 @@ Mão and the ladder it climbs once someone calls truco — Paulista counts 1 the
 3, 6, 9, 12; Mineiro counts in twos, base 2 then 4, 6, 10, 12; Gaudério counts 1
 then 2, 3, 4 to a target of 24. Not a score: it is what the winner of the Mão
 collects. User-facing: **Valor** ("Valor da mão").
+The ladder is stored as a plain list of integers — the Presets do not share a
+rung count (4, 4, 3), and ADR 0006 stamps by value, so there is nothing symbolic
+to store. The base value is fixed to 1 or 2; the ladder is picked from the known
+escalations or hand-built, bounded to 1–4 rungs, strictly increasing, first rung
+above the base (issue #141).
 _Avoid_: aposta (the app records a Mão's Valor even when nobody called truco and
 nothing was bet), bet, points (for the stake itself)
 
@@ -98,10 +103,14 @@ table-tennis usage is "melhor de 5 sets", so a ping pong game is displayed as a
 > The truco words are settled (issue #124): the unit is **Mão**, the value is
 > **Valor**, and the match target is **Pontos** ("Pontos para vencer") — not
 > *tentos*, which is authentic but reads regional, and not *Meta*, which nobody
-> says at the table. What is still open is the *shape* of the Stake ladder, not
-> its vocabulary: issue #141 decides whether it is a free list of integers or a
-> fixed four-rung escalation, which also decides whether Gaudério ships as a
-> Preset at all.
+> says at the table.
+
+> Known non-goal: **envido and flor are not modelled** (issue #141). In Gaudério
+> they are side bets settled inside the same deal, worth 1 to 7, and they can go
+> to the side that *loses* the Mão — so recording them means a Mão that credits
+> both duplas, which is a different scoring unit, not a wider Stake ladder.
+> Gaudério still ships as a Preset on its ladder and target; a Mão has exactly
+> one winner, and that is what the definition above says.
 
 **Headline Score**:
 The single pair of numbers that stands for a match's result — in the match list,
