@@ -79,7 +79,16 @@ final class PhoneSessionManager: NSObject, ObservableObject {
                       ),
                       teamAName: teamAName,
                       teamBName: teamBName,
-                      healthMonitoringEnabled: healthMonitoringEnabled)
+                      healthMonitoringEnabled: healthMonitoringEnabled,
+                      rulesetsBlob: encodedActiveRulesets)
+    }
+
+    /// The active Ruleset for every sport, encoded as a blob dictionary. Before
+    /// any Ruleset editing UI exists every sport uses its built-in preset, so
+    /// the dictionary is empty and the watch falls back to presets — no encoding
+    /// traffic for something the watch already knows.
+    private var encodedActiveRulesets: [String: Data] {
+        [:]
     }
 
     func pushSettingsToWatch() {
@@ -157,7 +166,8 @@ extension PhoneSessionManager: WCSessionDelegate {
                 teamAName: payload.teamAName,
                 teamBName: payload.teamBName,
                 activeCalories: payload.activeCalories,
-                avgHeartRate: payload.avgHeartRate
+                avgHeartRate: payload.avgHeartRate,
+                rulesetData: payload.rulesetData
             )
             context.insert(match)
             try? context.save()

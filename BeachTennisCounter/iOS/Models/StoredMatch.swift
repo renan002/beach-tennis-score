@@ -30,6 +30,9 @@ final class StoredMatch {
     // store migrates in place, leaving these null.
     var activeCalories: Double? = nil
     var avgHeartRate: Double? = nil
+    // Ruleset stamped on the match at creation (ADR 0006). Empty data = the
+    // sport's built-in preset, which is also how pre-Ruleset matches decode.
+    var rulesetData: Data = Data()
 
     init(
         id: UUID = UUID(),
@@ -46,7 +49,8 @@ final class StoredMatch {
         teamAName: String = "",
         teamBName: String = "",
         activeCalories: Double? = nil,
-        avgHeartRate: Double? = nil
+        avgHeartRate: Double? = nil,
+        rulesetData: Data = Data()
     ) {
         self.id = id
         self.date = date
@@ -63,6 +67,7 @@ final class StoredMatch {
         self.teamBName = teamBName
         self.activeCalories = activeCalories
         self.avgHeartRate = avgHeartRate
+        self.rulesetData = rulesetData
     }
 
     /// A detached copy for inserting into another context. Copies every
@@ -84,7 +89,8 @@ final class StoredMatch {
             teamAName: other.teamAName,
             teamBName: other.teamBName,
             activeCalories: other.activeCalories,
-            avgHeartRate: other.avgHeartRate
+            avgHeartRate: other.avgHeartRate,
+            rulesetData: other.rulesetData
         )
     }
 
@@ -101,15 +107,30 @@ final class StoredMatch {
         return matches.filter { $0.matchType == type }
     }
 
-    /// True when the match is scored in sets — a tennis match with at least one
-    /// set on the board. Beach tennis never is, and a tennis match abandoned
-    /// inside its first set has no set to show, so both fall back to games.
-    var isSetScored: Bool {
-        matchType == .tennis && (setsWonA > 0 || setsWonB > 0)
+    /// The Ruleset this match was played under. Falls back to the sport's
+    /// built-in preset when `rulesetData` is empty — covering pre-Ruleset
+    /// matches migrated in-place via lightweight migration (default `Data()`).
+    var ruleset: Ruleset {
+        guard !rulesetData.isEmpty,
+              let decoded = try? JSONDecoder().decode(Ruleset.self, from: rulesetData)
+        else { return Ruleset.preset(for: matchType) }
+        return decoded
     }
 
+    /// True when the sport is scored in sets and at least one set is on the
+    /// board. Both `scoreDisplay` and `ResultCard` need this same gate to
+    /// decide whether the headline shows sets or games.
+    var hasCompleteSets: Bool {
+        ruleset.hasSets && (setsWonA > 0 || setsWonB > 0)
+    }
+
+    /// The headline score pair: sets when the sport has sets and at least one
+    /// is complete, games otherwise.
     var scoreDisplay: String {
-        isSetScored ? "\(setsWonA) – \(setsWonB)" : "\(setScoreA) – \(setScoreB)"
+        if hasCompleteSets {
+            return "\(setsWonA) – \(setsWonB)"
+        }
+        return "\(setScoreA) – \(setScoreB)"
     }
 
     /// The label for `team`: its stored Team Name, or the localized

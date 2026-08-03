@@ -54,7 +54,7 @@ struct ResultCard: Sendable, Equatable {
         teamAName = match.teamName(for: .a)
         teamBName = match.teamName(for: .b)
 
-        if match.isSetScored {
+        if match.hasCompleteSets {
             let sets = match.setHistory
             scoreA = match.setsWonA
             scoreB = match.setsWonB
