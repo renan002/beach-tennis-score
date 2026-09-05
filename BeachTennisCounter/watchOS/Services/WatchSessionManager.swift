@@ -32,6 +32,7 @@ final class WatchSessionManager: NSObject, ObservableObject {
     ) {
         guard let winner = state.winner else { return }
 
+        let rulesetData = (try? JSONEncoder().encode(state.ruleset)) ?? Data()
         let payload = MatchResultPayload(
             matchId: UUID(),
             setScoreA: state.setScoreA,
@@ -47,7 +48,8 @@ final class WatchSessionManager: NSObject, ObservableObject {
             teamAName: state.teamAName,
             teamBName: state.teamBName,
             activeCalories: activeCalories,
-            avgHeartRate: avgHeartRate
+            avgHeartRate: avgHeartRate,
+            rulesetData: rulesetData
         )
 
         guard WCSession.default.activationState == .activated else {

@@ -22,6 +22,10 @@ struct WatchSettings: Sendable, Equatable {
     let teamAName: String
     let teamBName: String
     let healthMonitoringEnabled: Bool
+    /// Encoded active Ruleset per sport: `[sportRawValue: encodedRuleset]`.
+    /// Empty dictionary means presets for every sport, which is the default
+    /// before any Ruleset editing UI exists.
+    let rulesetsBlob: [String: Data]
 
     init(
         teamAColorHex: String,
@@ -29,7 +33,8 @@ struct WatchSettings: Sendable, Equatable {
         sportSetting: SportSetting,
         teamAName: String = defaultTeamAName,
         teamBName: String = defaultTeamBName,
-        healthMonitoringEnabled: Bool = defaultHealthMonitoringEnabled
+        healthMonitoringEnabled: Bool = defaultHealthMonitoringEnabled,
+        rulesetsBlob: [String: Data] = [:]
     ) {
         self.teamAColorHex = teamAColorHex
         self.teamBColorHex = teamBColorHex
@@ -37,10 +42,11 @@ struct WatchSettings: Sendable, Equatable {
         self.teamAName = teamAName
         self.teamBName = teamBName
         self.healthMonitoringEnabled = healthMonitoringEnabled
+        self.rulesetsBlob = rulesetsBlob
     }
 
     func toApplicationContext() -> [String: Any] {
-        [
+        var dict: [String: Any] = [
             WatchMessageKey.teamAColor: teamAColorHex,
             WatchMessageKey.teamBColor: teamBColorHex,
             WatchMessageKey.sportSetting: sportSetting.rawValue,
@@ -48,20 +54,33 @@ struct WatchSettings: Sendable, Equatable {
             WatchMessageKey.teamBName: teamBName,
             WatchMessageKey.healthMonitoring: healthMonitoringEnabled
         ]
+        if !rulesetsBlob.isEmpty,
+           let data = try? JSONEncoder().encode(rulesetsBlob) {
+            dict[WatchMessageKey.rulesetData] = data
+        }
+        return dict
     }
 
     /// Decodes a settings context. Always succeeds: a missing or garbled key falls
     /// back to the default above. Callers decide whether a context is worth applying
     /// at all — an empty context means "no settings received", not "reset to defaults".
     static func from(_ dict: [String: Any]) -> WatchSettings {
-        WatchSettings(
+        let rulesetsBlob: [String: Data]
+        if let data = dict[WatchMessageKey.rulesetData] as? Data,
+           let decoded = try? JSONDecoder().decode([String: Data].self, from: data) {
+            rulesetsBlob = decoded
+        } else {
+            rulesetsBlob = [:]
+        }
+        return WatchSettings(
             teamAColorHex: dict[WatchMessageKey.teamAColor] as? String ?? defaultTeamAColorHex,
             teamBColorHex: dict[WatchMessageKey.teamBColor] as? String ?? defaultTeamBColorHex,
             sportSetting: (dict[WatchMessageKey.sportSetting] as? String)
                 .map(SportSetting.init(storedToken:)) ?? defaultSportSetting,
             teamAName: dict[WatchMessageKey.teamAName] as? String ?? defaultTeamAName,
             teamBName: dict[WatchMessageKey.teamBName] as? String ?? defaultTeamBName,
-            healthMonitoringEnabled: dict[WatchMessageKey.healthMonitoring] as? Bool ?? defaultHealthMonitoringEnabled
+            healthMonitoringEnabled: dict[WatchMessageKey.healthMonitoring] as? Bool ?? defaultHealthMonitoringEnabled,
+            rulesetsBlob: rulesetsBlob
         )
     }
 }

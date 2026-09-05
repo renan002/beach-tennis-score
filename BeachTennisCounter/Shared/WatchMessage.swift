@@ -22,6 +22,7 @@ enum WatchMessageKey {
     static let avgHeartRate = "avgHeartRate"
     static let healthMonitoring = "healthMonitoring"
     static let healthAuthStatus = "healthAuthStatus"
+    static let rulesetData = "rulesetData"
 }
 
 enum WatchMessageType {
@@ -72,6 +73,9 @@ struct MatchResultPayload: Codable, Sendable {
     // pre-feature payload. Second decode tier, same as the team names above.
     let activeCalories: Double?
     let avgHeartRate: Double?
+    // The Ruleset stamped on the match at creation. Empty data = sport's preset,
+    // which is also what a pre-Ruleset watch sends.
+    let rulesetData: Data
 
     init(
         matchId: UUID,
@@ -88,7 +92,8 @@ struct MatchResultPayload: Codable, Sendable {
         teamAName: String,
         teamBName: String,
         activeCalories: Double? = nil,
-        avgHeartRate: Double? = nil
+        avgHeartRate: Double? = nil,
+        rulesetData: Data = Data()
     ) {
         self.matchId = matchId
         self.setScoreA = setScoreA
@@ -105,6 +110,7 @@ struct MatchResultPayload: Codable, Sendable {
         self.teamBName = teamBName
         self.activeCalories = activeCalories
         self.avgHeartRate = avgHeartRate
+        self.rulesetData = rulesetData
     }
 
     func toDictionary() -> [String: Any] {
@@ -130,6 +136,7 @@ struct MatchResultPayload: Codable, Sendable {
         if let data = try? JSONEncoder().encode(setHistory) {
             dict[WatchMessageKey.setHistory] = data
         }
+        dict[WatchMessageKey.rulesetData] = rulesetData
         return dict
     }
 
@@ -158,6 +165,8 @@ struct MatchResultPayload: Codable, Sendable {
         let activeCalories = dict[WatchMessageKey.activeCalories] as? Double
         let avgHeartRate = dict[WatchMessageKey.avgHeartRate] as? Double
 
+        let rulesetData = dict[WatchMessageKey.rulesetData] as? Data ?? Data()
+
         let gameHistory: [GameRecord]
         if let data = dict[WatchMessageKey.gameHistory] as? Data,
            let records = try? JSONDecoder().decode([GameRecord].self, from: data) {
@@ -182,7 +191,8 @@ struct MatchResultPayload: Codable, Sendable {
             gameHistory: gameHistory, setHistory: setHistory,
             matchType: matchType,
             teamAName: teamAName, teamBName: teamBName,
-            activeCalories: activeCalories, avgHeartRate: avgHeartRate
+            activeCalories: activeCalories, avgHeartRate: avgHeartRate,
+            rulesetData: rulesetData
         )
     }
 }

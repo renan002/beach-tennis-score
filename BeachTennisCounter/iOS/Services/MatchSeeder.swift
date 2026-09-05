@@ -159,7 +159,8 @@ extension StoredMatch {
             setHistoryData: (try? JSONEncoder().encode(state.setHistory)) ?? Data(),
             matchTypeRaw: state.matchType.rawValue,
             teamAName: state.teamAName,
-            teamBName: state.teamBName
+            teamBName: state.teamBName,
+            rulesetData: (try? JSONEncoder().encode(state.ruleset)) ?? Data()
         )
     }
 }

@@ -13,6 +13,7 @@
 		07A1FB876AC0C9E772BC2127 /* StoreRecoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26496E4FEA0A7EC058601837 /* StoreRecoveryTests.swift */; };
 		0A3317307515E0A37B2DB4DB /* CardShapeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85CED9CFABB9F9C4EE20BF10 /* CardShapeTests.swift */; };
 		0B489373413FD7E122D3D81F /* ResultCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E80BA71634453CD2D2CA927 /* ResultCard.swift */; };
+		0BF4C73A5AA1697C85004738 /* Ruleset.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B1672676E7992AEADFCDA1 /* Ruleset.swift */; };
 		0C1D3EF86FE7C9CA3DDA3FB4 /* ProPurchaseSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FC79BF2C5726FA5F03BCDEF /* ProPurchaseSheet.swift */; };
 		119B8ACC1EBD02D5AA9C3C18 /* Pro.storekit in Resources */ = {isa = PBXBuildFile; fileRef = AEA1040B8388FB91DB4D394B /* Pro.storekit */; };
 		1244A696FA2200BBC7DA5CBE /* ScoreEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67E5FFD85FDB63F1E4B704B7 /* ScoreEngine.swift */; };
@@ -74,6 +75,7 @@
 		AD2D58DC34C9219E7D061B5E /* WorkoutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289983D093D6664CE4262A73 /* WorkoutManager.swift */; };
 		ADE596C62E51D48A4B98A776 /* WatchSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E310D764A0970D265C75E09 /* WatchSettings.swift */; };
 		AE18F8DC2EB0E0ADFE13E7BE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AEC4ADE5E101A4C6B8C59E3A /* Assets.xcassets */; };
+		B290B7BA6C46D4026C535852 /* Ruleset.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B1672676E7992AEADFCDA1 /* Ruleset.swift */; };
 		B72701CF7686A78E82C00AB4 /* StoreRecoveryRestoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41390DBE859A457CB1FE6D9D /* StoreRecoveryRestoreTests.swift */; };
 		B86F503C681CF82BFC87BB9E /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D2079D2D2B1621F0A22237B /* SettingsView.swift */; };
 		BDCF12315E51FD6C4BB7435D /* MatchInProgressTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBACE2705E798132CB66AA1B /* MatchInProgressTests.swift */; };
@@ -196,6 +198,7 @@
 		B0E91E910B21A186AAB84215 /* HexColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HexColor.swift; sourceTree = "<group>"; };
 		BF2D1C2D253A267BD353C2ED /* LiveStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStore.swift; sourceTree = "<group>"; };
 		C0997213C193AD77CEACD376 /* ScoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreView.swift; sourceTree = "<group>"; };
+		C3B1672676E7992AEADFCDA1 /* Ruleset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ruleset.swift; sourceTree = "<group>"; };
 		C4A4D3115E5DE217FA7F7D86 /* BeachTennisCounterWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BeachTennisCounterWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CBACE2705E798132CB66AA1B /* MatchInProgressTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchInProgressTests.swift; sourceTree = "<group>"; };
 		CCDF39FAF3B604ED50E84AFB /* CardShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardShape.swift; sourceTree = "<group>"; };
@@ -289,6 +292,7 @@
 				5B1FFBEDF33AFA0F774BAAB5 /* MatchInProgress.swift */,
 				21275F20964C30E0BE57431F /* MatchPersistence.swift */,
 				F51DDD9F7DDD920BA32478B6 /* MatchState.swift */,
+				C3B1672676E7992AEADFCDA1 /* Ruleset.swift */,
 				67E5FFD85FDB63F1E4B704B7 /* ScoreEngine.swift */,
 				165486187497B2731E40231E /* SportSetting.swift */,
 				FEBFB89700BC5CCC8455F2CD /* TeamName.swift */,
@@ -581,6 +585,7 @@
 				338E5A754083D3F8C446DAC5 /* MatchPersistence.swift in Sources */,
 				35241BE0AF00D8DEF3997A7A /* MatchState.swift in Sources */,
 				78C92880128A099B24A7CD48 /* MatchTypeSelectionView.swift in Sources */,
+				B290B7BA6C46D4026C535852 /* Ruleset.swift in Sources */,
 				1244A696FA2200BBC7DA5CBE /* ScoreEngine.swift in Sources */,
 				71D24E07EBDC009124B556AE /* ScoreView.swift in Sources */,
 				C6DD6BBA15414E669DE7FE1E /* ServeSelectionView.swift in Sources */,
@@ -621,6 +626,7 @@
 				0B489373413FD7E122D3D81F /* ResultCard.swift in Sources */,
 				E57342CCBC0FC2A8F5C99C6C /* ResultCardShareSheet.swift in Sources */,
 				20A18206E21DB29E9E98361A /* ResultCardView.swift in Sources */,
+				0BF4C73A5AA1697C85004738 /* Ruleset.swift in Sources */,
 				7B9000E3AD16732A147CB65B /* ScoreEngine.swift in Sources */,
 				B86F503C681CF82BFC87BB9E /* SettingsView.swift in Sources */,
 				58344D784381E039E0675796 /* SportSetting.swift in Sources */,

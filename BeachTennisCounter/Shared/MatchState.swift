@@ -86,6 +86,31 @@ struct GameRecord: Codable, Sendable, Equatable {
     let winner: Team
     let isTiebreak: Bool
     var gameScoreDisplay: String?
+    /// Per-sport numeric points at game end. Defaults so records persisted
+    /// before these fields existed decode without migrating — `nil` means the
+    /// record was written before the field was added.
+    let pointsA: Int?
+    let pointsB: Int?
+
+    init(
+        gameNumber: Int,
+        setScoreA: Int,
+        setScoreB: Int,
+        winner: Team,
+        isTiebreak: Bool,
+        gameScoreDisplay: String? = nil,
+        pointsA: Int? = nil,
+        pointsB: Int? = nil
+    ) {
+        self.gameNumber = gameNumber
+        self.setScoreA = setScoreA
+        self.setScoreB = setScoreB
+        self.winner = winner
+        self.isTiebreak = isTiebreak
+        self.gameScoreDisplay = gameScoreDisplay
+        self.pointsA = pointsA
+        self.pointsB = pointsB
+    }
 }
 
 struct SetRecord: Codable, Sendable, Equatable {
@@ -140,10 +165,16 @@ struct MatchState: Codable, Sendable, Equatable {
     var teamAName: String = ""
     var teamBName: String = ""
 
+    // Ruleset this match is played under, stamped by value at match creation
+    // (ADR 0006). Default for backward-compatible decoding from old persisted
+    // data that lacks the key.
+    var ruleset: Ruleset = Ruleset.preset(for: .beachTennis)
+
     /// Builds the starting state for a brand-new match, stamping the Team Names
-    /// in effect at match start. Names are copied by value, so a later Settings
-    /// rename never rewrites a match already under way or already stored —
-    /// history keeps the names it was played with.
+    /// and the Ruleset in effect at match start. Names and rules are copied by
+    /// value, so a later Settings or Regras rename never rewrites a match already
+    /// under way or already stored — history keeps the names and rules it was
+    /// played with.
     static func newMatch(
         matchType: MatchType,
         initialServer: Team,
@@ -157,7 +188,74 @@ struct MatchState: Codable, Sendable, Equatable {
         s.tiebreakFirstServer = initialServer
         s.teamAName = teamAName
         s.teamBName = teamBName
+        s.ruleset = Ruleset.preset(for: matchType)
         return s
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case matchType, setScoreA, setScoreB, setsWonA, setsWonB, setHistory
+        case pointA, pointB, isGoldenPoint, advantageTeam
+        case isTiebreak, tiebreakA, tiebreakB, tiebreakPointsPlayed, tiebreakFirstServer
+        case servingTeam, initialServer, isMatchOver, winner, matchStartDate, gameHistory
+        case teamAName, teamBName, ruleset
+    }
+
+    init() {}
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        matchType = try container.decodeIfPresent(MatchType.self, forKey: .matchType) ?? .beachTennis
+        setScoreA = try container.decodeIfPresent(Int.self, forKey: .setScoreA) ?? 0
+        setScoreB = try container.decodeIfPresent(Int.self, forKey: .setScoreB) ?? 0
+        setsWonA = try container.decodeIfPresent(Int.self, forKey: .setsWonA) ?? 0
+        setsWonB = try container.decodeIfPresent(Int.self, forKey: .setsWonB) ?? 0
+        setHistory = try container.decodeIfPresent([SetRecord].self, forKey: .setHistory) ?? []
+        pointA = try container.decodeIfPresent(PointScore.self, forKey: .pointA) ?? .zero
+        pointB = try container.decodeIfPresent(PointScore.self, forKey: .pointB) ?? .zero
+        isGoldenPoint = try container.decodeIfPresent(Bool.self, forKey: .isGoldenPoint) ?? false
+        advantageTeam = try container.decodeIfPresent(Team.self, forKey: .advantageTeam)
+        isTiebreak = try container.decodeIfPresent(Bool.self, forKey: .isTiebreak) ?? false
+        tiebreakA = try container.decodeIfPresent(Int.self, forKey: .tiebreakA) ?? 0
+        tiebreakB = try container.decodeIfPresent(Int.self, forKey: .tiebreakB) ?? 0
+        tiebreakPointsPlayed = try container.decodeIfPresent(Int.self, forKey: .tiebreakPointsPlayed) ?? 0
+        tiebreakFirstServer = try container.decodeIfPresent(Team.self, forKey: .tiebreakFirstServer) ?? .a
+        servingTeam = try container.decodeIfPresent(Team.self, forKey: .servingTeam) ?? .a
+        initialServer = try container.decodeIfPresent(Team.self, forKey: .initialServer) ?? .a
+        isMatchOver = try container.decodeIfPresent(Bool.self, forKey: .isMatchOver) ?? false
+        winner = try container.decodeIfPresent(Team.self, forKey: .winner)
+        matchStartDate = try container.decodeIfPresent(Date.self, forKey: .matchStartDate) ?? Date()
+        gameHistory = try container.decodeIfPresent([GameRecord].self, forKey: .gameHistory) ?? []
+        teamAName = try container.decodeIfPresent(String.self, forKey: .teamAName) ?? ""
+        teamBName = try container.decodeIfPresent(String.self, forKey: .teamBName) ?? ""
+        ruleset = try container.decodeIfPresent(Ruleset.self, forKey: .ruleset) ?? Ruleset.preset(for: matchType)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(matchType, forKey: .matchType)
+        try container.encode(setScoreA, forKey: .setScoreA)
+        try container.encode(setScoreB, forKey: .setScoreB)
+        try container.encode(setsWonA, forKey: .setsWonA)
+        try container.encode(setsWonB, forKey: .setsWonB)
+        try container.encode(setHistory, forKey: .setHistory)
+        try container.encode(pointA, forKey: .pointA)
+        try container.encode(pointB, forKey: .pointB)
+        try container.encode(isGoldenPoint, forKey: .isGoldenPoint)
+        try container.encodeIfPresent(advantageTeam, forKey: .advantageTeam)
+        try container.encode(isTiebreak, forKey: .isTiebreak)
+        try container.encode(tiebreakA, forKey: .tiebreakA)
+        try container.encode(tiebreakB, forKey: .tiebreakB)
+        try container.encode(tiebreakPointsPlayed, forKey: .tiebreakPointsPlayed)
+        try container.encode(tiebreakFirstServer, forKey: .tiebreakFirstServer)
+        try container.encode(servingTeam, forKey: .servingTeam)
+        try container.encode(initialServer, forKey: .initialServer)
+        try container.encode(isMatchOver, forKey: .isMatchOver)
+        try container.encodeIfPresent(winner, forKey: .winner)
+        try container.encode(matchStartDate, forKey: .matchStartDate)
+        try container.encode(gameHistory, forKey: .gameHistory)
+        try container.encode(teamAName, forKey: .teamAName)
+        try container.encode(teamBName, forKey: .teamBName)
+        try container.encode(ruleset, forKey: .ruleset)
     }
 
     /// The label to show for `team`: its Team Name when set, otherwise the
