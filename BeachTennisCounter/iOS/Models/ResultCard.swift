@@ -39,9 +39,9 @@ struct ResultCard: Sendable, Equatable {
     /// match with sets on the board, "Games" for a tennis match abandoned
     /// inside its first set.
     let scoreUnitLabel: String
-    /// Tennis only: the games in each completed set, "6-4  3-6  10-8". `nil`
-    /// when there is no set to break down.
-    let setBreakdown: String?
+    /// Tennis only: the games in each completed set, one chip per set.
+    /// Empty when there is no set to break down.
+    let setBreakdown: [String]
     /// The side to highlight, `nil` when no known side won.
     let winner: Team?
     let sportName: String
@@ -55,18 +55,15 @@ struct ResultCard: Sendable, Equatable {
         teamBName = match.teamName(for: .b)
 
         if match.hasCompleteSets {
-            let sets = match.setHistory
             scoreA = match.setsWonA
             scoreB = match.setsWonB
             scoreUnitLabel = MatchType.setsSectionTitle
-            setBreakdown = sets.isEmpty
-                ? nil
-                : sets.map { "\($0.gamesA)-\($0.gamesB)" }.joined(separator: "  ")
+            setBreakdown = match.setHistory.map { "\($0.gamesA)-\($0.gamesB)" }
         } else {
             scoreA = match.setScoreA
             scoreB = match.setScoreB
             scoreUnitLabel = match.matchType.gamesSectionTitle
-            setBreakdown = nil
+            setBreakdown = []
         }
 
         winner = match.winnerTeam

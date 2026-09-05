@@ -16,7 +16,8 @@ final class MatchPersistenceTests: XCTestCase {
     }
 
     private func sampleState() -> MatchState {
-        var s = MatchState()
+        var s = MatchState.newMatch(matchType: .tennis, initialServer: .b,
+                                    teamAName: "Home", teamBName: "Visitors")
         s.setScoreA = 3
         s.setScoreB = 2
         s.pointA = .thirty
@@ -25,12 +26,10 @@ final class MatchPersistenceTests: XCTestCase {
     }
 
     func test_saveThenLoad_roundtripsState() {
-        MatchPersistence.save(sampleState(), in: defaults)
+        let state = sampleState()
+        MatchPersistence.save(state, in: defaults)
         let loaded = MatchPersistence.load(in: defaults)
-        XCTAssertEqual(loaded?.setScoreA, 3)
-        XCTAssertEqual(loaded?.setScoreB, 2)
-        XCTAssertEqual(loaded?.pointA, .thirty)
-        XCTAssertEqual(loaded?.servingTeam, .b)
+        XCTAssertEqual(loaded, state)
     }
 
     func test_load_returnsNilWhenNothingSaved() {

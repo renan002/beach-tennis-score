@@ -99,32 +99,20 @@ enum ScoreEngine {
         if team == .a { state.tiebreakA += 1 } else { state.tiebreakB += 1 }
         state.tiebreakPointsPlayed += 1
 
-        if state.tiebreakA >= 7 && (state.tiebreakA - state.tiebreakB) >= 2 {
-            let display = "\(state.tiebreakA)–\(state.tiebreakB)"
-            state.setScoreA += 1
+        let a = state.tiebreakA
+        let b = state.tiebreakB
+        if max(a, b) >= 7 && abs(a - b) >= 2 {
+            let winner: Team = a > b ? .a : .b
+            if winner == .a { state.setScoreA += 1 } else { state.setScoreB += 1 }
             state.gameHistory.append(GameRecord(
                 gameNumber: state.gameHistory.count + 1,
                 setScoreA: state.setScoreA,
                 setScoreB: state.setScoreB,
-                winner: .a,
+                winner: winner,
                 isTiebreak: true,
-                gameScoreDisplay: display
+                gameScoreDisplay: "\(a)–\(b)"
             ))
-            endMatch(winner: .a, state: &state)
-            return
-        }
-        if state.tiebreakB >= 7 && (state.tiebreakB - state.tiebreakA) >= 2 {
-            let display = "\(state.tiebreakA)–\(state.tiebreakB)"
-            state.setScoreB += 1
-            state.gameHistory.append(GameRecord(
-                gameNumber: state.gameHistory.count + 1,
-                setScoreA: state.setScoreA,
-                setScoreB: state.setScoreB,
-                winner: .b,
-                isTiebreak: true,
-                gameScoreDisplay: display
-            ))
-            endMatch(winner: .b, state: &state)
+            endMatch(winner: winner, state: &state)
             return
         }
 
@@ -261,32 +249,18 @@ enum ScoreEngine {
         let a = state.tiebreakA
         let b = state.tiebreakB
         // Win by 2, minimum 7
-        if a >= 7 && (a - b) >= 2 {
-            let display = "\(a)–\(b)"
-            state.gameHistory.append(GameRecord(
-                gameNumber: state.gameHistory.count + 1,
-                setScoreA: state.setScoreA + 1,
-                setScoreB: state.setScoreB,
-                winner: .a,
-                isTiebreak: true,
-                gameScoreDisplay: display
-            ))
-            state.setScoreA += 1
-            winTennisSet(winner: .a, isTiebreak: true, state: &state)
-            return
-        }
-        if b >= 7 && (b - a) >= 2 {
-            let display = "\(a)–\(b)"
+        if max(a, b) >= 7 && abs(a - b) >= 2 {
+            let winner: Team = a > b ? .a : .b
+            if winner == .a { state.setScoreA += 1 } else { state.setScoreB += 1 }
             state.gameHistory.append(GameRecord(
                 gameNumber: state.gameHistory.count + 1,
                 setScoreA: state.setScoreA,
-                setScoreB: state.setScoreB + 1,
-                winner: .b,
+                setScoreB: state.setScoreB,
+                winner: winner,
                 isTiebreak: true,
-                gameScoreDisplay: display
+                gameScoreDisplay: "\(a)–\(b)"
             ))
-            state.setScoreB += 1
-            winTennisSet(winner: .b, isTiebreak: true, state: &state)
+            winTennisSet(winner: winner, isTiebreak: true, state: &state)
             return
         }
 

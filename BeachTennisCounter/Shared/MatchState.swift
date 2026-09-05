@@ -230,34 +230,6 @@ struct MatchState: Codable, Sendable, Equatable {
         ruleset = try container.decodeIfPresent(Ruleset.self, forKey: .ruleset) ?? Ruleset.preset(for: matchType)
     }
 
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(matchType, forKey: .matchType)
-        try container.encode(setScoreA, forKey: .setScoreA)
-        try container.encode(setScoreB, forKey: .setScoreB)
-        try container.encode(setsWonA, forKey: .setsWonA)
-        try container.encode(setsWonB, forKey: .setsWonB)
-        try container.encode(setHistory, forKey: .setHistory)
-        try container.encode(pointA, forKey: .pointA)
-        try container.encode(pointB, forKey: .pointB)
-        try container.encode(isGoldenPoint, forKey: .isGoldenPoint)
-        try container.encodeIfPresent(advantageTeam, forKey: .advantageTeam)
-        try container.encode(isTiebreak, forKey: .isTiebreak)
-        try container.encode(tiebreakA, forKey: .tiebreakA)
-        try container.encode(tiebreakB, forKey: .tiebreakB)
-        try container.encode(tiebreakPointsPlayed, forKey: .tiebreakPointsPlayed)
-        try container.encode(tiebreakFirstServer, forKey: .tiebreakFirstServer)
-        try container.encode(servingTeam, forKey: .servingTeam)
-        try container.encode(initialServer, forKey: .initialServer)
-        try container.encode(isMatchOver, forKey: .isMatchOver)
-        try container.encodeIfPresent(winner, forKey: .winner)
-        try container.encode(matchStartDate, forKey: .matchStartDate)
-        try container.encode(gameHistory, forKey: .gameHistory)
-        try container.encode(teamAName, forKey: .teamAName)
-        try container.encode(teamBName, forKey: .teamBName)
-        try container.encode(ruleset, forKey: .ruleset)
-    }
-
     /// The label to show for `team`: its Team Name when set, otherwise the
     /// localized `Team.displayName` fallback. Forwards to `TeamName`, which
     /// states the rule for every display site.
