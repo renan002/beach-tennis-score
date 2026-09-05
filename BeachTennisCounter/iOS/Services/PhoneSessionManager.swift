@@ -178,13 +178,6 @@ extension PhoneSessionManager: WCSessionDelegate {
 // MARK: - Color hex helpers (iOS side)
 
 extension Color {
-    func toHex() -> String {
-        let ui = UIColor(self)
-        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0
-        ui.getRed(&r, green: &g, blue: &b, alpha: nil)
-        return String(format: "%02X%02X%02X", Int(r * 255), Int(g * 255), Int(b * 255))
-    }
-
     /// Non-failable on purpose: the phone decodes its own literals and its own
     /// stored values, so every call site here has a colour or the app is already
     /// broken. Parsing itself lives in `HexColor`.

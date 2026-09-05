@@ -64,7 +64,7 @@ final class ResultCardTests: XCTestCase {
         XCTAssertEqual(card.scoreA, 6)
         XCTAssertEqual(card.scoreB, 4)
         XCTAssertEqual(card.scoreUnitLabel, MatchType.beachTennis.gamesSectionTitle)
-        XCTAssertNil(card.setBreakdown)
+        XCTAssertTrue(card.setBreakdown.isEmpty)
     }
 
     /// A beach match never shows a per-set breakdown, even if a set record
@@ -74,7 +74,7 @@ final class ResultCardTests: XCTestCase {
             setHistory: [SetRecord(setNumber: 1, gamesA: 6, gamesB: 4, winner: .a, isTiebreak: false)]
         ))
 
-        XCTAssertNil(card.setBreakdown)
+        XCTAssertTrue(card.setBreakdown.isEmpty)
     }
 
     // MARK: - Score line, tennis
@@ -97,7 +97,7 @@ final class ResultCardTests: XCTestCase {
         XCTAssertEqual(card.scoreA, 2)
         XCTAssertEqual(card.scoreB, 1)
         XCTAssertEqual(card.scoreUnitLabel, MatchType.setsSectionTitle)
-        XCTAssertEqual(card.setBreakdown, "6-4  3-6  10-8")
+        XCTAssertEqual(card.setBreakdown, ["6-4", "3-6", "10-8"])
     }
 
     /// A tennis match abandoned inside the first set has no set won by anyone;
@@ -112,7 +112,7 @@ final class ResultCardTests: XCTestCase {
         XCTAssertEqual(card.scoreA, 4)
         XCTAssertEqual(card.scoreB, 2)
         XCTAssertEqual(card.scoreUnitLabel, MatchType.tennis.gamesSectionTitle)
-        XCTAssertNil(card.setBreakdown)
+        XCTAssertTrue(card.setBreakdown.isEmpty)
     }
 
     // MARK: - Winner

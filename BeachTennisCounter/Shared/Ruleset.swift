@@ -40,22 +40,11 @@ struct Ruleset: Codable, Equatable, Sendable {
         self.setsToWinMatch = setsToWinMatch
     }
 
-    private static func presetUUID<S: RawRepresentable>(_ token: S) -> UUID where S.RawValue == String {
-        let uuidMap: [String: String] = [
-            MatchType.beachTennis.rawValue: "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
-            MatchType.tennis.rawValue: "F721E1F8-C36C-495A-93FC-0C247A3E6E5F",
-        ]
-        guard let uuidString = uuidMap[token.rawValue],
-              let uuid = UUID(uuidString: uuidString)
-        else { fatalError("Unknown preset key: \(token.rawValue)") }
-        return uuid
-    }
-
     static func preset(for sport: MatchType) -> Ruleset {
         switch sport {
         case .beachTennis:
             Ruleset(
-                identifier: presetUUID(MatchType.beachTennis),
+                identifier: UUID(uuidString: "E621E1F8-C36C-495A-93FC-0C247A3E6E5F")!,
                 name: "Beach Tennis",
                 sport: .beachTennis,
                 hasSets: false,
@@ -67,7 +56,7 @@ struct Ruleset: Codable, Equatable, Sendable {
             )
         case .tennis:
             Ruleset(
-                identifier: presetUUID(MatchType.tennis),
+                identifier: UUID(uuidString: "F721E1F8-C36C-495A-93FC-0C247A3E6E5F")!,
                 name: "Tennis",
                 sport: .tennis,
                 hasSets: true,

@@ -161,13 +161,13 @@ struct ResultCardView: View {
     /// an empty rail under a heading would read as missing data.
     private var footerRail: some View {
         HStack(spacing: 6) {
-            if !setChips.isEmpty {
+            if !card.setBreakdown.isEmpty {
                 Text(card.scoreUnitLabel.uppercased())
                     .font(.system(size: 9, weight: .bold))
                     .kerning(1.5)
                     .foregroundStyle(.white.opacity(0.35))
 
-                ForEach(Array(setChips.enumerated()), id: \.offset) { _, set in
+                ForEach(Array(card.setBreakdown.enumerated()), id: \.offset) { _, set in
                     Text(set)
                         .font(.system(size: 10, weight: .semibold).monospacedDigit())
                         .foregroundStyle(.white.opacity(0.75))
@@ -181,14 +181,6 @@ struct ResultCardView: View {
                 .font(.system(size: 10).monospacedDigit())
                 .foregroundStyle(.white.opacity(0.45))
         }
-    }
-
-    /// The model hands the breakdown over as one pre-joined string; splitting
-    /// on whitespace rather than on the exact separator keeps the view from
-    /// depending on how wide that join happens to be.
-    private var setChips: [String] {
-        guard let breakdown = card.setBreakdown else { return [] }
-        return breakdown.split(whereSeparator: \.isWhitespace).map(String.init)
     }
 
     /// Dashed tear line with a notch punched top and bottom.

@@ -176,10 +176,17 @@ final class TennisScoreEngineTests: XCTestCase {
     }
 
     func test_tiebreak_gameRecordScore() {
-        var state = stateAtTiebreak()
-        for _ in 0..<7 { ScoreEngine.awardPoint(to: .a, state: &state) }
-        XCTAssertTrue(state.gameHistory.last?.isTiebreak == true)
-        XCTAssertEqual(state.gameHistory.last?.gameScoreDisplay, "7–0")
+        for winner in [Team.a, .b] {
+            var state = stateAtTiebreak()
+            for _ in 0..<7 { ScoreEngine.awardPoint(to: winner, state: &state) }
+            let record = state.gameHistory.last
+            XCTAssertEqual(record?.isTiebreak, true)
+            XCTAssertEqual(record?.winner, winner)
+            XCTAssertEqual(record?.setScoreA, winner == .a ? 7 : 6)
+            XCTAssertEqual(record?.setScoreB, winner == .b ? 7 : 6)
+            XCTAssertEqual(record?.gameScoreDisplay, winner == .a ? "7–0" : "0–7")
+            XCTAssertEqual(state.setsWon(for: winner), 1)
+        }
     }
 
     func test_tiebreak_serveRotation() {
