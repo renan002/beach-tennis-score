@@ -13,6 +13,7 @@ import Foundation
 enum SportSetting: String, Sendable, CaseIterable {
     case beachTennis = "beachTennis"
     case tennis = "tennis"
+    case pingPong = "pingPong"
     /// Vários — the watch asks which sport before each match instead of playing
     /// one fixed sport. Named in English like the other domain types, following
     /// the Cartão de Resultado and Estatísticas precedent.
@@ -36,6 +37,7 @@ enum SportSetting: String, Sendable, CaseIterable {
         switch self {
         case .beachTennis: return .beachTennis
         case .tennis:      return .tennis
+        case .pingPong:    return .pingPong
         case .multiple:    return nil
         }
     }
@@ -48,6 +50,7 @@ enum SportSetting: String, Sendable, CaseIterable {
         switch self {
         case .beachTennis: return String(localized: "Beach Tennis")
         case .tennis:      return String(localized: "Tennis")
+        case .pingPong:    return String(localized: "Ping pong")
         case .multiple:    return String(localized: "Multiple")
         }
     }
@@ -57,6 +60,7 @@ enum SportSetting: String, Sendable, CaseIterable {
         switch self {
         case .beachTennis: return String(localized: "The Watch will always start a Beach Tennis match.")
         case .tennis:      return String(localized: "The Watch will always start a Tennis match.")
+        case .pingPong:    return String(localized: "The Watch will always start a Ping pong match.")
         case .multiple:    return String(localized: "The Watch will ask which sport before each match.")
         }
     }

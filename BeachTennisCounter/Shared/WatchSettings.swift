@@ -61,6 +61,18 @@ struct WatchSettings: Sendable, Equatable {
         return dict
     }
 
+    /// The active Ruleset for `sport` resolved from the blob. The blob is a
+    /// full replacement, so a missing or undecodable entry means the phone did
+    /// not manage to ship a value — fall back to the sport's preset, never a
+    /// stale decoded value. The whole value is stamped as-is (ADR 0006).
+    func ruleset(for sport: MatchType) -> Ruleset {
+        guard let data = rulesetsBlob[sport.rawValue],
+              let rules = try? JSONDecoder().decode(Ruleset.self, from: data),
+              rules.sport == sport
+        else { return Ruleset.preset(for: sport) }
+        return rules
+    }
+
     /// Decodes a settings context. Always succeeds: a missing or garbled key falls
     /// back to the default above. Callers decide whether a context is worth applying
     /// at all — an empty context means "no settings received", not "reset to defaults".

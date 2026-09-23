@@ -12,6 +12,16 @@ final class WatchSessionManager: NSObject, ObservableObject {
     @Published var teamAName: String = WatchSettings.defaultTeamAName
     @Published var teamBName: String = WatchSettings.defaultTeamBName
     @Published var healthMonitoringEnabled: Bool = WatchSettings.defaultHealthMonitoringEnabled
+    /// The active Ruleset per sport, resolved from the shared application
+    /// context's rules blob. The watch scores, it does not configure (ADR 0006):
+    /// there is no Ruleset editor here, the value is whatever the phone sent.
+    private var resolvedRulesets: [String: Ruleset] = [:]
+
+    /// The Ruleset to stamp onto a new match of `sport`. Falls back to the
+    /// sport's preset when the context never shipped a value.
+    func ruleset(for sport: MatchType) -> Ruleset {
+        resolvedRulesets[sport.rawValue] ?? Ruleset.preset(for: sport)
+    }
 
     private nonisolated static let pendingResultKey = "pendingMatchResult"
     private nonisolated static let lastReportedAuthKey = "lastReportedHealthAuthStatus"
@@ -33,10 +43,20 @@ final class WatchSessionManager: NSObject, ObservableObject {
         guard let winner = state.winner else { return }
 
         let rulesetData = (try? JSONEncoder().encode(state.ruleset)) ?? Data()
+        // ADR 0005: the flat columns carry what the headline needs. Ping pong
+        // maps games won into setScoreA/B; no ping counters are mirrored into
+        // the legacy fields, so a ping match's points ride in their own keys.
+        let flatA = state.matchType == .pingPong ? state.pingGamesWon(for: .a) : state.setScoreA
+        let flatB = state.matchType == .pingPong ? state.pingGamesWon(for: .b) : state.setScoreB
+        // Second-tier ping transport: the terminal pair in `PingPongState`. On
+        // the winning point the ScoreEngine leaves the final counts in the
+        // payload, so these are the points a finished best-of-1 match shows.
+        let pingPointsA = state.matchType == .pingPong ? state.pingPoints(for: .a) : nil
+        let pingPointsB = state.matchType == .pingPong ? state.pingPoints(for: .b) : nil
         let payload = MatchResultPayload(
             matchId: UUID(),
-            setScoreA: state.setScoreA,
-            setScoreB: state.setScoreB,
+            setScoreA: flatA,
+            setScoreB: flatB,
             setsWonA: state.setsWonA,
             setsWonB: state.setsWonB,
             winner: winner,
@@ -49,7 +69,9 @@ final class WatchSessionManager: NSObject, ObservableObject {
             teamBName: state.teamBName,
             activeCalories: activeCalories,
             avgHeartRate: avgHeartRate,
-            rulesetData: rulesetData
+            rulesetData: rulesetData,
+            pingPointsA: pingPointsA,
+            pingPointsB: pingPointsB
         )
 
         guard WCSession.default.activationState == .activated else {
@@ -79,6 +101,11 @@ final class WatchSessionManager: NSObject, ObservableObject {
         teamAName = settings.teamAName
         teamBName = settings.teamBName
         healthMonitoringEnabled = settings.healthMonitoringEnabled
+        var resolved: [String: Ruleset] = [:]
+        for sport in MatchType.allCases {
+            resolved[sport.rawValue] = settings.ruleset(for: sport)
+        }
+        resolvedRulesets = resolved
     }
 
     /// Pushes the watch's HealthKit authorization status to the phone, on change

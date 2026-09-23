@@ -54,15 +54,19 @@ struct ResultCard: Sendable, Equatable {
         teamAName = match.teamName(for: .a)
         teamBName = match.teamName(for: .b)
 
-        if match.hasCompleteSets {
-            scoreA = match.setsWonA
-            scoreB = match.setsWonB
+        let headline = match.headline
+        scoreA = headline.a
+        scoreB = headline.b
+        if headline.unit == .sets {
             scoreUnitLabel = MatchType.setsSectionTitle
             setBreakdown = match.setHistory.map { "\($0.gamesA)-\($0.gamesB)" }
-        } else {
-            scoreA = match.setScoreA
-            scoreB = match.setScoreB
+        } else if headline.unit == .games {
             scoreUnitLabel = match.matchType.gamesSectionTitle
+            setBreakdown = []
+        } else {
+            // Ping best-of-1 / first-game abandonment — the card carries the
+            // points only, nothing beyond the score line.
+            scoreUnitLabel = ""
             setBreakdown = []
         }
 

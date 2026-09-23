@@ -19,7 +19,7 @@ struct MatchDetailView: View {
                     Spacer()
                     Text(match.matchType.displayName)
                         .font(.headline)
-                        .foregroundColor(match.matchType == .tennis ? .green : .orange)
+                        .foregroundColor(match.matchType == .tennis ? .green : (match.matchType == .pingPong ? .blue : .orange))
                 }
                 HStack {
                     Text("Score")
@@ -173,7 +173,17 @@ private struct GameRecordRow: View {
                 .font(.subheadline.bold())
                 .monospacedDigit()
 
-            if record.isTiebreak {
+            if matchType == .pingPong {
+                // Ping pong games are sets (never tiebreaks); the row shows the
+                // winner dot and the per-set numeric points from the record.
+                Text(record.winner == .a ? "A" : "B")
+                    .font(.caption.bold())
+                    .foregroundStyle(.white)
+                    .frame(width: 22, height: 22)
+                    .background(Circle().fill(record.winner == .a
+                        ? Color(hex: phoneSession.teamAColorHex)
+                        : Color(hex: phoneSession.teamBColorHex)))
+            } else if record.isTiebreak {
                 Text("TB")
                     .font(.caption.bold())
                     .foregroundStyle(.orange)

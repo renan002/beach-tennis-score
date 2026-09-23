@@ -20,13 +20,26 @@ struct ScoreView: View {
 
     private var state: MatchState { match.state }
 
-    /// Starts a fresh match, stamping the synced Team Names at match start.
+    /// The headline over the live Placar, through the same shared `HeadlineScore`
+/// projection the Match List and the Cartão use. Ping pong draws only on
+/// `PingPongState` — games won once a best-of-N match has a complete game,
+/// points otherwise (a best-of-1's terminal points stay in `PingPongState`).
+    private var headlineScore: String {
+        let headline = HeadlineScore.live(state)
+        return "\(headline.a) – \(headline.b)"
+    }
+
+    /// Starts a fresh match, stamping the synced Team Names and the active
+    /// Ruleset at match start. The ruleset is the watch's resolved value (it
+    /// scores, it does not configure); for ping pong this is the whole stamped
+    /// rules — target, best-of, serve mode, name.
     init(
         initialServer: Team,
         matchType: MatchType,
         teamAName: String = "",
         teamBName: String = "",
-        isActive: Binding<Bool>
+        isActive: Binding<Bool>,
+        ruleset: Ruleset? = nil
     ) {
         self.matchType = matchType
         self._isActive = isActive
@@ -34,7 +47,8 @@ struct ScoreView: View {
             matchType: matchType,
             initialServer: initialServer,
             teamAName: teamAName,
-            teamBName: teamBName
+            teamBName: teamBName,
+            ruleset: ruleset
         )))
     }
 
@@ -80,11 +94,13 @@ struct ScoreView: View {
         VStack(spacing: 4) {
             topBar
 
-            if matchType == .tennis {
-                tennisSetRow
+            if matchType == .tennis || matchType == .pingPong {
+                setsWonRow
             }
 
-            scoreRow
+            if matchType != .pingPong {
+                scoreRow
+            }
 
             squaresRow
 
@@ -128,15 +144,16 @@ struct ScoreView: View {
         }
     }
 
-    // Tennis: sets won at the top in large numerals
-    private var tennisSetRow: some View {
+    // Sets won at the top in large numerals — tennis's sets, and ping pong's
+    // games displayed as "Sets" (Brazilian table-tennis convention).
+    private var setsWonRow: some View {
         HStack(spacing: 0) {
             Spacer()
-            Text("\(state.setsWonA)")
+            Text("\(setsWonDisplay(for: .a))")
                 .font(.system(size: 22, weight: .semibold))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
-            Text("\(state.setsWonB)")
+            Text("\(setsWonDisplay(for: .b))")
                 .font(.system(size: 22, weight: .semibold))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
@@ -144,18 +161,22 @@ struct ScoreView: View {
         }
     }
 
-    // Current set games (subdued for tennis since sets won is the main focus)
+    private func setsWonDisplay(for team: Team) -> Int {
+        matchType == .pingPong ? state.pingGamesWon(for: team) : state.setsWon(for: team)
+    }
+
+    // The live set score; tennis games are subdued since sets won is the main focus.
     private var scoreRow: some View {
         HStack(spacing: 0) {
             Spacer()
-            Text("\(state.setScoreA)")
+            Text(scoreRowText(for: .a))
                 .font(.system(
                     size: matchType == .tennis ? 15 : 22,
                     weight: matchType == .tennis ? .regular : .semibold
                 ))
                 .foregroundStyle(matchType == .tennis ? Color.secondary : .white)
                 .frame(maxWidth: .infinity)
-            Text("\(state.setScoreB)")
+            Text(scoreRowText(for: .b))
                 .font(.system(
                     size: matchType == .tennis ? 15 : 22,
                     weight: matchType == .tennis ? .regular : .semibold
@@ -164,6 +185,10 @@ struct ScoreView: View {
                 .frame(maxWidth: .infinity)
             Spacer()
         }
+    }
+
+    private func scoreRowText(for team: Team) -> String {
+        "\(state.setScore(for: team))"
     }
 
     private var squaresRow: some View {
@@ -240,13 +265,18 @@ struct ScoreView: View {
     }
 
     private func scoreLabel(for team: Team) -> String {
-        if state.isTiebreak {
-            return "\(state.tiebreakScore(for: team))"
+        switch matchType {
+        case .pingPong:
+            return "\(state.pingPoints(for: team))"
+        case .tennis, .beachTennis:
+            if state.isTiebreak {
+                return "\(state.tiebreakScore(for: team))"
+            }
+            if matchType == .tennis, let advTeam = state.advantageTeam {
+                return advTeam == team ? "Ad" : "40"
+            }
+            return state.point(for: team).display
         }
-        if matchType == .tennis, let advTeam = state.advantageTeam {
-            return advTeam == team ? "Ad" : "40"
-        }
-        return state.point(for: team).display
     }
 
     // MARK: - Match over overlay
@@ -263,6 +293,10 @@ struct ScoreView: View {
 
             if matchType == .tennis {
                 Text("\(state.setsWonA) – \(state.setsWonB)")
+                    .font(.title3.bold())
+                    .foregroundStyle(.white)
+            } else if matchType == .pingPong {
+                Text(headlineScore)
                     .font(.title3.bold())
                     .foregroundStyle(.white)
             } else {
@@ -334,9 +368,14 @@ struct ScoreView: View {
 
             case .startWorkout:
                 // The monitoring flag is watch-session state, not Match state,
-                // so the screen supplies it here.
+                // so the screen supplies it here. The sport's physicality comes
+                // from the match type (every sport shipped today is physical),
+                // and the type travels along so the workout is started under the
+                // right activity.
                 workoutManager.matchDidStart(
-                    monitoringEnabled: sessionManager.healthMonitoringEnabled
+                    monitoringEnabled: sessionManager.healthMonitoringEnabled,
+                    sportIsPhysical: matchType.isPhysicalSport,
+                    matchTypeRaw: matchType.rawValue
                 )
 
             case .sendResult(let finished, let duration):

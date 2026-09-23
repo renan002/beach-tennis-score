@@ -33,6 +33,12 @@ final class StoredMatch {
     // Ruleset stamped on the match at creation (ADR 0006). Empty data = the
     // sport's built-in preset, which is also how pre-Ruleset matches decode.
     var rulesetData: Data = Data()
+    // Ping pong's terminal numeric points, `nil` when absent (any other sport,
+    // or a pre-feature ping match). ADR 0005: setScoreA/B carry games won, so
+    // the points a ping headline can fall back to need their own optional
+    // attributes — a nil default satisfies the #47 lightweight-migration rule.
+    var pingPointsA: Int? = nil
+    var pingPointsB: Int? = nil
 
     init(
         id: UUID = UUID(),
@@ -50,7 +56,9 @@ final class StoredMatch {
         teamBName: String = "",
         activeCalories: Double? = nil,
         avgHeartRate: Double? = nil,
-        rulesetData: Data = Data()
+        rulesetData: Data = Data(),
+        pingPointsA: Int? = nil,
+        pingPointsB: Int? = nil
     ) {
         self.id = id
         self.date = date
@@ -68,6 +76,8 @@ final class StoredMatch {
         self.activeCalories = activeCalories
         self.avgHeartRate = avgHeartRate
         self.rulesetData = rulesetData
+        self.pingPointsA = pingPointsA
+        self.pingPointsB = pingPointsB
     }
 
     /// A detached copy for inserting into another context. Copies every
@@ -90,7 +100,9 @@ final class StoredMatch {
             teamBName: other.teamBName,
             activeCalories: other.activeCalories,
             avgHeartRate: other.avgHeartRate,
-            rulesetData: other.rulesetData
+            rulesetData: other.rulesetData,
+            pingPointsA: other.pingPointsA,
+            pingPointsB: other.pingPointsB
         )
     }
 
@@ -118,19 +130,35 @@ final class StoredMatch {
     }
 
     /// True when the sport is scored in sets and at least one set is on the
-    /// board. Both `scoreDisplay` and `ResultCard` need this same gate to
-    /// decide whether the headline shows sets or games.
+    /// board — the gate the headline projection uses to decide tennis shows
+    /// sets. Both the list and the Cartão need it to derive the same projection.
     var hasCompleteSets: Bool {
         ruleset.hasSets && (setsWonA > 0 || setsWonB > 0)
     }
 
-    /// The headline score pair: sets when the sport has sets and at least one
-    /// is complete, games otherwise.
+    /// The headline score pair, derived through the shared `HeadlineScore`
+    /// projection. Sets for tennis, games for beach and for a best-of-N ping
+    /// match with a complete game, points for ping first-game abandonment and
+    /// best-of-1 (terminal numeric points from the second-tier storage fields,
+    /// the Game Log, or the flat columns, in that order).
+    var headline: HeadlineScore {
+        HeadlineScore.stored(
+            matchType: matchType,
+            setScoreA: setScoreA,
+            setScoreB: setScoreB,
+            setsWonA: setsWonA,
+            setsWonB: setsWonB,
+            bestOf: ruleset.pingPong?.bestOf,
+            hasSets: ruleset.hasSets,
+            gameHistory: gameHistory,
+            pingPointsA: pingPointsA,
+            pingPointsB: pingPointsB
+        )
+    }
+
+    /// The network/storage carry-over of `headline`, as the list row shows it.
     var scoreDisplay: String {
-        if hasCompleteSets {
-            return "\(setsWonA) – \(setsWonB)"
-        }
-        return "\(setScoreA) – \(setScoreB)"
+        "\(headline.a) – \(headline.b)"
     }
 
     /// The label for `team`: its stored Team Name, or the localized

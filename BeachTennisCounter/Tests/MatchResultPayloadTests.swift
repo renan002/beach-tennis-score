@@ -15,7 +15,10 @@ final class MatchResultPayloadTests: XCTestCase {
         teamAName: String = "",
         teamBName: String = "",
         activeCalories: Double? = nil,
-        avgHeartRate: Double? = nil
+        avgHeartRate: Double? = nil,
+        pingPointsA: Int? = nil,
+        pingPointsB: Int? = nil,
+        rulesetData: Data = Data()
     ) -> MatchResultPayload {
         MatchResultPayload(matchId: matchId,
                            setScoreA: setScoreA, setScoreB: setScoreB,
@@ -24,7 +27,22 @@ final class MatchResultPayloadTests: XCTestCase {
                            date: date, gameHistory: gameHistory,
                            setHistory: setHistory, matchType: matchType,
                            teamAName: teamAName, teamBName: teamBName,
-                           activeCalories: activeCalories, avgHeartRate: avgHeartRate)
+                           activeCalories: activeCalories, avgHeartRate: avgHeartRate,
+                           rulesetData: rulesetData,
+                           pingPointsA: pingPointsA, pingPointsB: pingPointsB)
+    }
+
+    /// A playable ping Ruleset blob, so a ping payload round-trips with a stamp
+    /// to decode. Mirrors `StoredMatchDisplayTests.pingRulesetData`.
+    private func pingRulesetData(bestOf: Int = 5, name: String = "Test") -> Data {
+        let rules = Ruleset.pingPong(PingPongRuleset(
+            identifier: UUID(),
+            name: name,
+            pointsTarget: 11,
+            bestOf: bestOf,
+            serveMode: .every2
+        ))
+        return (try? JSONEncoder().encode(rules)) ?? Data()
     }
 
     // MARK: - Round-trip
@@ -97,6 +115,40 @@ final class MatchResultPayloadTests: XCTestCase {
         XCTAssertNotNil(MatchResultPayload.from(dict))
     }
 
+    // MARK: - Match type
+
+    func test_from_missingMatchType_fallsBackToBeachTennis() {
+        var dict = makePayload(matchType: .tennis).toDictionary()
+        dict.removeValue(forKey: WatchMessageKey.matchType)
+
+        XCTAssertEqual(MatchResultPayload.from(dict)?.matchType, .beachTennis)
+    }
+
+    func test_from_unknownMatchType_rejects() {
+        var dict = makePayload().toDictionary()
+        dict[WatchMessageKey.matchType] = "unknown"
+
+        XCTAssertNil(MatchResultPayload.from(dict))
+    }
+
+    func test_from_nonStringMatchType_rejects() {
+        var dict = makePayload().toDictionary()
+        dict[WatchMessageKey.matchType] = 42
+
+        XCTAssertNil(MatchResultPayload.from(dict))
+    }
+
+    func test_from_pingPayloadWithUnknownMatchType_rejects() {
+        var dict = makePayload(
+            setScoreA: 1, setScoreB: 0, matchType: .pingPong,
+            pingPointsA: 11, pingPointsB: 9,
+            rulesetData: pingRulesetData(bestOf: 1)
+        ).toDictionary()
+        dict[WatchMessageKey.matchType] = "unknown"
+
+        XCTAssertNil(MatchResultPayload.from(dict))
+    }
+
     // MARK: - Team Names
 
     func test_roundtrip_teamNames() {
@@ -149,6 +201,138 @@ final class MatchResultPayloadTests: XCTestCase {
         let dict = makePayload(activeCalories: nil, avgHeartRate: nil).toDictionary()
         XCTAssertFalse(dict.keys.contains(WatchMessageKey.activeCalories))
         XCTAssertFalse(dict.keys.contains(WatchMessageKey.avgHeartRate))
+    }
+
+    // MARK: - Ping pong terminal points (second-tier transport)
+
+    /// A finished best-of-1's numeric points ride the second-tier payload keys;
+    /// the flat setScoreA/B keep the games-won count (ADR 0005).
+    func test_roundtrip_pingPoints() {
+        let payload = makePayload(
+            setScoreA: 1, setScoreB: 0, matchType: .pingPong,
+            pingPointsA: 11, pingPointsB: 9,
+            rulesetData: pingRulesetData(bestOf: 1)
+        )
+        let decoded = MatchResultPayload.from(payload.toDictionary())
+        XCTAssertNotNil(decoded)
+        XCTAssertEqual(decoded?.pingPointsA, 11)
+        XCTAssertEqual(decoded?.pingPointsB, 9)
+        XCTAssertEqual(decoded?.setScoreA, 1)
+        XCTAssertEqual(decoded?.setScoreB, 0)
+    }
+
+    /// A legacy watch never wrote the ping-points keys — the result must still
+    /// decode, with the pair materializing nil (the headline then falls back to
+    /// the Game Log, then to the flat columns).
+    func test_from_missingPingPoints_decodeToNil() {
+        var dict = makePayload(matchType: .pingPong,
+                               pingPointsA: 11, pingPointsB: 9,
+                               rulesetData: pingRulesetData(bestOf: 1)).toDictionary()
+        dict.removeValue(forKey: WatchMessageKey.pingPointsA)
+        dict.removeValue(forKey: WatchMessageKey.pingPointsB)
+        let decoded = MatchResultPayload.from(dict)
+        XCTAssertNotNil(decoded)
+        XCTAssertNil(decoded?.pingPointsA)
+        XCTAssertNil(decoded?.pingPointsB)
+    }
+
+    /// Non-ping sports omit the keys entirely — no empty ping points on the
+    /// wire for a beach or tennis match.
+    func test_toDictionary_omitsPingPoints_forNonPingSport() {
+        let dict = makePayload(pingPointsA: 11, pingPointsB: 9).toDictionary()
+        XCTAssertNil(dict[WatchMessageKey.pingPointsA])
+        XCTAssertNil(dict[WatchMessageKey.pingPointsB])
+    }
+
+    /// Codable round-trip (local persistence) preserves the second tier too.
+    func test_codableRoundtrip_preservesPingPoints() {
+        let payload = makePayload(setScoreA: 1, setScoreB: 0, matchType: .pingPong,
+                                  pingPointsA: 11, pingPointsB: 9,
+                                  rulesetData: pingRulesetData(bestOf: 1))
+        let data = try! JSONEncoder().encode(payload)
+        let decoded = try! JSONDecoder().decode(MatchResultPayload.self, from: data)
+        XCTAssertEqual(decoded.pingPointsA, 11)
+        XCTAssertEqual(decoded.pingPointsB, 9)
+    }
+
+    // MARK: - Ping pong stamped ruleset is mandatory (ADR 0006)
+
+    /// The watch stamps the sport's active Ruleset onto every match at start,
+    /// ping included. A ping payload from the current watch always carries it;
+    /// an unrecognized or malformed stamp cannot stand in for a match defaulted
+    /// to the beach preset.
+    func test_from_pingPayloadWithoutRuleset_isRejected() {
+        var dict = makePayload(setScoreA: 1, setScoreB: 0, matchType: .pingPong,
+                               pingPointsA: 11, pingPointsB: 9).toDictionary()
+        dict.removeValue(forKey: WatchMessageKey.rulesetData)
+        XCTAssertNil(dict[WatchMessageKey.rulesetData])
+        XCTAssertNil(MatchResultPayload.from(dict))
+    }
+
+    func test_from_pingPayloadWithRuleset_decodes() {
+        let dict = makePayload(setScoreA: 1, setScoreB: 0, matchType: .pingPong,
+                               pingPointsA: 11, pingPointsB: 9,
+                               rulesetData: pingRulesetData(bestOf: 1)).toDictionary()
+        XCTAssertNotNil(MatchResultPayload.from(dict))
+    }
+
+    func test_from_nonPingPayloadWithoutRuleset_stillDecodes() {
+        // Legacy beach/tennis payloads predate the Ruleset feature — the stamp
+        // is optional for them and they must keep decoding (ADR 0006).
+        var dict = makePayload().toDictionary()
+        dict.removeValue(forKey: WatchMessageKey.rulesetData)
+        XCTAssertNil(dict[WatchMessageKey.rulesetData])
+        XCTAssertNotNil(MatchResultPayload.from(dict))
+    }
+
+    func test_from_pingPayloadWithRubbishRuleset_rejects() {
+        var dict = makePayload(setScoreA: 1, setScoreB: 0, matchType: .pingPong,
+                               pingPointsA: 11, pingPointsB: 9,
+                               rulesetData: pingRulesetData(bestOf: 1)).toDictionary()
+        dict[WatchMessageKey.rulesetData] = Data([0x00, 0xFF, 0xFE, 0xED])
+        XCTAssertNil(MatchResultPayload.from(dict))
+    }
+
+    func test_from_pingPayloadStampedAsAnotherSport_rejects() {
+        // A ping match stamped with a beach/tennis preset has no playable ping
+        // rules — the payload's stamp is corrupt.
+        let beachRules = (try? JSONEncoder().encode(Ruleset.preset(for: .beachTennis))) ?? Data()
+        let dict = makePayload(setScoreA: 1, setScoreB: 0, matchType: .pingPong,
+                               pingPointsA: 11, pingPointsB: 9,
+                               rulesetData: beachRules).toDictionary()
+        XCTAssertNil(MatchResultPayload.from(dict))
+    }
+
+    func test_from_pingPayloadWithNonNumericPoints_rejects() {
+        var dict = makePayload(setScoreA: 1, setScoreB: 0, matchType: .pingPong,
+                               pingPointsA: 11, pingPointsB: 9,
+                               rulesetData: pingRulesetData(bestOf: 1)).toDictionary()
+        dict[WatchMessageKey.pingPointsA] = "eleven"
+        XCTAssertNil(MatchResultPayload.from(dict))
+    }
+
+    func test_from_pingPayloadWithNonNumericPointB_rejects() {
+        var dict = makePayload(setScoreA: 1, setScoreB: 0, matchType: .pingPong,
+                               pingPointsA: 11, pingPointsB: 9,
+                               rulesetData: pingRulesetData(bestOf: 1)).toDictionary()
+        dict[WatchMessageKey.pingPointsB] = "nine"
+        XCTAssertNil(MatchResultPayload.from(dict))
+    }
+
+    func test_from_pingPayloadWithOneSidedPoints_rejects() {
+        var dict = makePayload(setScoreA: 1, setScoreB: 0, matchType: .pingPong,
+                               pingPointsA: 11, pingPointsB: 9,
+                               rulesetData: pingRulesetData(bestOf: 1)).toDictionary()
+        dict.removeValue(forKey: WatchMessageKey.pingPointsB)
+        XCTAssertNil(MatchResultPayload.from(dict))
+    }
+
+    func test_from_pingPayloadWithNegativePoints_rejects() {
+        // Points are counts; a negative number is corruption, not a match.
+        let dict = makePayload(setScoreA: 1, setScoreB: 0, matchType: .pingPong,
+                               pingPointsA: -1, pingPointsB: 9,
+                               rulesetData: pingRulesetData(bestOf: 1)).toDictionary()
+        XCTAssertNil(MatchResultPayload.from(dict))
     }
 
     // MARK: - Codable round-trip (local persistence)

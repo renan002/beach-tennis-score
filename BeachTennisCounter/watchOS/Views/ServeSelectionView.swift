@@ -42,7 +42,8 @@ struct ServeSelectionView: View {
                       matchType: matchType,
                       teamAName: sessionManager.teamAName,
                       teamBName: sessionManager.teamBName,
-                      isActive: $isActive)
+                      isActive: $isActive,
+                      ruleset: sessionManager.ruleset(for: matchType))
         }
     }
 
