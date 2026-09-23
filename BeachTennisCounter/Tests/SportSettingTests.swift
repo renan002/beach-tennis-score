@@ -14,6 +14,7 @@ final class SportSettingTests: XCTestCase {
     func testRawValuesAreTheTokensShippedBuildsPersist() {
         XCTAssertEqual(SportSetting.beachTennis.rawValue, "beachTennis")
         XCTAssertEqual(SportSetting.tennis.rawValue, "tennis")
+        XCTAssertEqual(SportSetting.pingPong.rawValue, "pingPong")
         XCTAssertEqual(SportSetting.multiple.rawValue, "multiple")
     }
 
@@ -22,6 +23,7 @@ final class SportSettingTests: XCTestCase {
     func testDecodingEachStoredToken() {
         XCTAssertEqual(SportSetting(storedToken: "beachTennis"), .beachTennis)
         XCTAssertEqual(SportSetting(storedToken: "tennis"), .tennis)
+        XCTAssertEqual(SportSetting(storedToken: "pingPong"), .pingPong)
         XCTAssertEqual(SportSetting(storedToken: "multiple"), .multiple)
     }
 
@@ -29,7 +31,7 @@ final class SportSettingTests: XCTestCase {
     /// a typo — decodes to the default rather than failing. There is no screen
     /// that can report "unknown sport", so the fallback is the whole handling.
     func testDecodingAnUnrecognizedTokenFallsBackToTheDefault() {
-        XCTAssertEqual(SportSetting(storedToken: "pingPong"), .default)
+        XCTAssertEqual(SportSetting(storedToken: "volleyball"), .default)
         XCTAssertEqual(SportSetting(storedToken: ""), .default)
         XCTAssertEqual(SportSetting.default, .beachTennis)
     }
@@ -39,6 +41,7 @@ final class SportSettingTests: XCTestCase {
     func testStartSportPerCase() {
         XCTAssertEqual(SportSetting.beachTennis.startSport, .beachTennis)
         XCTAssertEqual(SportSetting.tennis.startSport, .tennis)
+        XCTAssertEqual(SportSetting.pingPong.startSport, .pingPong)
         XCTAssertNil(SportSetting.multiple.startSport)
     }
 
@@ -47,6 +50,7 @@ final class SportSettingTests: XCTestCase {
     func testAsksBeforeEachMatchOnlyForMultiple() {
         XCTAssertFalse(SportSetting.beachTennis.asksBeforeEachMatch)
         XCTAssertFalse(SportSetting.tennis.asksBeforeEachMatch)
+        XCTAssertFalse(SportSetting.pingPong.asksBeforeEachMatch)
         XCTAssertTrue(SportSetting.multiple.asksBeforeEachMatch)
 
         for setting in SportSetting.allCases {
@@ -65,7 +69,7 @@ final class SportSettingTests: XCTestCase {
 
     /// The picker is built from `allCases`, so a case that stopped being listed
     /// would disappear from Settings without any other test noticing.
-    func testAllCasesListsTheThreeSettings() {
-        XCTAssertEqual(SportSetting.allCases, [.beachTennis, .tennis, .multiple])
+    func testAllCasesListsTheFourSettings() {
+        XCTAssertEqual(SportSetting.allCases, [.beachTennis, .tennis, .pingPong, .multiple])
     }
 }

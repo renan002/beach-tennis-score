@@ -20,6 +20,7 @@ struct MatchTypeSelectionView: View {
 
                 typeButton(type: .beachTennis, icon: "beach.umbrella", color: .orange)
                 typeButton(type: .tennis, icon: "tennis.racket", color: .green)
+                typeButton(type: .pingPong, icon: "figure.table.tennis", color: .blue)
             }
             .padding(.horizontal, 8)
         }

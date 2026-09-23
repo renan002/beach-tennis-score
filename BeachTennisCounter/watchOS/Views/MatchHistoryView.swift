@@ -19,7 +19,14 @@ struct MatchHistoryView: View {
                         .font(.caption.bold())
                         .foregroundColor(.white)
 
-                    if record.isTiebreak {
+                    if matchType == .pingPong {
+                        // Ping pong games are sets, never tiebreaks: the row
+                        // labels the winner, and the per-set numeric points ride
+                        // in the record's points fields.
+                        Text("\(record.pointsA ?? record.setScoreA)–\(record.pointsB ?? record.setScoreB)")
+                            .font(.caption2.bold())
+                            .foregroundColor(.white)
+                    } else if record.isTiebreak {
                         Text("TB")
                             .font(.caption2.bold())
                             .foregroundColor(.orange)

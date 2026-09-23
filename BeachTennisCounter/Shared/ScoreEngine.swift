@@ -4,10 +4,120 @@ enum ScoreEngine {
     static func awardPoint(to team: Team, state: inout MatchState) {
         guard !state.isMatchOver else { return }
 
-        if state.matchType == .tennis {
+        switch state.matchType {
+        case .tennis:
             awardTennisPoint(to: team, state: &state)
-        } else {
+        case .beachTennis:
             awardBeachTennisPoint(to: team, state: &state)
+        case .pingPong:
+            awardPingPongPoint(to: team, state: &state)
+        }
+    }
+
+    // MARK: - Ping pong scoring
+
+    private static func awardPingPongPoint(to team: Team, state: inout MatchState) {
+        // A ping match must carry a playable ping ruleset. `isValid` also keeps
+        // the deuce arithmetic `2×(target−1)` from overflowing for a ruleset
+        // constructed directly (decode already validated it).
+        guard let rules = state.ruleset.pingPong, rules.isValid else {
+            return
+        }
+        let target = rules.pointsTarget
+
+        if team == .a { state.pingPongScore.pointsA += 1 } else { state.pingPongScore.pointsB += 1 }
+        let a = state.pingPongScore.pointsA
+        let b = state.pingPongScore.pointsB
+
+        if didWinSet(a: a, b: b, target: target) {
+            let winner = a > b ? Team.a : Team.b
+            let finalA = a, finalB = b
+            appendPingGameRecord(winner: winner, finalA: finalA, finalB: finalB, state: &state)
+            checkPingMatchProgress(state: &state)
+            if !state.isMatchOver {
+                state.pingPongScore.pointsA = 0
+                state.pingPongScore.pointsB = 0
+                // Rally serve: the game's last scorer serves next. Interval
+                // modes alternate independently of the last point.
+                if rules.serveMode == .rally {
+                    state.pingPongScore.gameInitialServer = winner
+                } else {
+                    state.pingPongScore.gameInitialServer = state.pingPongScore.gameInitialServer.other
+                }
+                state.servingTeam = state.pingPongScore.gameInitialServer
+            }
+            return
+        }
+
+        state.servingTeam = pingServer(
+            completedPoints: (a + b),
+            firstServer: state.pingPongScore.gameInitialServer,
+            rules: rules,
+            lastScorer: team
+        )
+    }
+
+    // Set is won at the target with a two-point lead — win-by-2 is fixed for
+    // every sport shipped, not a knob.
+    private static func didWinSet(a: Int, b: Int, target: Int) -> Bool {
+        max(a, b) >= target && abs(a - b) >= 2
+    }
+
+    /// Serve rotation after `completedPoints` points of the current game.
+    ///
+    /// Interval modes: the first `interval` points go to `firstServer`, then the
+    /// serve alternates every `interval` points. At deuce (`(target−1,
+    /// target−1)`) the serve alternates every point instead — 10–10 in an
+    /// 11-point set, 20–20 in a 21-point one. Rally mode: the last point's
+    /// scorer serves, always.
+    private static func pingServer(
+        completedPoints: Int,
+        firstServer: Team,
+        rules: PingPongRuleset,
+        lastScorer: Team
+    ) -> Team {
+        guard let interval = rules.serveMode.interval else {
+            return lastScorer
+        }
+        let target = rules.pointsTarget
+        let deuceBound = 2 * (target - 1)
+        // `D/i + (n−D)`, not `n / i`, once n passes D — the deuce-offset.
+        // Without it target 15 / interval 5 would mis-rotate at 14–14.
+        let parity: Int
+        if completedPoints < deuceBound {
+            parity = completedPoints / interval
+        } else {
+            parity = deuceBound / interval + (completedPoints - deuceBound)
+        }
+        return parity % 2 == 0 ? firstServer : firstServer.other
+    }
+
+    private static func appendPingGameRecord(
+        winner: Team,
+        finalA: Int,
+        finalB: Int,
+        state: inout MatchState
+    ) {
+        if winner == .a { state.pingPongScore.gamesWonA += 1 } else { state.pingPongScore.gamesWonB += 1 }
+        state.gameHistory.append(GameRecord(
+            gameNumber: state.gameHistory.count + 1,
+            setScoreA: state.pingPongScore.gamesWonA,
+            setScoreB: state.pingPongScore.gamesWonB,
+            winner: winner,
+            isTiebreak: false,
+            gameScoreDisplay: "\(finalA)–\(finalB)",
+            pointsA: finalA,
+            pointsB: finalB
+        ))
+    }
+
+    private static func checkPingMatchProgress(state: inout MatchState) {
+        guard let rules = state.ruleset.pingPong else { return }
+        let needed = rules.gamesToWinMatch
+        let a = state.pingPongScore.gamesWonA
+        let b = state.pingPongScore.gamesWonB
+        if a >= needed || b >= needed {
+            endMatch(winner: a > b ? .a : .b, state: &state)
         }
     }
 
