@@ -160,7 +160,9 @@ extension StoredMatch {
             matchTypeRaw: state.matchType.rawValue,
             teamAName: state.teamAName,
             teamBName: state.teamBName,
-            rulesetData: (try? JSONEncoder().encode(state.ruleset)) ?? Data()
+            rulesetData: (try? JSONEncoder().encode(state.ruleset)) ?? Data(),
+            pingPointsA: state.matchType == .pingPong ? state.pingPoints(for: .a) : nil,
+            pingPointsB: state.matchType == .pingPong ? state.pingPoints(for: .b) : nil
         )
     }
 }

@@ -219,16 +219,30 @@ struct MatchRowView: View {
     }
 
     private var sportBadge: some View {
-        Text(match.matchType == .tennis ? String(localized: "Tennis") : "Beach")
+        Text(sportBadgeText)
             .font(.caption2.bold())
-            .foregroundColor(match.matchType == .tennis ? .green : .orange)
+            .foregroundColor(sportBadgeColor)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
             .background(
-                Capsule().fill(
-                    (match.matchType == .tennis ? Color.green : Color.orange).opacity(0.15)
-                )
+                Capsule().fill(sportBadgeColor.opacity(0.15))
             )
+    }
+
+    private var sportBadgeText: String {
+        switch match.matchType {
+        case .tennis: return String(localized: "Tennis")
+        case .beachTennis: return "Beach"
+        case .pingPong: return String(localized: "Ping pong")
+        }
+    }
+
+    private var sportBadgeColor: Color {
+        switch match.matchType {
+        case .tennis: return .green
+        case .beachTennis: return .orange
+        case .pingPong: return .blue
+        }
     }
 
     private var winnerBadge: some View {

@@ -40,6 +40,12 @@ struct SettingsView: View {
                     Text(effectiveSportSetting.settingsFooter)
                 }
 
+                Section("Rules") {
+                    NavigationLink("Rules") {
+                        RulesSettingsView()
+                    }
+                }
+
                 Section("Teams") {
                     teamRow(label: "Team A",
                             nameBinding: $phoneSession.teamAName,

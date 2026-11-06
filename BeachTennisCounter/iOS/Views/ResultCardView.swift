@@ -12,6 +12,7 @@ extension MatchType {
         // Same hex path the team colours travel — see `Color(hex:)`.
         case .tennis: return Color(hex: "CCFF00")
         case .beachTennis: return Color(hex: "F08A30")
+        case .pingPong: return Color(hex: "2E86AB")
         }
     }
 

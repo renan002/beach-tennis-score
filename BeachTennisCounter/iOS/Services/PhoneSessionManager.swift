@@ -30,6 +30,7 @@ final class PhoneSessionManager: NSObject, ObservableObject {
     @Published private(set) var isWatchAppInstalled: Bool? = nil
 
     private var modelContext: ModelContext?
+    private var rulesObserver: NSObjectProtocol?
 
     func setModelContainer(_ container: ModelContainer) {
         modelContext = ModelContext(container)
@@ -40,6 +41,17 @@ final class PhoneSessionManager: NSObject, ObservableObject {
         if WCSession.isSupported() {
             WCSession.default.delegate = self
             WCSession.default.activate()
+        }
+        // A Regras edit pushes to the watch immediately, from any screen —
+        // not only Settings' Done. Observation keeps the call out of the
+        // library (which must stay Foundation-only and testable) and off the
+        // views (which would each have to wire a push).
+        rulesObserver = NotificationCenter.default.addObserver(
+            forName: RulesetLibrary.didChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in self?.pushSettingsToWatch() }
         }
     }
 
@@ -83,12 +95,22 @@ final class PhoneSessionManager: NSObject, ObservableObject {
                       rulesetsBlob: encodedActiveRulesets)
     }
 
-    /// The active Ruleset for every sport, encoded as a blob dictionary. Before
-    /// any Ruleset editing UI exists every sport uses its built-in preset, so
-    /// the dictionary is empty and the watch falls back to presets — no encoding
-    /// traffic for something the watch already knows.
+    /// The active Ruleset for every sport, encoded as a blob dictionary
+/// `[sportRaw: Data]`. The phone owns the library, so it resolves the active
+/// value for **all** sports — including the frozen beach/tennis presets that
+/// have no editing UI — and ships them all, because with Vários the watch picks
+/// the sport after the context arrives and must already hold every sport's
+/// rules. A sport falling back to its preset still encodes that preset, so the
+/// watch never resolves against a stale value.
     private var encodedActiveRulesets: [String: Data] {
-        [:]
+        var blob: [String: Data] = [:]
+        for sport in MatchType.allCases {
+            let rules = RulesetLibrary.activeRuleset(for: sport)
+            if let data = try? JSONEncoder().encode(rules) {
+                blob[sport.rawValue] = data
+            }
+        }
+        return blob
     }
 
     func pushSettingsToWatch() {
@@ -109,12 +131,24 @@ extension PhoneSessionManager: WCSessionDelegate {
         Task { @MainActor in
             isWatchAppInstalled = installed
             if let status { watchHealthAuthStatusRaw = status.rawValue }
+            // Rules edited while the session was inactive — the app not running,
+            // or the Watch app not installed — never reached the watch: the
+            // push was dropped by the guard. Resolution works on the current
+            // stored value, so re-send the whole context now that the session
+            // is activated; the guard inside decides whether the watch is
+            // actually reachable.
+            pushSettingsToWatch()
         }
     }
 
     nonisolated func sessionWatchStateDidChange(_ session: WCSession) {
         let installed = session.isWatchAppInstalled
-        Task { @MainActor in isWatchAppInstalled = installed }
+        Task { @MainActor in
+            isWatchAppInstalled = installed
+            // A fresh Watch install after rules were edited on the phone must
+            // receive the current settings immediately, not start from presets.
+            pushSettingsToWatch()
+        }
     }
 
     nonisolated func sessionDidBecomeInactive(_ session: WCSession) {}
@@ -167,7 +201,9 @@ extension PhoneSessionManager: WCSessionDelegate {
                 teamBName: payload.teamBName,
                 activeCalories: payload.activeCalories,
                 avgHeartRate: payload.avgHeartRate,
-                rulesetData: payload.rulesetData
+                rulesetData: payload.rulesetData,
+                pingPointsA: payload.pingPointsA,
+                pingPointsB: payload.pingPointsB
             )
             context.insert(match)
             try? context.save()

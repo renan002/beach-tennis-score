@@ -19,9 +19,13 @@ final class ResultCardTests: XCTestCase {
         winner: String = "a",
         duration: TimeInterval = 3_723,
         setHistory: [SetRecord] = [],
+        gameHistoryData: Data = Data(),
         matchTypeRaw: String = "beachTennis",
         teamAName: String = "",
-        teamBName: String = ""
+        teamBName: String = "",
+        rulesetData: Data = Data(),
+        pingPointsA: Int? = nil,
+        pingPointsB: Int? = nil
     ) -> StoredMatch {
         StoredMatch(
             date: date,
@@ -31,11 +35,26 @@ final class ResultCardTests: XCTestCase {
             setsWonB: setsWonB,
             winner: winner,
             duration: duration,
+            gameHistoryData: gameHistoryData,
             setHistoryData: setHistoryData(setHistory),
             matchTypeRaw: matchTypeRaw,
             teamAName: teamAName,
-            teamBName: teamBName
+            teamBName: teamBName,
+            rulesetData: rulesetData,
+            pingPointsA: pingPointsA,
+            pingPointsB: pingPointsB
         )
+    }
+
+    private func pingRulesetData(bestOf: Int) -> Data {
+        let rules = Ruleset.pingPong(PingPongRuleset(
+            identifier: UUID(),
+            name: "Test",
+            pointsTarget: 11,
+            bestOf: bestOf,
+            serveMode: .every2
+        ))
+        return (try? JSONEncoder().encode(rules)) ?? Data()
     }
 
     // MARK: - Team labels
@@ -158,6 +177,64 @@ final class ResultCardTests: XCTestCase {
             card.durationText,
             Duration.seconds(3_723).formatted(.units(allowed: [.hours, .minutes], width: .narrow))
         )
+    }
+
+    // MARK: - Score line, ping pong
+
+    /// A finished best-of-1 (Rápido) match: the card carries the terminal
+    /// numeric points on the stub — 11–9, never a bare 1–0.
+    func test_ping_bestOf1_finished_showsTerminalPoints() {
+        let card = ResultCard(match: makeMatch(
+            setScoreA: 1,
+            setScoreB: 0,
+            winner: "a",
+            matchTypeRaw: MatchType.pingPong.rawValue,
+            rulesetData: pingRulesetData(bestOf: 1),
+            pingPointsA: 11,
+            pingPointsB: 9
+        ))
+
+        XCTAssertEqual(card.scoreA, 11)
+        XCTAssertEqual(card.scoreB, 9)
+        XCTAssertEqual(card.scoreUnitLabel, "")
+        XCTAssertTrue(card.setBreakdown.isEmpty)
+    }
+
+    /// A best-of-3 match with a complete game shows the games-won count,
+    /// labelled with the ping "Sets" convention.
+    func test_ping_bestOf3_withCompleteGame_showsGames() {
+        let card = ResultCard(match: makeMatch(
+            setScoreA: 2,
+            setScoreB: 1,
+            winner: "a",
+            matchTypeRaw: MatchType.pingPong.rawValue,
+            rulesetData: pingRulesetData(bestOf: 3)
+        ))
+
+        XCTAssertEqual(card.scoreA, 2)
+        XCTAssertEqual(card.scoreB, 1)
+        XCTAssertEqual(card.scoreUnitLabel, MatchType.pingPong.gamesSectionTitle)
+        XCTAssertTrue(card.setBreakdown.isEmpty)
+    }
+
+    /// A pre-feature best-of-1 row (no second-tier storage) still shows the
+    /// terminal points via the Game Log's numeric record.
+    func test_ping_bestOf1_legacyRow_fallsBackToGameLogPoints() {
+        let record = GameRecord(gameNumber: 1, setScoreA: 1, setScoreB: 0,
+                                winner: .a, isTiebreak: false,
+                                gameScoreDisplay: "21–19", pointsA: 21, pointsB: 19)
+        let card = ResultCard(match: makeMatch(
+            setScoreA: 1,
+            setScoreB: 0,
+            winner: "a",
+            gameHistoryData: (try? JSONEncoder().encode([record])) ?? Data(),
+            matchTypeRaw: MatchType.pingPong.rawValue,
+            rulesetData: pingRulesetData(bestOf: 1)
+        ))
+
+        XCTAssertEqual(card.scoreA, 21)
+        XCTAssertEqual(card.scoreB, 19)
+        XCTAssertEqual(card.scoreUnitLabel, "")
     }
 
     // MARK: - Watermark
