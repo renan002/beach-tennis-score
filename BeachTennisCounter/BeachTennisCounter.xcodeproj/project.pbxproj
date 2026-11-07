@@ -17,6 +17,7 @@
 		0B489373413FD7E122D3D81F /* ResultCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E80BA71634453CD2D2CA927 /* ResultCard.swift */; };
 		0BF4C73A5AA1697C85004738 /* Ruleset.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B1672676E7992AEADFCDA1 /* Ruleset.swift */; };
 		0C1D3EF86FE7C9CA3DDA3FB4 /* ProPurchaseSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FC79BF2C5726FA5F03BCDEF /* ProPurchaseSheet.swift */; };
+		0E5AA1925CDBFCC2F2BA72EB /* PhoneTrucoPathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB52A8AF16B9A7F395A8DB2 /* PhoneTrucoPathTests.swift */; };
 		119B8ACC1EBD02D5AA9C3C18 /* Pro.storekit in Resources */ = {isa = PBXBuildFile; fileRef = AEA1040B8388FB91DB4D394B /* Pro.storekit */; };
 		1244A696FA2200BBC7DA5CBE /* ScoreEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67E5FFD85FDB63F1E4B704B7 /* ScoreEngine.swift */; };
 		1409A1806C27458EAED5BA4A /* MatchTypeLabelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68B2336A3635F40C8D56E97C /* MatchTypeLabelTests.swift */; };
@@ -51,6 +52,7 @@
 		564FFB929783F14E683261CB /* StoreRecovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC40D6416C38F7B65B653DD8 /* StoreRecovery.swift */; };
 		573043183F4E098DE87C2B7F /* TrucoRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66162CDE40B7B0EC1FCB0A87 /* TrucoRules.swift */; };
 		58344D784381E039E0675796 /* SportSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 165486187497B2731E40231E /* SportSetting.swift */; };
+		5B55DE5FAF0D0A5955EA7818 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5003393E7AD8F6673BED6215 /* RootView.swift */; };
 		5B6F69490F861256230C277A /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 53AC24C14225AFDAE7BC7BFD /* Localizable.xcstrings */; };
 		5B815E5D64AA76126EC29217 /* HeadlineScore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B2A0C0C7B5D3C5CA258EEE2 /* HeadlineScore.swift */; };
 		5E9001F22112B9F4DAF5B8DD /* PingPongRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71C6C66F91CE1C0056984FEF /* PingPongRules.swift */; };
@@ -101,6 +103,7 @@
 		C6DD6BBA15414E669DE7FE1E /* ServeSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 616D650E03B50F5426E92D38 /* ServeSelectionView.swift */; };
 		CB3D172713E94C0B8CB5FE81 /* ProEntitlement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13AA66F45FAD189C14A658F3 /* ProEntitlement.swift */; };
 		D12A62A2338CB39D5AA0F5BD /* ResultCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3480A90BCBEEA8CC3F6FB98F /* ResultCardTests.swift */; };
+		D14198B22B2521F38988C933 /* TrucoPlacarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFA08F5865003ED62ACF2055 /* TrucoPlacarView.swift */; };
 		D2CA7E2CD05F51014173004E /* QuarantinedStoresSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971B4278F8EE09572EB0FA5F /* QuarantinedStoresSection.swift */; };
 		D5D8D6C1C99A0201DF0680B4 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 53AC24C14225AFDAE7BC7BFD /* Localizable.xcstrings */; };
 		DC7A9E4824658BE89523399B /* HexColorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79C4E82D16EDC9AC9126196C /* HexColorTests.swift */; };
@@ -186,6 +189,7 @@
 		425529E1E7F0F0708643A565 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		4856BDCE27A58A7DCDA0E535 /* SportSettingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SportSettingTests.swift; sourceTree = "<group>"; };
 		4B6E8D11E8E5CCF54165EC7A /* HealthSettingsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthSettingsSection.swift; sourceTree = "<group>"; };
+		5003393E7AD8F6673BED6215 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		525E681C17FA8539D36694BC /* TrucoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrucoTests.swift; sourceTree = "<group>"; };
 		53AC24C14225AFDAE7BC7BFD /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		559DA79145365F0EA4383EE1 /* InfoPlist.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = InfoPlist.strings; path = "pt-BR.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
@@ -199,6 +203,7 @@
 		67E5FFD85FDB63F1E4B704B7 /* ScoreEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreEngine.swift; sourceTree = "<group>"; };
 		68B2336A3635F40C8D56E97C /* MatchTypeLabelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchTypeLabelTests.swift; sourceTree = "<group>"; };
 		6B2A0C0C7B5D3C5CA258EEE2 /* HeadlineScore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadlineScore.swift; sourceTree = "<group>"; };
+		6FB52A8AF16B9A7F395A8DB2 /* PhoneTrucoPathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneTrucoPathTests.swift; sourceTree = "<group>"; };
 		71C6C66F91CE1C0056984FEF /* PingPongRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PingPongRules.swift; sourceTree = "<group>"; };
 		737E5C4A27BD85CA551EB4C9 /* WatchSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSessionManager.swift; sourceTree = "<group>"; };
 		73C4920FEDDEDC4712E7CA11 /* RulesetLibraryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulesetLibraryTests.swift; sourceTree = "<group>"; };
@@ -249,6 +254,7 @@
 		FA5BBE820E1F5224ECC19672 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		FC7808EE0B9A294D753A82E6 /* LegacyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyStore.swift; sourceTree = "<group>"; };
 		FEBFB89700BC5CCC8455F2CD /* TeamName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamName.swift; sourceTree = "<group>"; };
+		FFA08F5865003ED62ACF2055 /* TrucoPlacarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrucoPlacarView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -312,9 +318,11 @@
 				7A23CE764F6C43C398987642 /* RestorePurchasesButton.swift */,
 				9594452A705D30BC6E09EB2C /* ResultCardShareSheet.swift */,
 				3545F89785DBE10F5C029336 /* ResultCardView.swift */,
+				5003393E7AD8F6673BED6215 /* RootView.swift */,
 				ABAE1FF4B95A08FCA3A7E11B /* RulesSettingsView.swift */,
 				1D2079D2D2B1621F0A22237B /* SettingsView.swift */,
 				60FEB51C7CADF69C4AB76E7B /* StatisticsView.swift */,
+				FFA08F5865003ED62ACF2055 /* TrucoPlacarView.swift */,
 				60F82A970203A3C51E8C9827 /* TrucoRulesView.swift */,
 			);
 			path = Views;
@@ -360,6 +368,7 @@
 				F051F216DBABF6C5F8D81CBE /* MatchStateTeamNameTests.swift */,
 				0BA8A9213693F141E0F45B7E /* MatchStatisticsTests.swift */,
 				68B2336A3635F40C8D56E97C /* MatchTypeLabelTests.swift */,
+				6FB52A8AF16B9A7F395A8DB2 /* PhoneTrucoPathTests.swift */,
 				0428BFA5A82742FB73F29334 /* PingPongRulesTests.swift */,
 				C0B1DD8FB485D9A239C129A9 /* PingPongScoreEngineTests.swift */,
 				0C4F5BF1EE5C2D60E7F3EFD5 /* PointScoreTests.swift */,
@@ -679,6 +688,7 @@
 				0B489373413FD7E122D3D81F /* ResultCard.swift in Sources */,
 				E57342CCBC0FC2A8F5C99C6C /* ResultCardShareSheet.swift in Sources */,
 				20A18206E21DB29E9E98361A /* ResultCardView.swift in Sources */,
+				5B55DE5FAF0D0A5955EA7818 /* RootView.swift in Sources */,
 				850B1AE2B6B3EFADF7AE27E6 /* RulesSettingsView.swift in Sources */,
 				0BF4C73A5AA1697C85004738 /* Ruleset.swift in Sources */,
 				8DA18947301C91771E85AC7A /* RulesetLibrary.swift in Sources */,
@@ -689,6 +699,7 @@
 				564FFB929783F14E683261CB /* StoreRecovery.swift in Sources */,
 				AC4A4BCF92EEDE5F78A5D2A3 /* StoredMatch.swift in Sources */,
 				482C9609359A50096D8BD5D7 /* TeamName.swift in Sources */,
+				D14198B22B2521F38988C933 /* TrucoPlacarView.swift in Sources */,
 				573043183F4E098DE87C2B7F /* TrucoRules.swift in Sources */,
 				DFB39901FDB98BDEFE58D645 /* TrucoRulesView.swift in Sources */,
 				1A8E705F463BAAC8D7B8BD49 /* WatchMessage.swift in Sources */,
@@ -716,6 +727,7 @@
 				4291A25B5E810818C7555F75 /* MatchStateTeamNameTests.swift in Sources */,
 				1DB7E7F299B582264B01872B /* MatchStatisticsTests.swift in Sources */,
 				1409A1806C27458EAED5BA4A /* MatchTypeLabelTests.swift in Sources */,
+				0E5AA1925CDBFCC2F2BA72EB /* PhoneTrucoPathTests.swift in Sources */,
 				A7C2DEB3BAA30E3D9C25A75B /* PingPongRulesTests.swift in Sources */,
 				8840E1712D0E117D4A712785 /* PingPongScoreEngineTests.swift in Sources */,
 				77AE42A898482A62ECC20CA6 /* PointScoreTests.swift in Sources */,

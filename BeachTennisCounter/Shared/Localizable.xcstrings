@@ -1980,6 +1980,116 @@
           }
         }
       }
+    },
+    "Scoreboard" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Placar"
+          }
+        }
+      }
+    },
+    "No hands yet" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma mão"
+          }
+        }
+      }
+    },
+    "Pick the value below, then tap a team." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha o valor abaixo e toque na dupla."
+          }
+        }
+      }
+    },
+    "Game over" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fim de jogo"
+          }
+        }
+      }
+    },
+    "%@ won" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ venceu"
+          }
+        }
+      }
+    },
+    "New match" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nova partida"
+          }
+        }
+      }
+    },
+    "Undo" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desfazer"
+          }
+        }
+      }
+    },
+    "Discard match" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descartar partida"
+          }
+        }
+      }
+    },
+    "Discard this match?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descartar esta partida?"
+          }
+        }
+      }
+    },
+    "Keep playing" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar jogando"
+          }
+        }
+      }
+    },
+    "Playing to %lld" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jogo até %lld"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
