@@ -205,16 +205,43 @@ final class MatchStatisticsTests: XCTestCase {
 
     // MARK: - Sport split
 
-    func test_sportSplit_countsPerSport() {
+    func test_sportSplit_countsEverySport() {
         let stats = MatchStatistics(matches: [
             makeMatch(matchTypeRaw: "beachTennis"),
             makeMatch(matchTypeRaw: "tennis"),
             makeMatch(matchTypeRaw: "beachTennis"),
+            makeMatch(matchTypeRaw: "pingPong"),
+            makeMatch(matchTypeRaw: "truco"),
+            makeMatch(matchTypeRaw: "truco"),
         ])
 
-        XCTAssertEqual(stats.beachMatches, 2)
-        XCTAssertEqual(stats.tennisMatches, 1)
-        XCTAssertEqual(stats.beachMatches + stats.tennisMatches, stats.matchesPlayed)
+        XCTAssertEqual(stats.matchesBySport[.beachTennis], 2)
+        XCTAssertEqual(stats.matchesBySport[.tennis], 1)
+        XCTAssertEqual(stats.matchesBySport[.pingPong], 1)
+        XCTAssertEqual(stats.matchesBySport[.truco], 2)
+        XCTAssertEqual(stats.matchesBySport.values.reduce(0, +), stats.matchesPlayed)
+    }
+
+    func test_sportSplit_hasAnEntryForSportsNeverPlayed() {
+        let stats = MatchStatistics(matches: [makeMatch(matchTypeRaw: "truco")])
+
+        XCTAssertEqual(stats.matchesBySport.count, MatchType.allCases.count)
+        XCTAssertEqual(stats.matchesBySport[.tennis], 0)
+    }
+
+    /// The sport filter is applied before the calculator, so a winning streak
+    /// never runs across sports.
+    func test_filteredBySport_streakStaysInsideTheSport() {
+        let matches = [
+            makeMatch(winner: "a", daysAgo: 3, matchTypeRaw: "beachTennis"),
+            makeMatch(winner: "a", daysAgo: 2, matchTypeRaw: "truco"),
+            makeMatch(winner: "a", daysAgo: 1, matchTypeRaw: "beachTennis"),
+        ]
+
+        XCTAssertEqual(MatchStatistics(matches: matches).bestStreak, 3)
+        let beach = MatchStatistics(matches: StoredMatch.filtered(matches, by: .beachTennis))
+        XCTAssertEqual(beach.bestStreak, 2)
+        XCTAssertEqual(beach.matchesPlayed, 2)
     }
 
     // MARK: - Court time

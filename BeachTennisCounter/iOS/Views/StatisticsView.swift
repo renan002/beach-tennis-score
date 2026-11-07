@@ -13,11 +13,14 @@ struct StatisticsView: View {
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \StoredMatch.date, order: .reverse) private var matches: [StoredMatch]
     @State private var showProSheet = false
+    /// The sport filter — `nil` is Todos. Plain `@State`, so reopening
+    /// Estatísticas starts from All again.
+    @State private var filter: MatchType?
 
     var body: some View {
         // Computed once per render — every section reads from this one value
         // rather than reconstructing (and re-sorting) the stats on each access.
-        let stats = MatchStatistics(matches: matches)
+        let stats = MatchStatistics(matches: StoredMatch.filtered(matches, by: filter))
         return NavigationStack {
             Group {
                 // The empty state is never gated: a teaser over "no statistics
@@ -34,6 +37,9 @@ struct StatisticsView: View {
             .navigationTitle("Statistics")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    filterPicker
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
                 }
@@ -41,6 +47,29 @@ struct StatisticsView: View {
             .sheet(isPresented: $showProSheet) {
                 ProPurchaseSheet()
                     .environmentObject(pro)
+            }
+        }
+    }
+
+    // MARK: - Sport filter
+
+    private var filterPicker: some View {
+        Menu {
+            Button { filter = nil } label: {
+                Label("All", systemImage: filter == nil ? "checkmark" : "")
+            }
+            Divider()
+            ForEach(MatchType.allCases, id: \.self) { type in
+                Button { filter = type } label: {
+                    // Plain String — `displayName` is already localized.
+                    Label(type.displayName, systemImage: filter == type ? "checkmark" : "")
+                }
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: "line.3.horizontal.decrease.circle")
+                Text(filter?.displayName ?? String(localized: "All"))
+                    .font(.subheadline)
             }
         }
     }
@@ -125,14 +154,23 @@ struct StatisticsView: View {
                 statRow("Best winning streak", "\(stats.bestStreak)")
             }
 
-            Section("Records") {
-                statRow("Golden points", recordText(won: stats.goldenPointsWon, lost: stats.goldenPointsLost))
-                statRow("Super tiebreaks", recordText(won: stats.superTiebreaksWon, lost: stats.superTiebreaksLost))
+            // Golden point and super tiebreak are beach tennis records: other
+            // sports have none, so their filters drop the section.
+            if filter == nil || filter == .beachTennis {
+                Section("Records") {
+                    statRow("Golden points", recordText(won: stats.goldenPointsWon, lost: stats.goldenPointsLost))
+                    statRow("Super tiebreaks", recordText(won: stats.superTiebreaksWon, lost: stats.superTiebreaksLost))
+                }
             }
 
-            Section("By sport") {
-                statRow(verbatim: MatchType.beachTennis.displayName, "\(stats.beachMatches)")
-                statRow(verbatim: MatchType.tennis.displayName, "\(stats.tennisMatches)")
+            // One sport selected makes the split a single row repeating the
+            // overview, so it only shows under All.
+            if filter == nil {
+                Section("By sport") {
+                    ForEach(MatchType.allCases, id: \.self) { type in
+                        statRow(verbatim: type.displayName, "\(stats.matchesBySport[type] ?? 0)")
+                    }
+                }
             }
 
             Section("Court time") {
