@@ -57,4 +57,24 @@ final class ProGateTests: XCTestCase {
         XCTAssertEqual(multiple, SportSetting.multiple)
         XCTAssertEqual(multiple.rawValue, "multiple")
     }
+
+    /// The iPhone's Placar tab is the Truco scoreboard: it shows only when the
+    /// *effective* setting is Truco or Vários, so a free user whose stored
+    /// Vários falls back to beach tennis does not see it.
+    func testPhonePlacarIsOfferedOnlyForTrucoAndEffectiveMultiple() {
+        let expected: [(SportSetting, isPro: Bool, offered: Bool)] = [
+            (.truco, true, true), (.truco, false, true),
+            (.multiple, true, true), (.multiple, false, false),
+            (.beachTennis, true, false), (.beachTennis, false, false),
+            (.tennis, true, false), (.tennis, false, false),
+            (.pingPong, true, false), (.pingPong, false, false),
+        ]
+        for (sport, isPro, offered) in expected {
+            XCTAssertEqual(
+                PhoneSessionManager.offersPhonePlacar(sport, isPro: isPro),
+                offered,
+                "\(sport) isPro=\(isPro)"
+            )
+        }
+    }
 }

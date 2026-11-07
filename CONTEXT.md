@@ -21,9 +21,17 @@ shape of the score screen, and whether the match is physical.
 _Avoid_: mode, match type (in user-facing copy — `MatchType` is the type's name,
 not the word)
 
+**Sport Setting**:
+The player's standing choice of sport, made once in the iPhone settings: one
+fixed sport, or Vários. It applies to both devices — it decides what the watch
+starts and whether the phone offers a Placar at all. Vários without Pro counts
+as the default sport.
+_Avoid_: watch sport, default sport
+
 **Placar**:
 A live scoreboard: the screen where a match in progress is scored. Normally the
-watch's, but truco is also scored on the phone. Each device owns at most one
+watch's, but truco is also scored on the phone — and the phone offers its Placar
+only when the Sport Setting is truco or Vários (with Pro). Each device owns at most one
 live Placar; the two devices are never coordinated, and a match scored on either
 lands in the same Match History.
 _Avoid_: scoreboard, counter (in user-facing pt-BR copy)

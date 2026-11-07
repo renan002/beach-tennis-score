@@ -88,8 +88,8 @@ struct ProPurchaseSheet: View {
             feature(
                 icon: "figure.tennis",
                 title: "Multiple",
-                // The Settings picker's own footer, reused verbatim: one
-                // sentence, one catalog key, one translation to keep true.
+                // The watch half of the Settings picker's Vários footer; the
+                // Pro sheet sells the watch behaviour, not the iPhone tab.
                 detail: "The Watch will ask which sport before each match."
             )
         }
