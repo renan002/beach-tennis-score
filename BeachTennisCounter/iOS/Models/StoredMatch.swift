@@ -106,6 +106,38 @@ final class StoredMatch {
         )
     }
 
+    /// The one way a finished match enters Match History — a result from the
+    /// watch and a truco match scored on the phone both come through here, so
+    /// the Cartão, Estatísticas and Restore never see two shapes. A matchId
+    /// already stored is ignored (the watch may deliver the same result twice).
+    @MainActor
+    static func insert(_ payload: MatchResultPayload, into context: ModelContext) {
+        let matchId = payload.matchId
+        let existing = FetchDescriptor<StoredMatch>(predicate: #Predicate { $0.id == matchId })
+        if let count = try? context.fetchCount(existing), count > 0 { return }
+        context.insert(StoredMatch(
+            id: payload.matchId,
+            date: payload.date,
+            setScoreA: payload.setScoreA,
+            setScoreB: payload.setScoreB,
+            setsWonA: payload.setsWonA,
+            setsWonB: payload.setsWonB,
+            winner: payload.winner.rawValue,
+            duration: payload.duration,
+            gameHistoryData: (try? JSONEncoder().encode(payload.gameHistory)) ?? Data(),
+            setHistoryData: (try? JSONEncoder().encode(payload.setHistory)) ?? Data(),
+            matchTypeRaw: payload.matchType.rawValue,
+            teamAName: payload.teamAName,
+            teamBName: payload.teamBName,
+            activeCalories: payload.activeCalories,
+            avgHeartRate: payload.avgHeartRate,
+            rulesetData: payload.rulesetData,
+            pingPointsA: payload.pingPointsA,
+            pingPointsB: payload.pingPointsB
+        ))
+        try? context.save()
+    }
+
     var matchType: MatchType { MatchType(rawValue: matchTypeRaw) ?? .beachTennis }
     var gameHistory: [GameRecord] { (try? JSONDecoder().decode([GameRecord].self, from: gameHistoryData)) ?? [] }
     var setHistory: [SetRecord] { (try? JSONDecoder().decode([SetRecord].self, from: setHistoryData)) ?? [] }

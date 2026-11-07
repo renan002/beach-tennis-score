@@ -62,12 +62,29 @@ struct MatchInProgress {
 
     /// A point went to `team` — for truco, a Mão worth `value` (`nil` = base).
     mutating func awardPoint(to team: Team, value: Int? = nil, now: Date = Date()) -> [Effect] {
+        mutate(now: now) { ScoreEngine.awardPoint(to: team, value: value, state: &$0) }
+    }
+
+    /// Truco only: rewrites the Valor of the Mão at `index`, keeping its winner.
+    mutating func correctHand(at index: Int, value: Int, now: Date = Date()) -> [Effect] {
+        mutate(now: now) { s in
+            guard s.gameHistory.indices.contains(index) else { return }
+            ScoreEngine.correctTrucoHand(at: index, winner: s.gameHistory[index].winner, value: value, state: &s)
+        }
+    }
+
+    /// Truco only: deletes the Mão at `index`.
+    mutating func removeHand(at index: Int, now: Date = Date()) -> [Effect] {
+        mutate(now: now) { ScoreEngine.removeTrucoHand(at: index, state: &$0) }
+    }
+
+    /// Runs one engine change and turns it into effects. A refused change
+    /// (state unchanged) leaves no Undo Stack entry behind.
+    private mutating func mutate(now: Date, _ change: (inout MatchState) -> Void) -> [Effect] {
         guard !state.isMatchOver else { return [] }
 
         let before = state
-        ScoreEngine.awardPoint(to: team, value: value, state: &state)
-        // A refused award (a Valor the Ruleset doesn't offer) changes nothing
-        // and leaves no Undo Stack entry behind.
+        change(&state)
         guard state != before else { return [] }
         undoStack.append(before)
 

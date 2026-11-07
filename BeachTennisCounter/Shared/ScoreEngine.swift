@@ -47,6 +47,21 @@ enum ScoreEngine {
         return true
     }
 
+    /// Deletes one recorded Mão, then rederives everything. Removing a hand can
+    /// reopen a finished match — the end is derived, never a stored flag.
+    @discardableResult
+    static func removeTrucoHand(at index: Int, state: inout MatchState) -> Bool {
+        guard state.matchType == .truco,
+              let rules = state.ruleset.truco, rules.isValid,
+              state.gameHistory.indices.contains(index)
+        else { return false }
+        var next = state
+        next.gameHistory.remove(at: index)
+        guard rederiveTruco(state: &next) else { return false }
+        state = next
+        return true
+    }
+
     /// A Mão as its Game Log record: the hand's own credit in `pointsA/B`
     /// (the unit recorded), running totals filled in by `rederiveTruco`.
     private static func trucoRecord(winner: Team, value: Int) -> GameRecord {
