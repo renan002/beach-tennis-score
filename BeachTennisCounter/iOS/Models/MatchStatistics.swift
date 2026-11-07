@@ -26,11 +26,11 @@ struct MatchStatistics: Sendable, Equatable {
     /// counted from the Game Log.
     let goldenPointsWon: Int
     let goldenPointsLost: Int
-    /// Super-tiebreak games Team A won and lost — the beach tennis decider at
-    /// 6-6. Tennis set tiebreaks also carry `isTiebreak` but are a different
-    /// thing, so they are not counted here.
-    let superTiebreaksWon: Int
-    let superTiebreaksLost: Int
+    /// Beach tennis Tiebreak games Team A won and lost — the decider at 6-6,
+    /// whatever its configured length. Tennis set tiebreaks also carry
+    /// `isTiebreak` but are a different thing, so they are not counted here.
+    let tiebreaksWon: Int
+    let tiebreaksLost: Int
     /// Per-sport split of `matchesPlayed`, with an entry for every `MatchType`
     /// (zero when never played) — a new sport needs no edit here.
     let matchesBySport: [MatchType: Int]
@@ -71,11 +71,11 @@ struct MatchStatistics: Sendable, Equatable {
         // streak, already zero if that match was not a Team A win.
         currentStreak = run
 
-        // Golden points and super-tiebreaks are derived from the Game Log: a
-        // golden-point game carries the "GP" score display, the super-tiebreak
-        // the `isTiebreak` flag. Both are beach tennis concepts — a tennis set
-        // tiebreak also sets `isTiebreak`, so super-tiebreaks are counted only
-        // for beach matches, keeping the "super" record what the spec means.
+        // Golden points and Tiebreaks are derived from the Game Log: a
+        // golden-point game carries the "GP" score display, the Tiebreak the
+        // `isTiebreak` flag. Both are beach tennis concepts — a tennis set
+        // tiebreak also sets `isTiebreak`, so Tiebreaks are counted only for
+        // beach matches.
         var gpWon = 0, gpLost = 0, tbWon = 0, tbLost = 0
         for match in matches {
             let isBeach = match.matchType == .beachTennis
@@ -90,8 +90,8 @@ struct MatchStatistics: Sendable, Equatable {
         }
         goldenPointsWon = gpWon
         goldenPointsLost = gpLost
-        superTiebreaksWon = tbWon
-        superTiebreaksLost = tbLost
+        tiebreaksWon = tbWon
+        tiebreaksLost = tbLost
 
         matchesBySport = Dictionary(uniqueKeysWithValues: MatchType.allCases.map { type in
             (type, matches.lazy.filter { $0.matchType == type }.count)

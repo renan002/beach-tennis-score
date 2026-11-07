@@ -153,12 +153,12 @@ struct StatisticsView: View {
                 statRow("Best winning streak", "\(stats.bestStreak)")
             }
 
-            // Golden point and super tiebreak are beach tennis records: other
+            // Golden point and Tiebreak are beach tennis records: other
             // sports have none, so their filters drop the section.
             if filter == nil || filter == .beachTennis {
                 Section("Records") {
                     statRow("Golden points", recordText(won: stats.goldenPointsWon, lost: stats.goldenPointsLost))
-                    statRow("Super tiebreaks", recordText(won: stats.superTiebreaksWon, lost: stats.superTiebreaksLost))
+                    statRow("Tiebreaks", recordText(won: stats.tiebreaksWon, lost: stats.tiebreaksLost))
                 }
             }
 
