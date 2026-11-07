@@ -10,10 +10,12 @@ struct RootView: View {
 
     var body: some View {
         TabView {
-            Tab("Scoreboard", systemImage: MatchType.truco.icon) {
-                NavigationStack {
-                    TrucoPlacarView()
-                        .settingsGear($showSettings)
+            if PhoneSessionManager.offersPhonePlacar(phoneSession.sportSetting, isPro: pro.isPro) {
+                Tab("Scoreboard", systemImage: MatchType.truco.icon) {
+                    NavigationStack {
+                        TrucoPlacarView()
+                            .settingsGear($showSettings)
+                    }
                 }
             }
             Tab("History", systemImage: "clock") {

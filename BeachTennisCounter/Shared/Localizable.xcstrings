@@ -1639,6 +1639,16 @@
         }
       }
     },
+    "The Watch will ask which sport before each match; the iPhone keeps the Truco Scoreboard tab." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Watch perguntará qual esporte antes de cada partida; o iPhone mantém o Placar de Truco."
+          }
+        }
+      }
+    },
     "The Watch will ask which sport before each match." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1961,12 +1971,12 @@
         }
       }
     },
-    "The Watch will always start a Truco match." : {
+    "Truco matches start on the Watch or on the iPhone's Scoreboard tab." : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O Watch sempre iniciará uma partida de Truco."
+            "value" : "As partidas de Truco começam no Watch ou no Placar do iPhone."
           }
         }
       }

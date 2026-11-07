@@ -78,6 +78,16 @@ final class PhoneSessionManager: NSObject, ObservableObject {
         return WatchSettings.defaultSportSetting
     }
 
+    /// Whether the iPhone's Placar tab (the Truco scoreboard) is shown: only
+    /// when the *effective* setting is Truco or Vários. Exhaustive on purpose —
+    /// a new sport must decide whether it has a phone scoreboard.
+    nonisolated static func offersPhonePlacar(_ stored: SportSetting, isPro: Bool) -> Bool {
+        switch effectiveSportSetting(stored, isPro: isPro) {
+        case .truco, .multiple: return true
+        case .beachTennis, .tennis, .pingPong: return false
+        }
+    }
+
     /// The settings the watch consumes, as currently stored on the phone —
     /// except for `sportSetting`, which is what the entitlement allows. The
     /// watch is told the effective value because it cannot work one out: it

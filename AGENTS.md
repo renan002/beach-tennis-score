@@ -98,7 +98,7 @@ watchOS/         ← Apple Watch app (primary runtime UI)
 iOS/             ← iPhone companion (history + settings)
   BeachTennisApp.swift
   Models/StoredMatch.swift             — @Model (SwiftData)
-  Views/          RootView (TabView: Placar / Histórico / Estatísticas) → TrucoPlacarView,
+  Views/          RootView (TabView: Placar — only for truco/Vários — / Histórico / Estatísticas) → TrucoPlacarView,
                   MatchListView → MatchDetailView, StatisticsView; SettingsView is a sheet from every tab's gear
   Services/PhoneSessionManager.swift   — @MainActor singleton, WCSession delegate
   Services/ProEntitlement.swift        — @MainActor singleton, StoreKit 2 (iOS only)

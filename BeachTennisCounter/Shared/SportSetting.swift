@@ -64,8 +64,8 @@ enum SportSetting: String, Sendable, CaseIterable {
         case .beachTennis: return String(localized: "The Watch will always start a Beach Tennis match.")
         case .tennis:      return String(localized: "The Watch will always start a Tennis match.")
         case .pingPong:    return String(localized: "The Watch will always start a Ping pong match.")
-        case .truco:       return String(localized: "The Watch will always start a Truco match.")
-        case .multiple:    return String(localized: "The Watch will ask which sport before each match.")
+        case .truco:       return String(localized: "Truco matches start on the Watch or on the iPhone's Scoreboard tab.")
+        case .multiple:    return String(localized: "The Watch will ask which sport before each match; the iPhone keeps the Truco Scoreboard tab.")
         }
     }
 }
