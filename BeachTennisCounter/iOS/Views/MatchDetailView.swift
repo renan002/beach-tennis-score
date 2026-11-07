@@ -19,7 +19,7 @@ struct MatchDetailView: View {
                     Spacer()
                     Text(match.matchType.displayName)
                         .font(.headline)
-                        .foregroundColor(match.matchType == .tennis ? .green : (match.matchType == .pingPong ? .blue : .orange))
+                        .foregroundColor(match.matchType == .tennis ? .green : (match.matchType == .pingPong ? .blue : (match.matchType == .truco ? .mint : .orange)))
                 }
                 HStack {
                     Text("Score")

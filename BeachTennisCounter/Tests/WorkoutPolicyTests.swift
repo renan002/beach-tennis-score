@@ -36,12 +36,11 @@ final class WorkoutPolicyTests: XCTestCase {
 
     // MARK: - Non-physical sports
 
-    /// Every sport shipped today is physical; a future non-physical sport is
-    /// the only way this gate fires. It must decline before any HealthKit
-    /// decision, regardless of monitoring or session state.
-    func test_allCurrentSportsArePhysical() {
+    /// Truco is the one non-physical sport; it must decline before any
+    /// HealthKit decision, regardless of monitoring or session state.
+    func test_onlyTrucoIsNonPhysical() {
         for sport in MatchType.allCases {
-            XCTAssertTrue(sport.isPhysicalSport, "\(sport.rawValue) expected physical")
+            XCTAssertEqual(sport.isPhysicalSport, sport != .truco, "\(sport.rawValue)")
         }
     }
 

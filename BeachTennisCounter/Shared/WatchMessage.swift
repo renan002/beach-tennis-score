@@ -232,6 +232,15 @@ struct MatchResultPayload: Codable, Sendable {
             pingPointsB = nil
         }
 
+        // Truco's stamped Ruleset is mandatory too: its target is what the
+        // totals in setScoreA/B were played to.
+        if matchType == .truco {
+            guard let stamped = try? JSONDecoder().decode(Ruleset.self, from: rulesetData),
+                  stamped.sport == .truco,
+                  stamped.truco?.isValid == true
+            else { return nil }
+        }
+
         let gameHistory: [GameRecord]
         if let data = dict[WatchMessageKey.gameHistory] as? Data,
            let records = try? JSONDecoder().decode([GameRecord].self, from: data) {

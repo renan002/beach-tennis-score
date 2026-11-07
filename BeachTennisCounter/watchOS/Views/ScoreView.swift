@@ -17,6 +17,9 @@ struct ScoreView: View {
     @State private var showMatchOver = false
     @State private var showHistory = false
     @State private var showCancelAlert = false
+    /// Truco only: the crown's position on the Valor strip. Rests on the base
+    /// Valor and returns there after every hand, so the common Mão stays one tap.
+    @State private var stakeIndex: Double = 0
 
     private var state: MatchState { match.state }
 
@@ -90,15 +93,18 @@ struct ScoreView: View {
 
     // MARK: - Score content
 
+    @ViewBuilder
     private var scoreContent: some View {
-        VStack(spacing: 4) {
+        let content = VStack(spacing: 4) {
             topBar
 
             if matchType == .tennis || matchType == .pingPong {
                 setsWonRow
             }
 
-            if matchType != .pingPong {
+            if matchType == .truco {
+                stakeStrip
+            } else if matchType != .pingPong {
                 scoreRow
             }
 
@@ -107,11 +113,56 @@ struct ScoreView: View {
             bottomBar
                 .padding(.top, 4)
         }
+        if matchType == .truco {
+            content
+                .focusable()
+                .digitalCrownRotation(
+                    $stakeIndex,
+                    from: 0,
+                    through: Double(max(stakes.count - 1, 0)),
+                    by: 1,
+                    sensitivity: .low,
+                    isContinuous: false,
+                    isHapticFeedbackEnabled: true
+                )
+        } else {
+            content
+        }
+    }
+
+    // MARK: - Truco Valor strip
+
+    private var stakes: [Int] { state.ruleset.truco?.stakes ?? [1] }
+
+    private var selectedStake: Int {
+        stakes[min(max(Int(stakeIndex.rounded()), 0), stakes.count - 1)]
+    }
+
+    /// The Valor da mão, one cell per stake; the crown moves the highlight.
+    private var stakeStrip: some View {
+        HStack(spacing: 4) {
+            ForEach(stakes, id: \.self) { value in
+                let selected = value == selectedStake
+                Text("\(value)")
+                    .font(.system(size: 15, weight: selected ? .bold : .regular))
+                    .monospacedDigit()
+                    .foregroundStyle(selected ? .black : .white)
+                    .frame(maxWidth: .infinity, minHeight: 22)
+                    .background(
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .fill(selected ? Color.white : Color.white.opacity(0.15))
+                    )
+            }
+        }
+        .padding(.horizontal, 6)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("Hand value"))
+        .accessibilityValue(Text("\(selectedStake)"))
     }
 
     private var topBar: some View {
         ZStack {
-            Text("Sets")
+            Text(matchType == .truco ? matchType.displayName : String(localized: "Sets"))
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
@@ -196,7 +247,7 @@ struct ScoreView: View {
             Circle()
                 .fill(Color.orange)
                 .frame(width: 8, height: 8)
-                .opacity(state.servingTeam == .a ? 1 : 0)
+                .opacity(matchType.hasServe && state.servingTeam == .a ? 1 : 0)
                 .padding(.leading, 2)
 
             scoreSquare(team: .a, color: sessionManager.teamAColor)
@@ -208,7 +259,7 @@ struct ScoreView: View {
             Circle()
                 .fill(Color.orange)
                 .frame(width: 8, height: 8)
-                .opacity(state.servingTeam == .b ? 1 : 0)
+                .opacity(matchType.hasServe && state.servingTeam == .b ? 1 : 0)
                 .padding(.trailing, 2)
         }
         .padding(.horizontal, 2)
@@ -268,6 +319,8 @@ struct ScoreView: View {
         switch matchType {
         case .pingPong:
             return "\(state.pingPoints(for: team))"
+        case .truco:
+            return "\(state.setScore(for: team))"
         case .tennis, .beachTennis:
             if state.isTiebreak {
                 return "\(state.tiebreakScore(for: team))"
@@ -331,7 +384,11 @@ struct ScoreView: View {
     // MARK: - Actions
 
     private func awardPoint(to team: Team) {
-        let effects = match.awardPoint(to: team)
+        let effects = match.awardPoint(
+            to: team,
+            value: matchType == .truco ? selectedStake : nil
+        )
+        stakeIndex = 0
         // Raised before the effects run, as it was when this was an observer on
         // the match-over flag: the overlay never waits on the stats snapshot.
         if state.isMatchOver {
@@ -342,6 +399,7 @@ struct ScoreView: View {
 
     private func undoLast() {
         perform(match.undo())
+        stakeIndex = 0
     }
 
     // MARK: - Effects

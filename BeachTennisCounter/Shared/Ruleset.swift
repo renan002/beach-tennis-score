@@ -12,6 +12,7 @@ struct Ruleset: Codable, Equatable, Sendable {
 
     enum StoredPayload: String, Codable {
         case pingPong
+        case truco
     }
 
     /// Coding keys, private so neither legacy fields nor the ping payload can be
@@ -21,7 +22,7 @@ struct Ruleset: Codable, Equatable, Sendable {
     private enum CodingKeys: String, CodingKey {
         case codingVersion, identifier, name, sport, hasSets
         case gamesToWinMatch, tiebreakAtGames, tiebreakPointsToWin, tiebreakWinByTwo, setsToWinMatch
-        case payloadType, pingPong
+        case payloadType, pingPong, truco
     }
 
     private let codingVersion: CodingVersion
@@ -39,6 +40,9 @@ struct Ruleset: Codable, Equatable, Sendable {
     /// match at its start (ADR 0006); a look-up of today's setting never
     /// rewrites a match already played.
     let pingPong: PingPongRuleset?
+    /// Truco's own rules, `nil` for every other sport. Stamped by value like
+    /// `pingPong`.
+    let truco: TrucoRuleset?
 
     init(
         codingVersion: CodingVersion = .v1,
@@ -51,7 +55,8 @@ struct Ruleset: Codable, Equatable, Sendable {
         tiebreakPointsToWin: Int,
         tiebreakWinByTwo: Bool,
         setsToWinMatch: Int?,
-        pingPong: PingPongRuleset? = nil
+        pingPong: PingPongRuleset? = nil,
+        truco: TrucoRuleset? = nil
     ) {
         self.codingVersion = codingVersion
         self.identifier = identifier
@@ -64,6 +69,7 @@ struct Ruleset: Codable, Equatable, Sendable {
         self.tiebreakWinByTwo = tiebreakWinByTwo
         self.setsToWinMatch = setsToWinMatch
         self.pingPong = pingPong
+        self.truco = truco
     }
 
     init(from decoder: Decoder) throws {
@@ -86,17 +92,24 @@ struct Ruleset: Codable, Equatable, Sendable {
                   let ping = try c.decodeIfPresent(PingPongRuleset.self, forKey: .pingPong)
             else { throw RulesetCodecError.malformed }
             pingPong = ping
+            truco = nil
+        case .truco:
+            guard sport == .truco,
+                  let rules = try c.decodeIfPresent(TrucoRuleset.self, forKey: .truco)
+            else { throw RulesetCodecError.malformed }
+            pingPong = nil
+            truco = rules
         case .none:
             // A legacy encoded blob — a preset/custom for beach or tennis — has
             // no payload key. It must still decode (ADR 0006), materializing
-            // `nil` ping rules.
-            guard sport == .pingPong else {
-                pingPong = nil
-                return
+            // `nil` sport rules.
+            pingPong = nil
+            truco = nil
+            // A ping or truco ruleset encoded without a payload is malformed —
+            // reject rather than silently interpreting it as legacy.
+            if sport == .pingPong || sport == .truco {
+                throw RulesetCodecError.malformed
             }
-            // A ping ruleset encoded without a payload is malformed — reject
-            // rather than silently interpreting it as legacy.
-            throw RulesetCodecError.malformed
         }
     }
 
@@ -116,6 +129,27 @@ struct Ruleset: Codable, Equatable, Sendable {
             try c.encode(StoredPayload.pingPong, forKey: .payloadType)
             try c.encode(ping, forKey: .pingPong)
         }
+        if let truco {
+            try c.encode(StoredPayload.truco, forKey: .payloadType)
+            try c.encode(truco, forKey: .truco)
+        }
+    }
+
+    /// Builds the truco Ruleset wrapping `rules`. The legacy fields carry the
+    /// target so flat views that read `gamesToWinMatch` still agree.
+    static func truco(_ rules: TrucoRuleset) -> Ruleset {
+        Ruleset(
+            identifier: rules.identifier,
+            name: rules.name,
+            sport: .truco,
+            hasSets: false,
+            gamesToWinMatch: rules.pointsTarget,
+            tiebreakAtGames: nil,
+            tiebreakPointsToWin: 0,
+            tiebreakWinByTwo: false,
+            setsToWinMatch: nil,
+            truco: rules
+        )
     }
 
     /// Builds the ping pong Ruleset wrapping `rules`. The legacy fields are
@@ -175,6 +209,8 @@ struct Ruleset: Codable, Equatable, Sendable {
                 setsToWinMatch: nil,
                 pingPong: .oficial
             )
+        case .truco:
+            .truco(.paulista)
         }
     }
 }

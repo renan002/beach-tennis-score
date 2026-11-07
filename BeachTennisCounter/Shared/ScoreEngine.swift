@@ -1,7 +1,9 @@
 import Foundation
 
 enum ScoreEngine {
-    static func awardPoint(to team: Team, state: inout MatchState) {
+    /// The single award entry point. `value` is the Valor of a truco Mão —
+    /// `nil` means the Ruleset's base Valor — and is ignored by every other sport.
+    static func awardPoint(to team: Team, value: Int? = nil, state: inout MatchState) {
         guard !state.isMatchOver else { return }
 
         switch state.matchType {
@@ -11,7 +13,89 @@ enum ScoreEngine {
             awardBeachTennisPoint(to: team, state: &state)
         case .pingPong:
             awardPingPongPoint(to: team, state: &state)
+        case .truco:
+            awardTrucoHand(to: team, value: value, state: &state)
         }
+    }
+
+    // MARK: - Truco scoring
+
+    private static func awardTrucoHand(to team: Team, value: Int?, state: inout MatchState) {
+        guard let rules = state.ruleset.truco, rules.isValid else { return }
+        let value = value ?? rules.baseValue
+        guard rules.stakes.contains(value) else { return }
+        state.gameHistory.append(trucoRecord(winner: team, value: value))
+        rederiveTruco(state: &state)
+    }
+
+    /// Rewrites one recorded Mão after the fact, then rederives everything.
+    /// Lowering a hand below the target reopens a finished match — the end is
+    /// never a stored flag. Refused (returns false, state untouched) for an
+    /// out-of-range index, a Valor the Ruleset does not offer, or a correction
+    /// that would end the match before the last recorded hand.
+    @discardableResult
+    static func correctTrucoHand(at index: Int, winner: Team, value: Int, state: inout MatchState) -> Bool {
+        guard state.matchType == .truco,
+              let rules = state.ruleset.truco, rules.isValid,
+              state.gameHistory.indices.contains(index),
+              rules.stakes.contains(value)
+        else { return false }
+        var next = state
+        next.gameHistory[index] = trucoRecord(winner: winner, value: value)
+        guard rederiveTruco(state: &next) else { return false }
+        state = next
+        return true
+    }
+
+    /// A Mão as its Game Log record: the hand's own credit in `pointsA/B`
+    /// (the unit recorded), running totals filled in by `rederiveTruco`.
+    private static func trucoRecord(winner: Team, value: Int) -> GameRecord {
+        GameRecord(
+            gameNumber: 0, setScoreA: 0, setScoreB: 0,
+            winner: winner, isTiebreak: false,
+            pointsA: winner == .a ? value : 0,
+            pointsB: winner == .b ? value : 0
+        )
+    }
+
+    /// Totals, Game Log numbering and the match's end, all from the hands in
+    /// the Game Log. The first side to reach the target wins; totals are not
+    /// capped, so a 3 on 11 shows 14. Returns false — leaving `state` as it
+    /// was — when the log is not a valid sequence of hands: a record crediting
+    /// nothing or the loser, or a hand recorded after the match had ended.
+    @discardableResult
+    static func rederiveTruco(state: inout MatchState) -> Bool {
+        guard let target = state.ruleset.truco?.pointsTarget else { return false }
+        var a = 0, b = 0
+        var winner: Team?
+        var log: [GameRecord] = []
+        for (i, record) in state.gameHistory.enumerated() {
+            guard winner == nil,
+                  let value = MatchState.trucoHandValue(record), value >= 1,
+                  (record.winner == .a ? record.pointsB : record.pointsA) ?? 0 == 0
+            else { return false }
+            let (sumA, overA) = a.addingReportingOverflow(record.winner == .a ? value : 0)
+            let (sumB, overB) = b.addingReportingOverflow(record.winner == .b ? value : 0)
+            guard !overA, !overB else { return false }
+            a = sumA; b = sumB
+            if max(a, b) >= target { winner = record.winner }
+            log.append(GameRecord(
+                gameNumber: i + 1,
+                setScoreA: a,
+                setScoreB: b,
+                winner: record.winner,
+                isTiebreak: false,
+                gameScoreDisplay: "+\(value)",
+                pointsA: record.pointsA,
+                pointsB: record.pointsB
+            ))
+        }
+        state.gameHistory = log
+        state.setScoreA = a
+        state.setScoreB = b
+        state.winner = winner
+        state.isMatchOver = winner != nil
+        return true
     }
 
     // MARK: - Ping pong scoring

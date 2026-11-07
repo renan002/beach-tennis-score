@@ -70,6 +70,6 @@ final class SportSettingTests: XCTestCase {
     /// The picker is built from `allCases`, so a case that stopped being listed
     /// would disappear from Settings without any other test noticing.
     func testAllCasesListsTheFourSettings() {
-        XCTAssertEqual(SportSetting.allCases, [.beachTennis, .tennis, .pingPong, .multiple])
+        XCTAssertEqual(SportSetting.allCases, [.beachTennis, .tennis, .pingPong, .truco, .multiple])
     }
 }

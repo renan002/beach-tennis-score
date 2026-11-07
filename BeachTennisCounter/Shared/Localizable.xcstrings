@@ -1810,6 +1810,176 @@
           }
         }
       }
+    },
+    "Truco" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Truco"
+          }
+        }
+      }
+    },
+    "Hand %lld" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mão %lld"
+          }
+        }
+      }
+    },
+    "Hands" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mãos"
+          }
+        }
+      }
+    },
+    "Truco Paulista" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paulista"
+          }
+        }
+      }
+    },
+    "Truco Mineiro" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mineiro"
+          }
+        }
+      }
+    },
+    "Truco Gaudério" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gaudério"
+          }
+        }
+      }
+    },
+    "Points to win" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pontos para vencer"
+          }
+        }
+      }
+    },
+    "Base value" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valor base"
+          }
+        }
+      }
+    },
+    "Raises" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escalada"
+          }
+        }
+      }
+    },
+    "Custom…" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personalizada…"
+          }
+        }
+      }
+    },
+    "Truco Rules" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regras do truco"
+          }
+        }
+      }
+    },
+    "Add raise" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar degrau"
+          }
+        }
+      }
+    },
+    "Raise %lld" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Degrau %lld"
+          }
+        }
+      }
+    },
+    "Hand value" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valor da mão"
+          }
+        }
+      }
+    },
+    "%lld points to win · hands of %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pontos para vencer · mãos de %@"
+          }
+        }
+      }
+    },
+    "The Watch will always start a Truco match." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Watch sempre iniciará uma partida de Truco."
+          }
+        }
+      }
+    },
+    "Raises must go up, starting above the base value." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A escalada tem que subir, começando acima do valor base."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

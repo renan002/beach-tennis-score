@@ -234,6 +234,7 @@ struct MatchRowView: View {
         case .tennis: return String(localized: "Tennis")
         case .beachTennis: return "Beach"
         case .pingPong: return String(localized: "Ping pong")
+        case .truco: return String(localized: "Truco")
         }
     }
 
@@ -242,6 +243,7 @@ struct MatchRowView: View {
         case .tennis: return .green
         case .beachTennis: return .orange
         case .pingPong: return .blue
+        case .truco: return .mint
         }
     }
 
