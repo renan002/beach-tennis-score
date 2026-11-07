@@ -180,27 +180,27 @@ final class MatchStatisticsTests: XCTestCase {
 
     // MARK: - Super-tiebreaks
 
-    func test_superTiebreaks_countedFromGameLog() {
+    func test_tiebreaks_countedFromGameLog() {
         let stats = MatchStatistics(matches: [
             makeMatch(gameHistory: [tiebreakGame(winner: .a), plainGame(winner: .a)]),
             makeMatch(gameHistory: [tiebreakGame(winner: .b)]),
             makeMatch(gameHistory: [tiebreakGame(winner: .a)]),
         ])
 
-        XCTAssertEqual(stats.superTiebreaksWon, 2)
-        XCTAssertEqual(stats.superTiebreaksLost, 1)
+        XCTAssertEqual(stats.tiebreaksWon, 2)
+        XCTAssertEqual(stats.tiebreaksLost, 1)
     }
 
     /// A tennis set tiebreak also carries `isTiebreak`, but it is not the beach
-    /// 6-6 super-tiebreak the record is about — it must not be counted.
-    func test_superTiebreaks_excludeTennisSetTiebreaks() {
+    /// 6-6 Tiebreak the record is about — it must not be counted.
+    func test_tiebreaks_excludeTennisSetTiebreaks() {
         let stats = MatchStatistics(matches: [
             makeMatch(matchTypeRaw: "tennis", gameHistory: [tiebreakGame(winner: .a)]),
             makeMatch(matchTypeRaw: "beachTennis", gameHistory: [tiebreakGame(winner: .a)]),
         ])
 
-        XCTAssertEqual(stats.superTiebreaksWon, 1, "only the beach super-tiebreak counts")
-        XCTAssertEqual(stats.superTiebreaksLost, 0)
+        XCTAssertEqual(stats.tiebreaksWon, 1, "only the beach Tiebreak counts")
+        XCTAssertEqual(stats.tiebreaksLost, 0)
     }
 
     // MARK: - Sport split
