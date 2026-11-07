@@ -31,9 +31,9 @@ struct MatchStatistics: Sendable, Equatable {
     /// thing, so they are not counted here.
     let superTiebreaksWon: Int
     let superTiebreaksLost: Int
-    /// Per-sport split of `matchesPlayed`.
-    let beachMatches: Int
-    let tennisMatches: Int
+    /// Per-sport split of `matchesPlayed`, with an entry for every `MatchType`
+    /// (zero when never played) — a new sport needs no edit here.
+    let matchesBySport: [MatchType: Int]
     /// Court time across every match, and the per-match average. Average is
     /// zero when nothing has been played.
     let totalDuration: TimeInterval
@@ -93,8 +93,9 @@ struct MatchStatistics: Sendable, Equatable {
         superTiebreaksWon = tbWon
         superTiebreaksLost = tbLost
 
-        beachMatches = matches.lazy.filter { $0.matchType == .beachTennis }.count
-        tennisMatches = matches.lazy.filter { $0.matchType == .tennis }.count
+        matchesBySport = Dictionary(uniqueKeysWithValues: MatchType.allCases.map { type in
+            (type, matches.lazy.filter { $0.matchType == type }.count)
+        })
 
         let total = matches.reduce(0) { $0 + $1.duration }
         totalDuration = total
