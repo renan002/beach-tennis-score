@@ -97,8 +97,8 @@ final class PhoneSessionManager: NSObject, ObservableObject {
 
     /// The active Ruleset for every sport, encoded as a blob dictionary
 /// `[sportRaw: Data]`. The phone owns the library, so it resolves the active
-/// value for **all** sports — including the frozen beach/tennis presets that
-/// have no editing UI — and ships them all, because with Vários the watch picks
+/// value for **all** sports — including tennis's frozen preset, which has no
+/// editing UI — and ships them all, because with Vários the watch picks
 /// the sport after the context arrives and must already hold every sport's
 /// rules. A sport falling back to its preset still encodes that preset, so the
 /// watch never resolves against a stale value.
