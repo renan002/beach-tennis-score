@@ -34,7 +34,7 @@ final class ProGateTests: XCTestCase {
     /// untouched, with or without Pro. Tennis especially — it is free, and a
     /// gate that reached it would silently move players onto the wrong court.
     func testTheFreeSportsPassThroughInBothStates() {
-        for sport in ["beachTennis", "tennis"] {
+        for sport in [SportSetting.beachTennis, .tennis] {
             for isPro in [true, false] {
                 XCTAssertEqual(
                     PhoneSessionManager.effectiveSportSetting(sport, isPro: isPro),
@@ -45,21 +45,16 @@ final class ProGateTests: XCTestCase {
         }
     }
 
-    /// An unrecognised stored value is passed through rather than corrected.
-    /// `HomeView`'s own `switch` already falls back for anything it does not
-    /// know, and a gate that quietly rewrote unknown values would be deciding
-    /// something it was not asked to decide.
-    func testAnUnknownSettingIsLeftAlone() {
-        XCTAssertEqual(
-            PhoneSessionManager.effectiveSportSetting("pingPong", isPro: false),
-            "pingPong"
-        )
-    }
+    // An unrecognised stored token no longer reaches this gate: the value is a
+    // `SportSetting`, decoded at the storage and wire boundaries, so there is
+    // no unknown case left to decide about. `SportSettingTests` covers that
+    // fallback, and `WatchSettingsTests` covers it on the wire.
 
-    /// `multiple` is a storage key travelling to the watch in the application
-    /// context, so the gate and the wire format must name it identically. They
-    /// are declared in different files; this is what keeps them the same word.
-    func testTheGatedValueIsTheTokenThePickerPersists() {
-        XCTAssertEqual(multiple, "multiple")
+    /// The gated setting is the one the picker persists and the watch reads —
+    /// a storage key, never displayed and never translated. `SportSettingTests`
+    /// pins the token itself; this pins which case the gate names.
+    func testTheGatedValueIsTheOneThePickerPersists() {
+        XCTAssertEqual(multiple, SportSetting.multiple)
+        XCTAssertEqual(multiple.rawValue, "multiple")
     }
 }

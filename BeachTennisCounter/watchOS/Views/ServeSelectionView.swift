@@ -8,6 +8,25 @@ struct ServeSelectionView: View {
     @State private var selectedServer: Team = .a
 
     var body: some View {
+        // A sport with no serve (truco) has nothing to ask: go straight to the
+        // Placar. `.a` is a placeholder the engine never reads for it.
+        if matchType.hasServe {
+            servePicker
+        } else {
+            scoreView(initialServer: .a)
+        }
+    }
+
+    private func scoreView(initialServer: Team) -> ScoreView {
+        ScoreView(initialServer: initialServer,
+                  matchType: matchType,
+                  teamAName: sessionManager.teamAName,
+                  teamBName: sessionManager.teamBName,
+                  isActive: $isActive,
+                  ruleset: sessionManager.ruleset(for: matchType))
+    }
+
+    private var servePicker: some View {
         ZStack {
             Color.black.ignoresSafeArea()
 
@@ -22,7 +41,7 @@ struct ServeSelectionView: View {
                     navigateToScore = true
                 } label: {
                     teamButton(color: sessionManager.teamAColor,
-                               label: displayName(sessionManager.teamAName, fallback: "Team A"))
+                               label: TeamName.resolved(sessionManager.teamAName, for: .a))
                 }
                 .buttonStyle(.plain)
 
@@ -31,26 +50,15 @@ struct ServeSelectionView: View {
                     navigateToScore = true
                 } label: {
                     teamButton(color: sessionManager.teamBColor,
-                               label: displayName(sessionManager.teamBName, fallback: "Team B"))
+                               label: TeamName.resolved(sessionManager.teamBName, for: .b))
                 }
                 .buttonStyle(.plain)
             }
         }
         .navigationBarHidden(true)
         .navigationDestination(isPresented: $navigateToScore) {
-            ScoreView(initialServer: selectedServer,
-                      matchType: matchType,
-                      teamAName: sessionManager.teamAName,
-                      teamBName: sessionManager.teamBName,
-                      isActive: $isActive)
+            scoreView(initialServer: selectedServer)
         }
-    }
-
-    /// The synced team name, or the localized slot label when the name is empty.
-    /// The result is a resolved plain string so a user-entered name never goes
-    /// through String Catalog lookup — only the fallback literal is localized.
-    private func displayName(_ name: String, fallback: LocalizedStringResource) -> String {
-        name.isEmpty ? String(localized: fallback) : name
     }
 
     @ViewBuilder

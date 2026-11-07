@@ -30,6 +30,15 @@ final class StoredMatch {
     // store migrates in place, leaving these null.
     var activeCalories: Double? = nil
     var avgHeartRate: Double? = nil
+    // Ruleset stamped on the match at creation (ADR 0006). Empty data = the
+    // sport's built-in preset, which is also how pre-Ruleset matches decode.
+    var rulesetData: Data = Data()
+    // Ping pong's terminal numeric points, `nil` when absent (any other sport,
+    // or a pre-feature ping match). ADR 0005: setScoreA/B carry games won, so
+    // the points a ping headline can fall back to need their own optional
+    // attributes — a nil default satisfies the #47 lightweight-migration rule.
+    var pingPointsA: Int? = nil
+    var pingPointsB: Int? = nil
 
     init(
         id: UUID = UUID(),
@@ -46,7 +55,10 @@ final class StoredMatch {
         teamAName: String = "",
         teamBName: String = "",
         activeCalories: Double? = nil,
-        avgHeartRate: Double? = nil
+        avgHeartRate: Double? = nil,
+        rulesetData: Data = Data(),
+        pingPointsA: Int? = nil,
+        pingPointsB: Int? = nil
     ) {
         self.id = id
         self.date = date
@@ -63,6 +75,9 @@ final class StoredMatch {
         self.teamBName = teamBName
         self.activeCalories = activeCalories
         self.avgHeartRate = avgHeartRate
+        self.rulesetData = rulesetData
+        self.pingPointsA = pingPointsA
+        self.pingPointsB = pingPointsB
     }
 
     /// A detached copy for inserting into another context. Copies every
@@ -84,8 +99,43 @@ final class StoredMatch {
             teamAName: other.teamAName,
             teamBName: other.teamBName,
             activeCalories: other.activeCalories,
-            avgHeartRate: other.avgHeartRate
+            avgHeartRate: other.avgHeartRate,
+            rulesetData: other.rulesetData,
+            pingPointsA: other.pingPointsA,
+            pingPointsB: other.pingPointsB
         )
+    }
+
+    /// The one way a finished match enters Match History — a result from the
+    /// watch and a truco match scored on the phone both come through here, so
+    /// the Cartão, Estatísticas and Restore never see two shapes. A matchId
+    /// already stored is ignored (the watch may deliver the same result twice).
+    @MainActor
+    static func insert(_ payload: MatchResultPayload, into context: ModelContext) {
+        let matchId = payload.matchId
+        let existing = FetchDescriptor<StoredMatch>(predicate: #Predicate { $0.id == matchId })
+        if let count = try? context.fetchCount(existing), count > 0 { return }
+        context.insert(StoredMatch(
+            id: payload.matchId,
+            date: payload.date,
+            setScoreA: payload.setScoreA,
+            setScoreB: payload.setScoreB,
+            setsWonA: payload.setsWonA,
+            setsWonB: payload.setsWonB,
+            winner: payload.winner.rawValue,
+            duration: payload.duration,
+            gameHistoryData: (try? JSONEncoder().encode(payload.gameHistory)) ?? Data(),
+            setHistoryData: (try? JSONEncoder().encode(payload.setHistory)) ?? Data(),
+            matchTypeRaw: payload.matchType.rawValue,
+            teamAName: payload.teamAName,
+            teamBName: payload.teamBName,
+            activeCalories: payload.activeCalories,
+            avgHeartRate: payload.avgHeartRate,
+            rulesetData: payload.rulesetData,
+            pingPointsA: payload.pingPointsA,
+            pingPointsB: payload.pingPointsB
+        ))
+        try? context.save()
     }
 
     var matchType: MatchType { MatchType(rawValue: matchTypeRaw) ?? .beachTennis }
@@ -93,25 +143,62 @@ final class StoredMatch {
     var setHistory: [SetRecord] { (try? JSONDecoder().decode([SetRecord].self, from: setHistoryData)) ?? [] }
     var winnerTeam: Team? { Team(rawValue: winner) }
 
-    /// True when the match is scored in sets — a tennis match with at least one
-    /// set on the board. Beach tennis never is, and a tennis match abandoned
-    /// inside its first set has no set to show, so both fall back to games.
-    var isSetScored: Bool {
-        matchType == .tennis && (setsWonA > 0 || setsWonB > 0)
+    /// The Match History sport filter, applied. A `nil` type means All — every
+    /// other case compares `MatchType` values, never the persisted token, so a
+    /// mistyped sport string can't silently empty the screen.
+    static func filtered(_ matches: [StoredMatch], by type: MatchType?) -> [StoredMatch] {
+        guard let type else { return matches }
+        return matches.filter { $0.matchType == type }
     }
 
+    /// The Ruleset this match was played under. Falls back to the sport's
+    /// built-in preset when `rulesetData` is empty — covering pre-Ruleset
+    /// matches migrated in-place via lightweight migration (default `Data()`).
+    var ruleset: Ruleset {
+        guard !rulesetData.isEmpty,
+              let decoded = try? JSONDecoder().decode(Ruleset.self, from: rulesetData)
+        else { return Ruleset.preset(for: matchType) }
+        return decoded
+    }
+
+    /// True when the sport is scored in sets and at least one set is on the
+    /// board — the gate the headline projection uses to decide tennis shows
+    /// sets. Both the list and the Cartão need it to derive the same projection.
+    var hasCompleteSets: Bool {
+        ruleset.hasSets && (setsWonA > 0 || setsWonB > 0)
+    }
+
+    /// The headline score pair, derived through the shared `HeadlineScore`
+    /// projection. Sets for tennis, games for beach and for a best-of-N ping
+    /// match with a complete game, points for ping first-game abandonment and
+    /// best-of-1 (terminal numeric points from the second-tier storage fields,
+    /// the Game Log, or the flat columns, in that order).
+    var headline: HeadlineScore {
+        HeadlineScore.stored(
+            matchType: matchType,
+            setScoreA: setScoreA,
+            setScoreB: setScoreB,
+            setsWonA: setsWonA,
+            setsWonB: setsWonB,
+            bestOf: ruleset.pingPong?.bestOf,
+            hasSets: ruleset.hasSets,
+            gameHistory: gameHistory,
+            pingPointsA: pingPointsA,
+            pingPointsB: pingPointsB
+        )
+    }
+
+    /// The network/storage carry-over of `headline`, as the list row shows it.
     var scoreDisplay: String {
-        isSetScored ? "\(setsWonA) – \(setsWonB)" : "\(setScoreA) – \(setScoreB)"
+        "\(headline.a) – \(headline.b)"
     }
 
     /// The label for `team`: its stored Team Name, or the localized
-    /// "Team A"/"Team B" fallback when the name is empty. Resolved to a plain
-    /// String here so a user-entered name never reaches the String Catalog —
-    /// only the fallback literal is localized. Mirrors
-    /// `MatchState.teamName(for:)` on the scoring side.
+    /// "Team A"/"Team B" fallback when the name is empty. Forwards to
+    /// `TeamName`, the same rule `MatchState.teamName(for:)` uses on the
+    /// scoring side.
     func teamName(for team: Team) -> String {
-        let name = team == .a ? teamAName : teamBName
-        return name.isEmpty ? team.displayName : name
+        TeamName.resolved(team == .a ? teamAName : teamBName, for: team)
     }
 
     /// The score flanked by the Team Names — "Renan 6 – 3 Visitors".

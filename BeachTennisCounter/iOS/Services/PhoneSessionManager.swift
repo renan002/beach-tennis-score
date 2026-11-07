@@ -9,7 +9,10 @@ final class PhoneSessionManager: NSObject, ObservableObject {
 
     @AppStorage("teamAColorHex") var teamAColorHex: String = WatchSettings.defaultTeamAColorHex
     @AppStorage("teamBColorHex") var teamBColorHex: String = WatchSettings.defaultTeamBColorHex
-    @AppStorage("sportSetting") var sportSetting: String = WatchSettings.defaultSportSetting
+    /// Persisted as its raw token — `@AppStorage` stores a `RawRepresentable`
+    /// by its raw value, and hands back the default for anything it can't
+    /// decode, which is the same fallback `SportSetting(storedToken:)` applies.
+    @AppStorage("sportSetting") var sportSetting: SportSetting = WatchSettings.defaultSportSetting
     @AppStorage("teamAName") var teamAName: String = WatchSettings.defaultTeamAName
     @AppStorage("teamBName") var teamBName: String = WatchSettings.defaultTeamBName
     @AppStorage("healthMonitoringEnabled") var healthMonitoringEnabled: Bool = WatchSettings.defaultHealthMonitoringEnabled
@@ -27,6 +30,7 @@ final class PhoneSessionManager: NSObject, ObservableObject {
     @Published private(set) var isWatchAppInstalled: Bool? = nil
 
     private var modelContext: ModelContext?
+    private var rulesObserver: NSObjectProtocol?
 
     func setModelContainer(_ container: ModelContainer) {
         modelContext = ModelContext(container)
@@ -38,11 +42,22 @@ final class PhoneSessionManager: NSObject, ObservableObject {
             WCSession.default.delegate = self
             WCSession.default.activate()
         }
+        // A Regras edit pushes to the watch immediately, from any screen —
+        // not only Settings' Done. Observation keeps the call out of the
+        // library (which must stay Foundation-only and testable) and off the
+        // views (which would each have to wire a push).
+        rulesObserver = NotificationCenter.default.addObserver(
+            forName: RulesetLibrary.didChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in self?.pushSettingsToWatch() }
+        }
     }
 
-    /// The `sportSetting` value Pro gates — Vários, the watch asking which sport
-    /// before each match. A storage key, never displayed and never translated.
-    nonisolated static let proOnlySportSetting = "multiple"
+    /// The setting Pro gates — Vários, the watch asking which sport before each
+    /// match.
+    nonisolated static let proOnlySportSetting = SportSetting.multiple
 
     /// The sport setting that actually applies, which is not always the stored
     /// one: Vários is a Pro feature, so without Pro this reports the default
@@ -58,7 +73,7 @@ final class PhoneSessionManager: NSObject, ObservableObject {
     ///
     /// Pure and static so both answers are testable — including the dark one,
     /// where `isPro` is `true` for everybody and this is the identity.
-    nonisolated static func effectiveSportSetting(_ stored: String, isPro: Bool) -> String {
+    nonisolated static func effectiveSportSetting(_ stored: SportSetting, isPro: Bool) -> SportSetting {
         guard stored == proOnlySportSetting, !isPro else { return stored }
         return WatchSettings.defaultSportSetting
     }
@@ -76,7 +91,26 @@ final class PhoneSessionManager: NSObject, ObservableObject {
                       ),
                       teamAName: teamAName,
                       teamBName: teamBName,
-                      healthMonitoringEnabled: healthMonitoringEnabled)
+                      healthMonitoringEnabled: healthMonitoringEnabled,
+                      rulesetsBlob: encodedActiveRulesets)
+    }
+
+    /// The active Ruleset for every sport, encoded as a blob dictionary
+/// `[sportRaw: Data]`. The phone owns the library, so it resolves the active
+/// value for **all** sports — including the frozen beach/tennis presets that
+/// have no editing UI — and ships them all, because with Vários the watch picks
+/// the sport after the context arrives and must already hold every sport's
+/// rules. A sport falling back to its preset still encodes that preset, so the
+/// watch never resolves against a stale value.
+    private var encodedActiveRulesets: [String: Data] {
+        var blob: [String: Data] = [:]
+        for sport in MatchType.allCases {
+            let rules = RulesetLibrary.activeRuleset(for: sport)
+            if let data = try? JSONEncoder().encode(rules) {
+                blob[sport.rawValue] = data
+            }
+        }
+        return blob
     }
 
     func pushSettingsToWatch() {
@@ -97,12 +131,24 @@ extension PhoneSessionManager: WCSessionDelegate {
         Task { @MainActor in
             isWatchAppInstalled = installed
             if let status { watchHealthAuthStatusRaw = status.rawValue }
+            // Rules edited while the session was inactive — the app not running,
+            // or the Watch app not installed — never reached the watch: the
+            // push was dropped by the guard. Resolution works on the current
+            // stored value, so re-send the whole context now that the session
+            // is activated; the guard inside decides whether the watch is
+            // actually reachable.
+            pushSettingsToWatch()
         }
     }
 
     nonisolated func sessionWatchStateDidChange(_ session: WCSession) {
         let installed = session.isWatchAppInstalled
-        Task { @MainActor in isWatchAppInstalled = installed }
+        Task { @MainActor in
+            isWatchAppInstalled = installed
+            // A fresh Watch install after rules were edited on the phone must
+            // receive the current settings immediately, not start from presets.
+            pushSettingsToWatch()
+        }
     }
 
     nonisolated func sessionDidBecomeInactive(_ session: WCSession) {}
@@ -130,58 +176,28 @@ extension PhoneSessionManager: WCSessionDelegate {
         guard dict[WatchMessageKey.type] as? String == WatchMessageType.matchResult,
               let payload = MatchResultPayload.from(dict) else { return }
 
-        Task { @MainActor in
-            guard let context = modelContext else { return }
-            let matchId = payload.matchId
-            let existing = FetchDescriptor<StoredMatch>(
-                predicate: #Predicate { $0.id == matchId }
-            )
-            if let count = try? context.fetchCount(existing), count > 0 { return }
-            let gameData = (try? JSONEncoder().encode(payload.gameHistory)) ?? Data()
-            let setData = (try? JSONEncoder().encode(payload.setHistory)) ?? Data()
-            let match = StoredMatch(
-                id: payload.matchId,
-                date: payload.date,
-                setScoreA: payload.setScoreA,
-                setScoreB: payload.setScoreB,
-                setsWonA: payload.setsWonA,
-                setsWonB: payload.setsWonB,
-                winner: payload.winner.rawValue,
-                duration: payload.duration,
-                gameHistoryData: gameData,
-                setHistoryData: setData,
-                matchTypeRaw: payload.matchType.rawValue,
-                teamAName: payload.teamAName,
-                teamBName: payload.teamBName,
-                activeCalories: payload.activeCalories,
-                avgHeartRate: payload.avgHeartRate
-            )
-            context.insert(match)
-            try? context.save()
-        }
+        Task { @MainActor in record(payload) }
+    }
+
+    /// Files a finished match into Match History. The watch's results and the
+    /// phone's own truco Placar both end here.
+    func record(_ payload: MatchResultPayload) {
+        guard let modelContext else { return }
+        StoredMatch.insert(payload, into: modelContext)
     }
 }
 
 // MARK: - Color hex helpers (iOS side)
 
 extension Color {
-    func toHex() -> String {
-        let ui = UIColor(self)
-        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0
-        ui.getRed(&r, green: &g, blue: &b, alpha: nil)
-        return String(format: "%02X%02X%02X", Int(r * 255), Int(g * 255), Int(b * 255))
-    }
-
+    /// Non-failable on purpose: the phone decodes its own literals and its own
+    /// stored values, so every call site here has a colour or the app is already
+    /// broken. Parsing itself lives in `HexColor`.
     init(hex: String) {
-        var hex = hex.trimmingCharacters(in: .whitespacesAndNewlines)
-        if hex.hasPrefix("#") { hex.removeFirst() }
-        guard hex.count == 6, let value = UInt64(hex, radix: 16) else {
+        guard let rgb = HexColor.components(hex) else {
             self = .black
             return
         }
-        let r = Double((value >> 16) & 0xFF) / 255
-        let g = Double((value >> 8) & 0xFF) / 255
-        let b = Double(value & 0xFF) / 255
-        self.init(red: r, green: g, blue: b)
+        self.init(red: rgb.red, green: rgb.green, blue: rgb.blue)
     }
 }

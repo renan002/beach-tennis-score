@@ -9,36 +9,59 @@ struct ScoreView: View {
     let matchType: MatchType
     @Binding var isActive: Bool
 
-    @State private var state: MatchState
-    @State private var history: [MatchState] = []
+    /// The Match being scored. It owns the state, the Undo Stack and the order
+    /// the effects below run in; this screen only carries them out.
+    @State private var match: MatchInProgress
+
+    // Presentation only — none of this is Match state.
     @State private var showMatchOver = false
     @State private var showHistory = false
     @State private var showCancelAlert = false
+    /// Truco only: the crown's position on the Valor strip. Rests on the base
+    /// Valor and returns there after every hand, so the common Mão stays one tap.
+    @State private var stakeIndex: Double = 0
 
-    /// Starts a fresh match, stamping the synced Team Names at match start.
+    private var state: MatchState { match.state }
+
+    /// The headline over the live Placar, through the same shared `HeadlineScore`
+/// projection the Match List and the Cartão use. Ping pong draws only on
+/// `PingPongState` — games won once a best-of-N match has a complete game,
+/// points otherwise (a best-of-1's terminal points stay in `PingPongState`).
+    private var headlineScore: String {
+        let headline = HeadlineScore.live(state)
+        return "\(headline.a) – \(headline.b)"
+    }
+
+    /// Starts a fresh match, stamping the synced Team Names and the active
+    /// Ruleset at match start. The ruleset is the watch's resolved value (it
+    /// scores, it does not configure); for ping pong this is the whole stamped
+    /// rules — target, best-of, serve mode, name.
     init(
         initialServer: Team,
         matchType: MatchType,
         teamAName: String = "",
         teamBName: String = "",
-        isActive: Binding<Bool>
+        isActive: Binding<Bool>,
+        ruleset: Ruleset? = nil
     ) {
         self.matchType = matchType
         self._isActive = isActive
-        _state = State(initialValue: MatchState.newMatch(
+        _match = State(initialValue: MatchInProgress(state: MatchState.newMatch(
             matchType: matchType,
             initialServer: initialServer,
             teamAName: teamAName,
-            teamBName: teamBName
-        ))
+            teamBName: teamBName,
+            ruleset: ruleset
+        )))
     }
 
     /// Resumes a persisted match. The restored state carries its own stamped
-    /// names and serve wiring, so no fresh-match params apply here.
+    /// names and serve wiring, so no fresh-match params apply here — and it
+    /// brings no Undo Stack, so the point played before the app died stays.
     init(restoredState: MatchState, isActive: Binding<Bool>) {
         self.matchType = restoredState.matchType
         self._isActive = isActive
-        _state = State(initialValue: restoredState)
+        _match = State(initialValue: MatchInProgress(state: restoredState))
     }
 
     var body: some View {
@@ -53,22 +76,7 @@ struct ScoreView: View {
         }
         .navigationBarHidden(true)
         .onAppear {
-            MatchPersistence.save(state)
-            workoutManager.matchDidStart(monitoringEnabled: sessionManager.healthMonitoringEnabled)
-        }
-        .onChange(of: state.isMatchOver) { _, isOver in
-            guard isOver else { return }
-            showMatchOver = true
-            // Snapshot stats synchronously first so the result send never waits on
-            // HealthKit, then end/finish the workout asynchronously.
-            let stats = workoutManager.snapshotStats()
-            sessionManager.sendMatchResult(
-                state,
-                duration: Date().timeIntervalSince(state.matchStartDate),
-                activeCalories: stats.activeCalories,
-                avgHeartRate: stats.avgHeartRate
-            )
-            workoutManager.endAndFinish()
+            perform(match.start())
         }
         .sheet(isPresented: $showHistory) {
             MatchHistoryView(history: state.gameHistory, matchType: matchType)
@@ -76,10 +84,7 @@ struct ScoreView: View {
         }
         .alert("Cancel Match?", isPresented: $showCancelAlert) {
             Button("End Match", role: .destructive) {
-                // Below ~2 min the workout is discarded (accidental start), above it
-                // is saved (real exercise); the manager applies the policy.
-                workoutManager.cancelWorkout(elapsed: Date().timeIntervalSince(state.matchStartDate))
-                MatchPersistence.clear()
+                perform(match.cancel())
                 isActive = false
             }
             Button("Keep Playing", role: .cancel) {}
@@ -88,26 +93,76 @@ struct ScoreView: View {
 
     // MARK: - Score content
 
+    @ViewBuilder
     private var scoreContent: some View {
-        VStack(spacing: 4) {
+        let content = VStack(spacing: 4) {
             topBar
 
-            if matchType == .tennis {
-                tennisSetRow
+            if matchType == .tennis || matchType == .pingPong {
+                setsWonRow
             }
 
-            scoreRow
+            if matchType == .truco {
+                stakeStrip
+            } else if matchType != .pingPong {
+                scoreRow
+            }
 
             squaresRow
 
             bottomBar
                 .padding(.top, 4)
         }
+        if matchType == .truco {
+            content
+                .focusable()
+                .digitalCrownRotation(
+                    $stakeIndex,
+                    from: 0,
+                    through: Double(max(stakes.count - 1, 0)),
+                    by: 1,
+                    sensitivity: .low,
+                    isContinuous: false,
+                    isHapticFeedbackEnabled: true
+                )
+        } else {
+            content
+        }
+    }
+
+    // MARK: - Truco Valor strip
+
+    private var stakes: [Int] { state.ruleset.truco?.stakes ?? [1] }
+
+    private var selectedStake: Int {
+        stakes[min(max(Int(stakeIndex.rounded()), 0), stakes.count - 1)]
+    }
+
+    /// The Valor da mão, one cell per stake; the crown moves the highlight.
+    private var stakeStrip: some View {
+        HStack(spacing: 4) {
+            ForEach(stakes, id: \.self) { value in
+                let selected = value == selectedStake
+                Text("\(value)")
+                    .font(.system(size: 15, weight: selected ? .bold : .regular))
+                    .monospacedDigit()
+                    .foregroundStyle(selected ? .black : .white)
+                    .frame(maxWidth: .infinity, minHeight: 22)
+                    .background(
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .fill(selected ? Color.white : Color.white.opacity(0.15))
+                    )
+            }
+        }
+        .padding(.horizontal, 6)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("Hand value"))
+        .accessibilityValue(Text("\(selectedStake)"))
     }
 
     private var topBar: some View {
         ZStack {
-            Text("Sets")
+            Text(matchType == .truco ? matchType.displayName : String(localized: "Sets"))
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
@@ -116,10 +171,10 @@ struct ScoreView: View {
                 Button(action: undoLast) {
                     Image(systemName: "arrow.uturn.backward")
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(history.isEmpty ? .gray : .white)
+                        .foregroundStyle(match.canUndo ? .white : .gray)
                 }
                 .buttonStyle(.plain)
-                .disabled(history.isEmpty)
+                .disabled(!match.canUndo)
                 .padding(.leading, 6)
                 Spacer()
                 // Live heart rate mirrors the undo arrow. Rendered only while a
@@ -140,15 +195,16 @@ struct ScoreView: View {
         }
     }
 
-    // Tennis: sets won at the top in large numerals
-    private var tennisSetRow: some View {
+    // Sets won at the top in large numerals — tennis's sets, and ping pong's
+    // games displayed as "Sets" (Brazilian table-tennis convention).
+    private var setsWonRow: some View {
         HStack(spacing: 0) {
             Spacer()
-            Text("\(state.setsWonA)")
+            Text("\(setsWonDisplay(for: .a))")
                 .font(.system(size: 22, weight: .semibold))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
-            Text("\(state.setsWonB)")
+            Text("\(setsWonDisplay(for: .b))")
                 .font(.system(size: 22, weight: .semibold))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
@@ -156,18 +212,22 @@ struct ScoreView: View {
         }
     }
 
-    // Current set games (subdued for tennis since sets won is the main focus)
+    private func setsWonDisplay(for team: Team) -> Int {
+        matchType == .pingPong ? state.pingGamesWon(for: team) : state.setsWon(for: team)
+    }
+
+    // The live set score; tennis games are subdued since sets won is the main focus.
     private var scoreRow: some View {
         HStack(spacing: 0) {
             Spacer()
-            Text("\(state.setScoreA)")
+            Text(scoreRowText(for: .a))
                 .font(.system(
                     size: matchType == .tennis ? 15 : 22,
                     weight: matchType == .tennis ? .regular : .semibold
                 ))
                 .foregroundStyle(matchType == .tennis ? Color.secondary : .white)
                 .frame(maxWidth: .infinity)
-            Text("\(state.setScoreB)")
+            Text(scoreRowText(for: .b))
                 .font(.system(
                     size: matchType == .tennis ? 15 : 22,
                     weight: matchType == .tennis ? .regular : .semibold
@@ -176,6 +236,10 @@ struct ScoreView: View {
                 .frame(maxWidth: .infinity)
             Spacer()
         }
+    }
+
+    private func scoreRowText(for team: Team) -> String {
+        "\(state.setScore(for: team))"
     }
 
     private var squaresRow: some View {
@@ -183,7 +247,7 @@ struct ScoreView: View {
             Circle()
                 .fill(Color.orange)
                 .frame(width: 8, height: 8)
-                .opacity(state.servingTeam == .a ? 1 : 0)
+                .opacity(matchType.hasServe && state.servingTeam == .a ? 1 : 0)
                 .padding(.leading, 2)
 
             scoreSquare(team: .a, color: sessionManager.teamAColor)
@@ -195,7 +259,7 @@ struct ScoreView: View {
             Circle()
                 .fill(Color.orange)
                 .frame(width: 8, height: 8)
-                .opacity(state.servingTeam == .b ? 1 : 0)
+                .opacity(matchType.hasServe && state.servingTeam == .b ? 1 : 0)
                 .padding(.trailing, 2)
         }
         .padding(.horizontal, 2)
@@ -252,13 +316,20 @@ struct ScoreView: View {
     }
 
     private func scoreLabel(for team: Team) -> String {
-        if state.isTiebreak {
-            return "\(state.tiebreakScore(for: team))"
+        switch matchType {
+        case .pingPong:
+            return "\(state.pingPoints(for: team))"
+        case .truco:
+            return "\(state.setScore(for: team))"
+        case .tennis, .beachTennis:
+            if state.isTiebreak {
+                return "\(state.tiebreakScore(for: team))"
+            }
+            if matchType == .tennis, let advTeam = state.advantageTeam {
+                return advTeam == team ? "Ad" : "40"
+            }
+            return state.point(for: team).display
         }
-        if matchType == .tennis, let advTeam = state.advantageTeam {
-            return advTeam == team ? "Ad" : "40"
-        }
-        return state.point(for: team).display
     }
 
     // MARK: - Match over overlay
@@ -275,6 +346,10 @@ struct ScoreView: View {
 
             if matchType == .tennis {
                 Text("\(state.setsWonA) – \(state.setsWonB)")
+                    .font(.title3.bold())
+                    .foregroundStyle(.white)
+            } else if matchType == .pingPong {
+                Text(headlineScore)
                     .font(.title3.bold())
                     .foregroundStyle(.white)
             } else {
@@ -309,16 +384,77 @@ struct ScoreView: View {
     // MARK: - Actions
 
     private func awardPoint(to team: Team) {
-        history.append(state)
-        ScoreEngine.awardPoint(to: team, state: &state)
-        MatchPersistence.save(state)
-        WKInterfaceDevice.current().play(.click)
+        let effects = match.awardPoint(
+            to: team,
+            value: matchType == .truco ? selectedStake : nil
+        )
+        stakeIndex = 0
+        // Raised before the effects run, as it was when this was an observer on
+        // the match-over flag: the overlay never waits on the stats snapshot.
+        if state.isMatchOver {
+            showMatchOver = true
+        }
+        perform(effects)
     }
 
     private func undoLast() {
-        guard let previous = history.popLast() else { return }
-        state = previous
-        MatchPersistence.save(state)
-        WKInterfaceDevice.current().play(.click)
+        perform(match.undo())
+        stakeIndex = 0
+    }
+
+    // MARK: - Effects
+
+    /// Carries out what an interaction returned, in the order it returned it.
+    /// This screen decides nothing here — the ordering that matters (the stats
+    /// snapshot riding on the send, before the workout is torn down) is the
+    /// module's, and is tested there.
+    ///
+    /// Synchronous and in order, deliberately: `.persist` saves whatever the
+    /// module holds *now*, so an effect made async here would silently save a
+    /// later state than the one it was emitted for.
+    private func perform(_ effects: [MatchInProgress.Effect]) {
+        for effect in effects {
+            switch effect {
+            case .persist:
+                MatchPersistence.save(match.state)
+
+            case .clearPersisted:
+                MatchPersistence.clear()
+
+            case .haptic:
+                WKInterfaceDevice.current().play(.click)
+
+            case .startWorkout:
+                // The monitoring flag is watch-session state, not Match state,
+                // so the screen supplies it here. The sport's physicality comes
+                // from the match type (every sport shipped today is physical),
+                // and the type travels along so the workout is started under the
+                // right activity.
+                workoutManager.matchDidStart(
+                    monitoringEnabled: sessionManager.healthMonitoringEnabled,
+                    sportIsPhysical: matchType.isPhysicalSport,
+                    matchTypeRaw: matchType.rawValue
+                )
+
+            case .sendResult(let finished, let duration):
+                // Snapshot synchronously so the send never waits on HealthKit —
+                // and so it happens while the builder still has stats to give.
+                let stats = workoutManager.snapshotStats()
+                sessionManager.sendMatchResult(
+                    finished,
+                    duration: duration,
+                    activeCalories: stats.activeCalories,
+                    avgHeartRate: stats.avgHeartRate
+                )
+
+            case .endWorkout:
+                workoutManager.endAndFinish()
+
+            case .cancelWorkout(let elapsed):
+                // Below ~2 min the workout is discarded (accidental start), above
+                // it is saved (real exercise); the manager applies the policy.
+                workoutManager.cancelWorkout(elapsed: elapsed)
+            }
+        }
     }
 }

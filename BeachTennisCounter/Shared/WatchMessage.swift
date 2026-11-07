@@ -22,6 +22,11 @@ enum WatchMessageKey {
     static let avgHeartRate = "avgHeartRate"
     static let healthMonitoring = "healthMonitoring"
     static let healthAuthStatus = "healthAuthStatus"
+    static let rulesetData = "rulesetData"
+    // Ping pong's terminal numeric points. ADR 0005: the flat setScoreA/B
+    // columns carry games won, so a ping match's points need a second tier.
+    static let pingPointsA = "pingPointsA"
+    static let pingPointsB = "pingPointsB"
 }
 
 enum WatchMessageType {
@@ -72,6 +77,14 @@ struct MatchResultPayload: Codable, Sendable {
     // pre-feature payload. Second decode tier, same as the team names above.
     let activeCalories: Double?
     let avgHeartRate: Double?
+    // The Ruleset stamped on the match at creation. Empty data = sport's preset,
+    // which is also what a pre-Ruleset watch sends.
+    let rulesetData: Data
+    // Ping pong's terminal numeric points, `nil` for every other sport and for
+    // a ping payload from a pre-feature watch. ADR 0005: setScoreA/B carry games
+    // won, so the points a ping headline can fall back to need a second tier.
+    let pingPointsA: Int?
+    let pingPointsB: Int?
 
     init(
         matchId: UUID,
@@ -88,7 +101,10 @@ struct MatchResultPayload: Codable, Sendable {
         teamAName: String,
         teamBName: String,
         activeCalories: Double? = nil,
-        avgHeartRate: Double? = nil
+        avgHeartRate: Double? = nil,
+        rulesetData: Data = Data(),
+        pingPointsA: Int? = nil,
+        pingPointsB: Int? = nil
     ) {
         self.matchId = matchId
         self.setScoreA = setScoreA
@@ -105,6 +121,46 @@ struct MatchResultPayload: Codable, Sendable {
         self.teamBName = teamBName
         self.activeCalories = activeCalories
         self.avgHeartRate = avgHeartRate
+        self.rulesetData = rulesetData
+        self.pingPointsA = pingPointsA
+        self.pingPointsB = pingPointsB
+    }
+
+    /// The result of a finished match — the one place a `MatchState` becomes a
+    /// payload, shared by the watch's send and the phone's own truco Placar so
+    /// both land in Match History identically. `nil` while there is no winner.
+    init?(
+        finished state: MatchState,
+        duration: TimeInterval,
+        matchId: UUID = UUID(),
+        date: Date = Date(),
+        activeCalories: Double? = nil,
+        avgHeartRate: Double? = nil
+    ) {
+        guard let winner = state.winner else { return nil }
+        let isPing = state.matchType == .pingPong
+        // ADR 0005: the flat columns carry what the headline needs. Ping pong
+        // maps games won into setScoreA/B; its points ride in their own keys.
+        self.init(
+            matchId: matchId,
+            setScoreA: isPing ? state.pingGamesWon(for: .a) : state.setScoreA,
+            setScoreB: isPing ? state.pingGamesWon(for: .b) : state.setScoreB,
+            setsWonA: state.setsWonA,
+            setsWonB: state.setsWonB,
+            winner: winner,
+            duration: duration,
+            date: date,
+            gameHistory: state.gameHistory,
+            setHistory: state.setHistory,
+            matchType: state.matchType,
+            teamAName: state.teamAName,
+            teamBName: state.teamBName,
+            activeCalories: activeCalories,
+            avgHeartRate: avgHeartRate,
+            rulesetData: (try? JSONEncoder().encode(state.ruleset)) ?? Data(),
+            pingPointsA: isPing ? state.pingPoints(for: .a) : nil,
+            pingPointsB: isPing ? state.pingPoints(for: .b) : nil
+        )
     }
 
     func toDictionary() -> [String: Any] {
@@ -130,6 +186,15 @@ struct MatchResultPayload: Codable, Sendable {
         if let data = try? JSONEncoder().encode(setHistory) {
             dict[WatchMessageKey.setHistory] = data
         }
+        dict[WatchMessageKey.rulesetData] = rulesetData
+        // ADR 0005: the second-tier ping points only belong on a ping wire. A
+        // non-ping payload omits them entirely — no empty numeric points for a
+        // beach or tennis match. A ping payload's nil points are still written
+        // by `if let`, matching the current watch which always stamps them.
+        if matchType == .pingPong {
+            if let pingPointsA { dict[WatchMessageKey.pingPointsA] = pingPointsA }
+            if let pingPointsB { dict[WatchMessageKey.pingPointsB] = pingPointsB }
+        }
         return dict
     }
 
@@ -149,14 +214,69 @@ struct MatchResultPayload: Codable, Sendable {
         let setsWonA = dict[WatchMessageKey.setsWonA] as? Int ?? 0
         let setsWonB = dict[WatchMessageKey.setsWonB] as? Int ?? 0
 
-        let matchTypeRaw = dict[WatchMessageKey.matchType] as? String ?? "beachTennis"
-        let matchType = MatchType(rawValue: matchTypeRaw) ?? .beachTennis
+        let matchType: MatchType
+        switch dict[WatchMessageKey.matchType] {
+        case nil:
+            matchType = .beachTennis
+        case let raw as String:
+            guard let decoded = MatchType(rawValue: raw) else { return nil }
+            matchType = decoded
+        default:
+            return nil
+        }
 
         let teamAName = dict[WatchMessageKey.teamAName] as? String ?? ""
         let teamBName = dict[WatchMessageKey.teamBName] as? String ?? ""
 
         let activeCalories = dict[WatchMessageKey.activeCalories] as? Double
         let avgHeartRate = dict[WatchMessageKey.avgHeartRate] as? Double
+
+        let rulesetData = dict[WatchMessageKey.rulesetData] as? Data ?? Data()
+
+        let pingPointsA: Int?
+        let pingPointsB: Int?
+
+        // ADR 0006 validation: ping pong's stamped Ruleset is mandatory. A ping
+        // payload without one, or with one that does not decode to a playable
+        // ping ruleset, is corrupt — materializing it would silently represent
+        // the match with the beach preset's rules. Legacy beach/tennis payloads
+        // predate the feature and keep their fallback to the sport's preset.
+        if matchType == .pingPong {
+            guard !rulesetData.isEmpty else { return nil }
+            guard let stamped = try? JSONDecoder().decode(Ruleset.self, from: rulesetData),
+                  stamped.sport == .pingPong,
+                  stamped.pingPong?.isValid == true
+            else { return nil }
+
+            // Distinguish a present-but-malformed key from a pre-feature absence:
+            // `as? Int` collapses both to nil. Both absent stays legal for a
+            // legacy ping wire, but a present pair must contain nonnegative Ints.
+            switch (dict[WatchMessageKey.pingPointsA], dict[WatchMessageKey.pingPointsB]) {
+            case (nil, nil):
+                pingPointsA = nil
+                pingPointsB = nil
+            case (let rawA?, let rawB?):
+                guard let a = rawA as? Int, let b = rawB as? Int,
+                      a >= 0, b >= 0
+                else { return nil }
+                pingPointsA = a
+                pingPointsB = b
+            default:
+                return nil
+            }
+        } else {
+            pingPointsA = nil
+            pingPointsB = nil
+        }
+
+        // Truco's stamped Ruleset is mandatory too: its target is what the
+        // totals in setScoreA/B were played to.
+        if matchType == .truco {
+            guard let stamped = try? JSONDecoder().decode(Ruleset.self, from: rulesetData),
+                  stamped.sport == .truco,
+                  stamped.truco?.isValid == true
+            else { return nil }
+        }
 
         let gameHistory: [GameRecord]
         if let data = dict[WatchMessageKey.gameHistory] as? Data,
@@ -182,7 +302,9 @@ struct MatchResultPayload: Codable, Sendable {
             gameHistory: gameHistory, setHistory: setHistory,
             matchType: matchType,
             teamAName: teamAName, teamBName: teamBName,
-            activeCalories: activeCalories, avgHeartRate: avgHeartRate
+            activeCalories: activeCalories, avgHeartRate: avgHeartRate,
+            rulesetData: rulesetData,
+            pingPointsA: pingPointsA, pingPointsB: pingPointsB
         )
     }
 }

@@ -3,20 +3,16 @@ import SwiftData
 
 struct MatchListView: View {
     @EnvironmentObject private var phoneSession: PhoneSessionManager
-    @EnvironmentObject private var pro: ProEntitlement
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \StoredMatch.date, order: .reverse) private var allMatches: [StoredMatch]
-    @State private var showSettings = false
-    @State private var showStatistics = false
-    @State private var filter: String = "all"
+    /// Owned by `RootView`, which presents the Settings sheet.
+    @Binding var showSettings: Bool
+    /// The sport filter — `nil` is All.
+    @State private var filter: MatchType?
     @State private var quarantines: [QuarantinedStore] = []
 
     private var matches: [StoredMatch] {
-        switch filter {
-        case "beachTennis": return allMatches.filter { $0.matchTypeRaw == "beachTennis" }
-        case "tennis":      return allMatches.filter { $0.matchTypeRaw == "tennis" }
-        default:            return allMatches
-        }
+        StoredMatch.filtered(allMatches, by: filter)
     }
 
     var body: some View {
@@ -42,29 +38,11 @@ struct MatchListView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     filterPicker
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showStatistics = true
-                    } label: {
-                        Image(systemName: "chart.bar.xaxis")
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showSettings = true
-                    } label: {
-                        Image(systemName: "gearshape")
-                    }
-                }
             }
-            .sheet(isPresented: $showSettings, onDismiss: reloadQuarantines) {
-                SettingsView()
-                    .environmentObject(phoneSession)
-                    .environmentObject(pro)
-            }
-            .sheet(isPresented: $showStatistics) {
-                StatisticsView()
-                    .environmentObject(pro)
+            .settingsGear($showSettings)
+            // A restore done inside Settings empties the notice on close.
+            .onChange(of: showSettings) { _, shown in
+                if !shown { reloadQuarantines() }
             }
             .task { reloadQuarantines() }
         }
@@ -113,15 +91,15 @@ struct MatchListView: View {
 
     private var filterPicker: some View {
         Menu {
-            Button { filter = "all" } label: {
-                Label("All", systemImage: filter == "all" ? "checkmark" : "")
+            Button { filter = nil } label: {
+                Label("All", systemImage: filter == nil ? "checkmark" : "")
             }
             Divider()
-            Button { filter = "beachTennis" } label: {
-                Label("Beach Tennis", systemImage: filter == "beachTennis" ? "checkmark" : "")
-            }
-            Button { filter = "tennis" } label: {
-                Label("Tennis", systemImage: filter == "tennis" ? "checkmark" : "")
+            ForEach(MatchType.allCases, id: \.self) { type in
+                Button { filter = type } label: {
+                    // Plain String — `displayName` is already localized.
+                    Label(type.displayName, systemImage: filter == type ? "checkmark" : "")
+                }
             }
         } label: {
             HStack(spacing: 4) {
@@ -133,11 +111,7 @@ struct MatchListView: View {
     }
 
     private var filterLabel: String {
-        switch filter {
-        case "beachTennis": return String(localized: "Beach Tennis")
-        case "tennis":      return String(localized: "Tennis")
-        default:            return String(localized: "All")
-        }
+        filter?.displayName ?? String(localized: "All")
     }
 
     private var watchNotInstalledBanner: some View {
@@ -226,16 +200,32 @@ struct MatchRowView: View {
     }
 
     private var sportBadge: some View {
-        Text(match.matchType == .tennis ? String(localized: "Tennis") : "Beach")
+        Text(sportBadgeText)
             .font(.caption2.bold())
-            .foregroundColor(match.matchType == .tennis ? .green : .orange)
+            .foregroundColor(sportBadgeColor)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
             .background(
-                Capsule().fill(
-                    (match.matchType == .tennis ? Color.green : Color.orange).opacity(0.15)
-                )
+                Capsule().fill(sportBadgeColor.opacity(0.15))
             )
+    }
+
+    private var sportBadgeText: String {
+        switch match.matchType {
+        case .tennis: return String(localized: "Tennis")
+        case .beachTennis: return "Beach"
+        case .pingPong: return String(localized: "Ping pong")
+        case .truco: return String(localized: "Truco")
+        }
+    }
+
+    private var sportBadgeColor: Color {
+        switch match.matchType {
+        case .tennis: return .green
+        case .beachTennis: return .orange
+        case .pingPong: return .blue
+        case .truco: return .mint
+        }
     }
 
     private var winnerBadge: some View {

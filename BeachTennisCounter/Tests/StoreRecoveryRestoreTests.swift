@@ -28,7 +28,9 @@ final class StoreRecoveryRestoreTests: XCTestCase {
         teamAName: String = "",
         teamBName: String = "",
         activeCalories: Double? = nil,
-        avgHeartRate: Double? = nil
+        avgHeartRate: Double? = nil,
+        pingPointsA: Int? = nil,
+        pingPointsB: Int? = nil
     ) -> StoredMatch {
         StoredMatch(
             id: id,
@@ -41,7 +43,9 @@ final class StoreRecoveryRestoreTests: XCTestCase {
             teamAName: teamAName,
             teamBName: teamBName,
             activeCalories: activeCalories,
-            avgHeartRate: avgHeartRate
+            avgHeartRate: avgHeartRate,
+            pingPointsA: pingPointsA,
+            pingPointsB: pingPointsB
         )
     }
 
@@ -213,6 +217,77 @@ final class StoreRecoveryRestoreTests: XCTestCase {
         let restored = try XCTUnwrap(try liveMatches().first { $0.id == unmonitored.id })
         XCTAssertNil(restored.activeCalories)
         XCTAssertNil(restored.avgHeartRate)
+    }
+
+    func test_restore_roundTripsPingPointsThroughTheCopyingInitializer() throws {
+        // A stored ping match's terminal numeric points are second-tier
+        // attributes; restore rebuilds each match through `init(copying:)`, so
+        // they must survive that copy or a restored best-of-1 match loses its
+        // headline points.
+        let ping = makeMatch(pingPointsA: 11, pingPointsB: 9)
+        let quarantine = try quarantineStore(with: [ping])
+
+        XCTAssertEqual(try StoreRecovery.restore(from: quarantine, into: liveContainer()), 1)
+
+        let restored = try XCTUnwrap(try liveMatches().first { $0.id == ping.id })
+        XCTAssertEqual(restored.pingPointsA, 11)
+        XCTAssertEqual(restored.pingPointsB, 9)
+    }
+
+    // MARK: - GameRecord backward compatibility
+
+    /// A GameRecord encoded before ping pong added `pointsA`/`pointsB` carries
+    /// neither key; synthesized Codable must decode the optionals as `nil`, so a
+    /// stored pre-ping blob decodes without migration.
+    func test_gameRecord_withoutPointsKeys_decodesWithNilPoints() throws {
+        let data = Data("""
+        [{"gameNumber":1,"setScoreA":6,"setScoreB":4,"winner":"a","isTiebreak":false,"gameScoreDisplay":"15–40"}]
+        """.utf8)
+
+        let restored = try JSONDecoder().decode([GameRecord].self, from: data)
+
+        XCTAssertEqual(restored.count, 1)
+        XCTAssertNil(restored[0].pointsA)
+        XCTAssertNil(restored[0].pointsB)
+        XCTAssertEqual(restored[0].gameNumber, 1)
+        XCTAssertEqual(restored[0].setScoreA, 6)
+        XCTAssertEqual(restored[0].setScoreB, 4)
+        XCTAssertEqual(restored[0].winner, .a)
+        XCTAssertEqual(restored[0].gameScoreDisplay, "15–40")
+    }
+
+    /// A GameRecord carrying the ping pong numeric points round-trips them, so
+    /// the headline points of a stored best-of-1 match survive re-decoding.
+    func test_gameRecord_withPointsKeys_roundTripsPoints() throws {
+        let record = GameRecord(
+            gameNumber: 1, setScoreA: 1, setScoreB: 0, winner: .a,
+            isTiebreak: false, gameScoreDisplay: "11–9", pointsA: 11, pointsB: 9)
+
+        let data = try JSONEncoder().encode([record])
+        let restored = try JSONDecoder().decode([GameRecord].self, from: data)
+
+        XCTAssertEqual(restored.first?.pointsA, 11)
+        XCTAssertEqual(restored.first?.pointsB, 9)
+        XCTAssertEqual(restored.first?.gameScoreDisplay, "11–9")
+    }
+
+    /// A quarantined StoredMatch whose `gameHistoryData` holds pre-ping GameRecords
+    /// restores exactly those records, points decoding as `nil`, with no data
+    /// loss during the copying round-trip.
+    func test_restore_preservesLegacyGameHistoryWhoseRecordsLackPointsKeys() throws {
+        let historyData = Data("""
+        [{"gameNumber":1,"setScoreA":6,"setScoreB":4,"winner":"a","isTiebreak":false,"gameScoreDisplay":"15–40"}]
+        """.utf8)
+        let legacy = makeMatch(gameHistoryData: historyData)
+        let quarantine = try quarantineStore(with: [legacy])
+
+        XCTAssertEqual(try StoreRecovery.restore(from: quarantine, into: liveContainer()), 1)
+
+        let restored = try XCTUnwrap(try liveMatches().first { $0.id == legacy.id })
+        XCTAssertEqual(restored.gameHistory.count, 1)
+        XCTAssertNil(restored.gameHistory[0].pointsA)
+        XCTAssertNil(restored.gameHistory[0].pointsB)
+        XCTAssertEqual(restored.gameHistory[0].gameScoreDisplay, "15–40")
     }
 
     func test_restore_isIdempotent_secondRunInsertsNothing() throws {

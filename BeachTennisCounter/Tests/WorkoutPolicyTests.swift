@@ -7,14 +7,14 @@ final class WorkoutPolicyTests: XCTestCase {
 
     func test_start_whenEnabledAndIdle_attempts() {
         XCTAssertEqual(
-            WorkoutPolicy.startDecision(monitoringEnabled: true, sessionRunning: false, recoveryPending: false),
+            WorkoutPolicy.startDecision(monitoringEnabled: true, sessionRunning: false, recoveryPending: false, sportIsPhysical: true),
             .start
         )
     }
 
     func test_start_whenMonitoringOff_skips() {
         XCTAssertEqual(
-            WorkoutPolicy.startDecision(monitoringEnabled: false, sessionRunning: false, recoveryPending: false),
+            WorkoutPolicy.startDecision(monitoringEnabled: false, sessionRunning: false, recoveryPending: false, sportIsPhysical: true),
             .skip
         )
     }
@@ -22,14 +22,38 @@ final class WorkoutPolicyTests: XCTestCase {
     func test_start_whenAlreadyRunning_skips() {
         // Idempotence: a re-entered / resumed score screen must not start a second session.
         XCTAssertEqual(
-            WorkoutPolicy.startDecision(monitoringEnabled: true, sessionRunning: true, recoveryPending: false),
+            WorkoutPolicy.startDecision(monitoringEnabled: true, sessionRunning: true, recoveryPending: false, sportIsPhysical: true),
             .skip
         )
     }
 
     func test_start_whenOffAndRunning_skips() {
         XCTAssertEqual(
-            WorkoutPolicy.startDecision(monitoringEnabled: false, sessionRunning: true, recoveryPending: false),
+            WorkoutPolicy.startDecision(monitoringEnabled: false, sessionRunning: true, recoveryPending: false, sportIsPhysical: true),
+            .skip
+        )
+    }
+
+    // MARK: - Non-physical sports
+
+    /// Truco is the one non-physical sport; it must decline before any
+    /// HealthKit decision, regardless of monitoring or session state.
+    func test_onlyTrucoIsNonPhysical() {
+        for sport in MatchType.allCases {
+            XCTAssertEqual(sport.isPhysicalSport, sport != .truco, "\(sport.rawValue)")
+        }
+    }
+
+    func test_start_nonPhysicalSport_skips() {
+        XCTAssertEqual(
+            WorkoutPolicy.startDecision(monitoringEnabled: true, sessionRunning: false, recoveryPending: false, sportIsPhysical: false),
+            .skip
+        )
+    }
+
+    func test_start_nonPhysicalSportWithRecoveryPending_skips() {
+        XCTAssertEqual(
+            WorkoutPolicy.startDecision(monitoringEnabled: true, sessionRunning: false, recoveryPending: true, sportIsPhysical: false),
             .skip
         )
     }
@@ -40,7 +64,7 @@ final class WorkoutPolicyTests: XCTestCase {
         // After a crash/force-quit the recovery lookup is async. Starting before it
         // answers would give the resumed Match a second workout.
         XCTAssertEqual(
-            WorkoutPolicy.startDecision(monitoringEnabled: true, sessionRunning: false, recoveryPending: true),
+            WorkoutPolicy.startDecision(monitoringEnabled: true, sessionRunning: false, recoveryPending: true, sportIsPhysical: true),
             .deferUntilRecovered
         )
     }
@@ -48,7 +72,7 @@ final class WorkoutPolicyTests: XCTestCase {
     func test_start_whileRecoveryPendingWithMonitoringOff_skips() {
         // Monitoring off never touches HealthKit at all — nothing to wait for.
         XCTAssertEqual(
-            WorkoutPolicy.startDecision(monitoringEnabled: false, sessionRunning: false, recoveryPending: true),
+            WorkoutPolicy.startDecision(monitoringEnabled: false, sessionRunning: false, recoveryPending: true, sportIsPhysical: true),
             .skip
         )
     }
@@ -56,7 +80,7 @@ final class WorkoutPolicyTests: XCTestCase {
     func test_start_whileRecoveryPendingWithSessionRunning_skips() {
         // A session already attached answers the question: no start, no waiting.
         XCTAssertEqual(
-            WorkoutPolicy.startDecision(monitoringEnabled: true, sessionRunning: true, recoveryPending: true),
+            WorkoutPolicy.startDecision(monitoringEnabled: true, sessionRunning: true, recoveryPending: true, sportIsPhysical: true),
             .skip
         )
     }

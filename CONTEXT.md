@@ -29,9 +29,11 @@ lands in the same Match History.
 _Avoid_: scoreboard, counter (in user-facing pt-BR copy)
 
 **Team Name**:
-The user-set label attached to side A or B of a match; empty means unnamed, and
-the UI falls back to the localized "Team A"/"Team B". Stamped onto the match at
-its start, so renaming in Settings never rewrites a match already played.
+The user-set label attached to side A or B of a match; empty — or only
+whitespace — means unnamed, and the UI falls back to the localized "Team
+A"/"Team B". Capped at twelve characters, counted as the user sees them, so
+emoji count one each. Stamped onto the match at its start, so renaming in
+Settings never rewrites a match already played.
 _Avoid_: player name, team label
 
 **Match History**:
@@ -45,9 +47,16 @@ The sequence of games played within one match, recording who won each game and
 at what score. Belongs to a single match and is meaningless outside it.
 _Avoid_: history, game history
 
+**Match In Progress**:
+The match currently being scored on the watch: its state, its Undo Stack, and
+the effects each interaction produces. Ends when the match ends or is cancelled.
+_Avoid_: current match, active match, session
+
 **Undo Stack**:
 The earlier states of the match currently being scored, kept only so a player
-can take back a point they entered by mistake. Discarded when the match ends.
+can take back a point they entered by mistake. Discarded when the match ends or
+is resumed — a match resumed after the app was killed offers nothing to take
+back.
 _Avoid_: history
 
 ### Scoring units
@@ -89,10 +98,9 @@ table-tennis usage is "melhor de 5 sets", so a ping pong game is displayed as a
 > The truco words are settled (issue #124): the unit is **Mão**, the value is
 > **Valor**, and the match target is **Pontos** ("Pontos para vencer") — not
 > *tentos*, which is authentic but reads regional, and not *Meta*, which nobody
-> says at the table. What is still open is the *shape* of the Stake ladder, not
-> its vocabulary: issue #141 decides whether it is a free list of integers or a
-> fixed four-rung escalation, which also decides whether Gaudério ships as a
-> Preset at all.
+> says at the table. The *shape* of the ladder is settled too (issue #141): a
+> Stake ladder is a base Valor (1 or 2) plus 1 to 4 raises, strictly increasing
+> from above the base, and Gaudério ships as a Preset.
 
 **Headline Score**:
 The single pair of numbers that stands for a match's result — in the match list,

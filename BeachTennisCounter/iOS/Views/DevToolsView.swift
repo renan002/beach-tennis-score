@@ -13,35 +13,6 @@ import SwiftData
 // English while the rest of the app stays pt-BR.
 #if DEV_FLAVOR
 
-/// The tools on the Dev Tools screen. One today; the tab bar is here because the
-/// second one is a new case and nothing else. Past four, iOS folds the rest into
-/// its own "More" list.
-enum DevTool: String, CaseIterable, Identifiable, Hashable {
-    case seeder = "Seeder"
-
-    var id: String { rawValue }
-
-    var icon: String {
-        switch self {
-        case .seeder: return "wand.and.stars"
-        }
-    }
-}
-
-struct DevToolsView: View {
-    @State private var tool: DevTool = .seeder
-
-    var body: some View {
-        TabView(selection: $tool) {
-            Tab(DevTool.seeder.rawValue, systemImage: DevTool.seeder.icon, value: DevTool.seeder) {
-                SeederToolView()
-            }
-        }
-        .tabBarMinimizeBehavior(.onScrollDown)
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
 /// Fills — and empties — the Dev store's Match History.
 ///
 /// Wipe cannot reach the production store, and not because of a check made here:
@@ -137,7 +108,8 @@ struct DevToolsSettingsSection: View {
     var body: some View {
         Section("Developer") {
             NavigationLink {
-                DevToolsView()
+                SeederToolView()
+                    .navigationBarTitleDisplayMode(.inline)
             } label: {
                 Label("Dev Tools", systemImage: "hammer")
             }

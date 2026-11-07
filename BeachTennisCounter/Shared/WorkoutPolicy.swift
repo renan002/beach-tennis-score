@@ -46,8 +46,10 @@ enum WorkoutPolicy {
     static func startDecision(
         monitoringEnabled: Bool,
         sessionRunning: Bool,
-        recoveryPending: Bool
+        recoveryPending: Bool,
+        sportIsPhysical: Bool
     ) -> WorkoutStartDecision {
+        guard sportIsPhysical else { return .skip }
         guard monitoringEnabled, !sessionRunning else { return .skip }
         return recoveryPending ? .deferUntilRecovered : .start
     }

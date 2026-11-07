@@ -9,7 +9,7 @@ import Foundation
 struct WatchSettings: Sendable, Equatable {
     static let defaultTeamAColorHex = "E74C3C"
     static let defaultTeamBColorHex = "5B8DEF"
-    static let defaultSportSetting = "beachTennis"
+    static let defaultSportSetting = SportSetting.default
     /// Default team names are empty — the watch serve buttons fall back to the
     /// localized "Team A"/"Team B" literals when a name is empty.
     static let defaultTeamAName = ""
@@ -18,18 +18,23 @@ struct WatchSettings: Sendable, Equatable {
 
     let teamAColorHex: String
     let teamBColorHex: String
-    let sportSetting: String
+    let sportSetting: SportSetting
     let teamAName: String
     let teamBName: String
     let healthMonitoringEnabled: Bool
+    /// Encoded active Ruleset per sport: `[sportRawValue: encodedRuleset]`.
+    /// Empty dictionary means presets for every sport, which is the default
+    /// before any Ruleset editing UI exists.
+    let rulesetsBlob: [String: Data]
 
     init(
         teamAColorHex: String,
         teamBColorHex: String,
-        sportSetting: String,
+        sportSetting: SportSetting,
         teamAName: String = defaultTeamAName,
         teamBName: String = defaultTeamBName,
-        healthMonitoringEnabled: Bool = defaultHealthMonitoringEnabled
+        healthMonitoringEnabled: Bool = defaultHealthMonitoringEnabled,
+        rulesetsBlob: [String: Data] = [:]
     ) {
         self.teamAColorHex = teamAColorHex
         self.teamBColorHex = teamBColorHex
@@ -37,30 +42,57 @@ struct WatchSettings: Sendable, Equatable {
         self.teamAName = teamAName
         self.teamBName = teamBName
         self.healthMonitoringEnabled = healthMonitoringEnabled
+        self.rulesetsBlob = rulesetsBlob
     }
 
     func toApplicationContext() -> [String: Any] {
-        [
+        var dict: [String: Any] = [
             WatchMessageKey.teamAColor: teamAColorHex,
             WatchMessageKey.teamBColor: teamBColorHex,
-            WatchMessageKey.sportSetting: sportSetting,
+            WatchMessageKey.sportSetting: sportSetting.rawValue,
             WatchMessageKey.teamAName: teamAName,
             WatchMessageKey.teamBName: teamBName,
             WatchMessageKey.healthMonitoring: healthMonitoringEnabled
         ]
+        if !rulesetsBlob.isEmpty,
+           let data = try? JSONEncoder().encode(rulesetsBlob) {
+            dict[WatchMessageKey.rulesetData] = data
+        }
+        return dict
+    }
+
+    /// The active Ruleset for `sport` resolved from the blob. The blob is a
+    /// full replacement, so a missing or undecodable entry means the phone did
+    /// not manage to ship a value — fall back to the sport's preset, never a
+    /// stale decoded value. The whole value is stamped as-is (ADR 0006).
+    func ruleset(for sport: MatchType) -> Ruleset {
+        guard let data = rulesetsBlob[sport.rawValue],
+              let rules = try? JSONDecoder().decode(Ruleset.self, from: data),
+              rules.sport == sport
+        else { return Ruleset.preset(for: sport) }
+        return rules
     }
 
     /// Decodes a settings context. Always succeeds: a missing or garbled key falls
     /// back to the default above. Callers decide whether a context is worth applying
     /// at all — an empty context means "no settings received", not "reset to defaults".
     static func from(_ dict: [String: Any]) -> WatchSettings {
-        WatchSettings(
+        let rulesetsBlob: [String: Data]
+        if let data = dict[WatchMessageKey.rulesetData] as? Data,
+           let decoded = try? JSONDecoder().decode([String: Data].self, from: data) {
+            rulesetsBlob = decoded
+        } else {
+            rulesetsBlob = [:]
+        }
+        return WatchSettings(
             teamAColorHex: dict[WatchMessageKey.teamAColor] as? String ?? defaultTeamAColorHex,
             teamBColorHex: dict[WatchMessageKey.teamBColor] as? String ?? defaultTeamBColorHex,
-            sportSetting: dict[WatchMessageKey.sportSetting] as? String ?? defaultSportSetting,
+            sportSetting: (dict[WatchMessageKey.sportSetting] as? String)
+                .map(SportSetting.init(storedToken:)) ?? defaultSportSetting,
             teamAName: dict[WatchMessageKey.teamAName] as? String ?? defaultTeamAName,
             teamBName: dict[WatchMessageKey.teamBName] as? String ?? defaultTeamBName,
-            healthMonitoringEnabled: dict[WatchMessageKey.healthMonitoring] as? Bool ?? defaultHealthMonitoringEnabled
+            healthMonitoringEnabled: dict[WatchMessageKey.healthMonitoring] as? Bool ?? defaultHealthMonitoringEnabled,
+            rulesetsBlob: rulesetsBlob
         )
     }
 }

@@ -1,13 +1,222 @@
 import Foundation
 
 enum ScoreEngine {
-    static func awardPoint(to team: Team, state: inout MatchState) {
+    /// The single award entry point. `value` is the Valor of a truco Mão —
+    /// `nil` means the Ruleset's base Valor — and is ignored by every other sport.
+    static func awardPoint(to team: Team, value: Int? = nil, state: inout MatchState) {
         guard !state.isMatchOver else { return }
 
-        if state.matchType == .tennis {
+        switch state.matchType {
+        case .tennis:
             awardTennisPoint(to: team, state: &state)
-        } else {
+        case .beachTennis:
             awardBeachTennisPoint(to: team, state: &state)
+        case .pingPong:
+            awardPingPongPoint(to: team, state: &state)
+        case .truco:
+            awardTrucoHand(to: team, value: value, state: &state)
+        }
+    }
+
+    // MARK: - Truco scoring
+
+    private static func awardTrucoHand(to team: Team, value: Int?, state: inout MatchState) {
+        guard let rules = state.ruleset.truco, rules.isValid else { return }
+        let value = value ?? rules.baseValue
+        guard rules.stakes.contains(value) else { return }
+        state.gameHistory.append(trucoRecord(winner: team, value: value))
+        rederiveTruco(state: &state)
+    }
+
+    /// Rewrites one recorded Mão after the fact, then rederives everything.
+    /// Lowering a hand below the target reopens a finished match — the end is
+    /// never a stored flag. Refused (returns false, state untouched) for an
+    /// out-of-range index, a Valor the Ruleset does not offer, or a correction
+    /// that would end the match before the last recorded hand.
+    @discardableResult
+    static func correctTrucoHand(at index: Int, winner: Team, value: Int, state: inout MatchState) -> Bool {
+        guard state.matchType == .truco,
+              let rules = state.ruleset.truco, rules.isValid,
+              state.gameHistory.indices.contains(index),
+              rules.stakes.contains(value)
+        else { return false }
+        var next = state
+        next.gameHistory[index] = trucoRecord(winner: winner, value: value)
+        guard rederiveTruco(state: &next) else { return false }
+        state = next
+        return true
+    }
+
+    /// Deletes one recorded Mão, then rederives everything. Removing a hand can
+    /// reopen a finished match — the end is derived, never a stored flag.
+    @discardableResult
+    static func removeTrucoHand(at index: Int, state: inout MatchState) -> Bool {
+        guard state.matchType == .truco,
+              let rules = state.ruleset.truco, rules.isValid,
+              state.gameHistory.indices.contains(index)
+        else { return false }
+        var next = state
+        next.gameHistory.remove(at: index)
+        guard rederiveTruco(state: &next) else { return false }
+        state = next
+        return true
+    }
+
+    /// A Mão as its Game Log record: the hand's own credit in `pointsA/B`
+    /// (the unit recorded), running totals filled in by `rederiveTruco`.
+    private static func trucoRecord(winner: Team, value: Int) -> GameRecord {
+        GameRecord(
+            gameNumber: 0, setScoreA: 0, setScoreB: 0,
+            winner: winner, isTiebreak: false,
+            pointsA: winner == .a ? value : 0,
+            pointsB: winner == .b ? value : 0
+        )
+    }
+
+    /// Totals, Game Log numbering and the match's end, all from the hands in
+    /// the Game Log. The first side to reach the target wins; totals are not
+    /// capped, so a 3 on 11 shows 14. Returns false — leaving `state` as it
+    /// was — when the log is not a valid sequence of hands: a record crediting
+    /// nothing or the loser, or a hand recorded after the match had ended.
+    @discardableResult
+    static func rederiveTruco(state: inout MatchState) -> Bool {
+        guard let target = state.ruleset.truco?.pointsTarget else { return false }
+        var a = 0, b = 0
+        var winner: Team?
+        var log: [GameRecord] = []
+        for (i, record) in state.gameHistory.enumerated() {
+            guard winner == nil,
+                  let value = MatchState.trucoHandValue(record), value >= 1,
+                  (record.winner == .a ? record.pointsB : record.pointsA) ?? 0 == 0
+            else { return false }
+            let (sumA, overA) = a.addingReportingOverflow(record.winner == .a ? value : 0)
+            let (sumB, overB) = b.addingReportingOverflow(record.winner == .b ? value : 0)
+            guard !overA, !overB else { return false }
+            a = sumA; b = sumB
+            if max(a, b) >= target { winner = record.winner }
+            log.append(GameRecord(
+                gameNumber: i + 1,
+                setScoreA: a,
+                setScoreB: b,
+                winner: record.winner,
+                isTiebreak: false,
+                gameScoreDisplay: "+\(value)",
+                pointsA: record.pointsA,
+                pointsB: record.pointsB
+            ))
+        }
+        state.gameHistory = log
+        state.setScoreA = a
+        state.setScoreB = b
+        state.winner = winner
+        state.isMatchOver = winner != nil
+        return true
+    }
+
+    // MARK: - Ping pong scoring
+
+    private static func awardPingPongPoint(to team: Team, state: inout MatchState) {
+        // A ping match must carry a playable ping ruleset. `isValid` also keeps
+        // the deuce arithmetic `2×(target−1)` from overflowing for a ruleset
+        // constructed directly (decode already validated it).
+        guard let rules = state.ruleset.pingPong, rules.isValid else {
+            return
+        }
+        let target = rules.pointsTarget
+
+        if team == .a { state.pingPongScore.pointsA += 1 } else { state.pingPongScore.pointsB += 1 }
+        let a = state.pingPongScore.pointsA
+        let b = state.pingPongScore.pointsB
+
+        if didWinSet(a: a, b: b, target: target) {
+            let winner = a > b ? Team.a : Team.b
+            let finalA = a, finalB = b
+            appendPingGameRecord(winner: winner, finalA: finalA, finalB: finalB, state: &state)
+            checkPingMatchProgress(state: &state)
+            if !state.isMatchOver {
+                state.pingPongScore.pointsA = 0
+                state.pingPongScore.pointsB = 0
+                // Rally serve: the game's last scorer serves next. Interval
+                // modes alternate independently of the last point.
+                if rules.serveMode == .rally {
+                    state.pingPongScore.gameInitialServer = winner
+                } else {
+                    state.pingPongScore.gameInitialServer = state.pingPongScore.gameInitialServer.other
+                }
+                state.servingTeam = state.pingPongScore.gameInitialServer
+            }
+            return
+        }
+
+        state.servingTeam = pingServer(
+            completedPoints: (a + b),
+            firstServer: state.pingPongScore.gameInitialServer,
+            rules: rules,
+            lastScorer: team
+        )
+    }
+
+    // Set is won at the target with a two-point lead — win-by-2 is fixed for
+    // every sport shipped, not a knob.
+    private static func didWinSet(a: Int, b: Int, target: Int) -> Bool {
+        max(a, b) >= target && abs(a - b) >= 2
+    }
+
+    /// Serve rotation after `completedPoints` points of the current game.
+    ///
+    /// Interval modes: the first `interval` points go to `firstServer`, then the
+    /// serve alternates every `interval` points. At deuce (`(target−1,
+    /// target−1)`) the serve alternates every point instead — 10–10 in an
+    /// 11-point set, 20–20 in a 21-point one. Rally mode: the last point's
+    /// scorer serves, always.
+    private static func pingServer(
+        completedPoints: Int,
+        firstServer: Team,
+        rules: PingPongRuleset,
+        lastScorer: Team
+    ) -> Team {
+        guard let interval = rules.serveMode.interval else {
+            return lastScorer
+        }
+        let target = rules.pointsTarget
+        let deuceBound = 2 * (target - 1)
+        // `D/i + (n−D)`, not `n / i`, once n passes D — the deuce-offset.
+        // Without it target 15 / interval 5 would mis-rotate at 14–14.
+        let parity: Int
+        if completedPoints < deuceBound {
+            parity = completedPoints / interval
+        } else {
+            parity = deuceBound / interval + (completedPoints - deuceBound)
+        }
+        return parity % 2 == 0 ? firstServer : firstServer.other
+    }
+
+    private static func appendPingGameRecord(
+        winner: Team,
+        finalA: Int,
+        finalB: Int,
+        state: inout MatchState
+    ) {
+        if winner == .a { state.pingPongScore.gamesWonA += 1 } else { state.pingPongScore.gamesWonB += 1 }
+        state.gameHistory.append(GameRecord(
+            gameNumber: state.gameHistory.count + 1,
+            setScoreA: state.pingPongScore.gamesWonA,
+            setScoreB: state.pingPongScore.gamesWonB,
+            winner: winner,
+            isTiebreak: false,
+            gameScoreDisplay: "\(finalA)–\(finalB)",
+            pointsA: finalA,
+            pointsB: finalB
+        ))
+    }
+
+    private static func checkPingMatchProgress(state: inout MatchState) {
+        guard let rules = state.ruleset.pingPong else { return }
+        let needed = rules.gamesToWinMatch
+        let a = state.pingPongScore.gamesWonA
+        let b = state.pingPongScore.gamesWonB
+        if a >= needed || b >= needed {
+            endMatch(winner: a > b ? .a : .b, state: &state)
         }
     }
 
@@ -99,32 +308,20 @@ enum ScoreEngine {
         if team == .a { state.tiebreakA += 1 } else { state.tiebreakB += 1 }
         state.tiebreakPointsPlayed += 1
 
-        if state.tiebreakA >= 7 && (state.tiebreakA - state.tiebreakB) >= 2 {
-            let display = "\(state.tiebreakA)–\(state.tiebreakB)"
-            state.setScoreA += 1
+        let a = state.tiebreakA
+        let b = state.tiebreakB
+        if max(a, b) >= 7 && abs(a - b) >= 2 {
+            let winner: Team = a > b ? .a : .b
+            if winner == .a { state.setScoreA += 1 } else { state.setScoreB += 1 }
             state.gameHistory.append(GameRecord(
                 gameNumber: state.gameHistory.count + 1,
                 setScoreA: state.setScoreA,
                 setScoreB: state.setScoreB,
-                winner: .a,
+                winner: winner,
                 isTiebreak: true,
-                gameScoreDisplay: display
+                gameScoreDisplay: "\(a)–\(b)"
             ))
-            endMatch(winner: .a, state: &state)
-            return
-        }
-        if state.tiebreakB >= 7 && (state.tiebreakB - state.tiebreakA) >= 2 {
-            let display = "\(state.tiebreakA)–\(state.tiebreakB)"
-            state.setScoreB += 1
-            state.gameHistory.append(GameRecord(
-                gameNumber: state.gameHistory.count + 1,
-                setScoreA: state.setScoreA,
-                setScoreB: state.setScoreB,
-                winner: .b,
-                isTiebreak: true,
-                gameScoreDisplay: display
-            ))
-            endMatch(winner: .b, state: &state)
+            endMatch(winner: winner, state: &state)
             return
         }
 
@@ -261,32 +458,18 @@ enum ScoreEngine {
         let a = state.tiebreakA
         let b = state.tiebreakB
         // Win by 2, minimum 7
-        if a >= 7 && (a - b) >= 2 {
-            let display = "\(a)–\(b)"
-            state.gameHistory.append(GameRecord(
-                gameNumber: state.gameHistory.count + 1,
-                setScoreA: state.setScoreA + 1,
-                setScoreB: state.setScoreB,
-                winner: .a,
-                isTiebreak: true,
-                gameScoreDisplay: display
-            ))
-            state.setScoreA += 1
-            winTennisSet(winner: .a, isTiebreak: true, state: &state)
-            return
-        }
-        if b >= 7 && (b - a) >= 2 {
-            let display = "\(a)–\(b)"
+        if max(a, b) >= 7 && abs(a - b) >= 2 {
+            let winner: Team = a > b ? .a : .b
+            if winner == .a { state.setScoreA += 1 } else { state.setScoreB += 1 }
             state.gameHistory.append(GameRecord(
                 gameNumber: state.gameHistory.count + 1,
                 setScoreA: state.setScoreA,
-                setScoreB: state.setScoreB + 1,
-                winner: .b,
+                setScoreB: state.setScoreB,
+                winner: winner,
                 isTiebreak: true,
-                gameScoreDisplay: display
+                gameScoreDisplay: "\(a)–\(b)"
             ))
-            state.setScoreB += 1
-            winTennisSet(winner: .b, isTiebreak: true, state: &state)
+            winTennisSet(winner: winner, isTiebreak: true, state: &state)
             return
         }
 

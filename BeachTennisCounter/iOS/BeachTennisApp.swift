@@ -19,7 +19,7 @@ struct BeachTennisApp: App {
 
     var body: some Scene {
         WindowGroup {
-            MatchListView()
+            RootView()
                 .environmentObject(phoneSession)
                 .environmentObject(pro)
                 // Starts the StoreKit transaction listener and takes the first

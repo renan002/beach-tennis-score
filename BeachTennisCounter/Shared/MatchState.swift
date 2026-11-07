@@ -14,11 +14,15 @@ enum Team: String, Codable, Sendable {
 enum MatchType: String, Codable, Sendable, CaseIterable {
     case beachTennis = "beachTennis"
     case tennis = "tennis"
+    case pingPong = "pingPong"
+    case truco = "truco"
 
     var displayName: String {
         switch self {
         case .beachTennis: return String(localized: "Beach Tennis")
         case .tennis: return String(localized: "Tennis")
+        case .pingPong: return String(localized: "Ping pong")
+        case .truco: return String(localized: "Truco")
         }
     }
 
@@ -26,22 +30,39 @@ enum MatchType: String, Codable, Sendable, CaseIterable {
         switch self {
         case .beachTennis: return "beach.umbrella"
         case .tennis: return "tennis.racket"
+        case .pingPong: return "figure.table.tennis"
+        case .truco: return "suit.club.fill"
         }
     }
 
+    /// Whether a match under this type is physical (a workout is started).
+    /// Truco is played sitting at a table: no workout, no HealthKit prompt.
+    var isPhysicalSport: Bool {
+        switch self {
+        case .beachTennis, .tennis, .pingPong: return true
+        case .truco: return false
+        }
+    }
+
+    /// Whether the sport has a serve — the watch asks who serves first and
+    /// shows the serve indicator only when it does.
+    var hasServe: Bool { self != .truco }
+
     // Beach tennis displays each game as a "Set" in every language, never by
-    // locale — see CONTEXT.md "Scoring units".
+    // locale — see CONTEXT.md "Scoring units". Ping pong does the same.
     func gameLabel(_ number: Int) -> String {
         switch self {
-        case .beachTennis: return String(localized: "Set \(number)")
+        case .beachTennis, .pingPong: return String(localized: "Set \(number)")
         case .tennis: return String(localized: "Game \(number)")
+        case .truco: return String(localized: "Hand \(number)")
         }
     }
 
     var gamesSectionTitle: String {
         switch self {
-        case .beachTennis: return String(localized: "Sets")
+        case .beachTennis, .pingPong: return String(localized: "Sets")
         case .tennis: return String(localized: "Games")
+        case .truco: return String(localized: "Hands")
         }
     }
 
@@ -73,7 +94,7 @@ enum PointScore: Int, Codable, Sendable, CaseIterable {
     }
 }
 
-struct GameRecord: Codable, Sendable {
+struct GameRecord: Codable, Sendable, Equatable {
     /// The `gameScoreDisplay` a golden-point (beach tennis sudden death) game
     /// records. The only Game Log signal that a game was decided at the golden
     /// point, so `ScoreEngine` writes it and Estatísticas reads it — one literal
@@ -86,9 +107,34 @@ struct GameRecord: Codable, Sendable {
     let winner: Team
     let isTiebreak: Bool
     var gameScoreDisplay: String?
+    /// Per-sport numeric points at game end. Defaults so records persisted
+    /// before these fields existed decode without migrating — `nil` means the
+    /// record was written before the field was added.
+    let pointsA: Int?
+    let pointsB: Int?
+
+    init(
+        gameNumber: Int,
+        setScoreA: Int,
+        setScoreB: Int,
+        winner: Team,
+        isTiebreak: Bool,
+        gameScoreDisplay: String? = nil,
+        pointsA: Int? = nil,
+        pointsB: Int? = nil
+    ) {
+        self.gameNumber = gameNumber
+        self.setScoreA = setScoreA
+        self.setScoreB = setScoreB
+        self.winner = winner
+        self.isTiebreak = isTiebreak
+        self.gameScoreDisplay = gameScoreDisplay
+        self.pointsA = pointsA
+        self.pointsB = pointsB
+    }
 }
 
-struct SetRecord: Codable, Sendable {
+struct SetRecord: Codable, Sendable, Equatable {
     let setNumber: Int
     let gamesA: Int
     let gamesB: Int
@@ -96,7 +142,7 @@ struct SetRecord: Codable, Sendable {
     let isTiebreak: Bool
 }
 
-struct MatchState: Codable, Sendable {
+struct MatchState: Codable, Sendable, Equatable {
     var matchType: MatchType = .beachTennis
 
     // Current set / beach tennis games
@@ -128,6 +174,11 @@ struct MatchState: Codable, Sendable {
     var servingTeam: Team = .a
     var initialServer: Team = .a
 
+    // Ping pong: the sport's own scoring state, per ADR 0005. Nothing is
+    // mirrored into the legacy beach/tennis fields above — `setScoreA/B`
+    // projections carry games won onto the wire/storage formats only.
+    var pingPongScore: PingPongState = PingPongState(initialServer: .a)
+
     var isMatchOver: Bool = false
     var winner: Team? = nil
 
@@ -140,15 +191,27 @@ struct MatchState: Codable, Sendable {
     var teamAName: String = ""
     var teamBName: String = ""
 
+    // Ruleset this match is played under, stamped by value at match creation
+    // (ADR 0006). Default for backward-compatible decoding from old persisted
+    // data that lacks the key.
+    var ruleset: Ruleset = Ruleset.preset(for: .beachTennis)
+
     /// Builds the starting state for a brand-new match, stamping the Team Names
-    /// in effect at match start. Names are copied by value, so a later Settings
-    /// rename never rewrites a match already under way or already stored —
-    /// history keeps the names it was played with.
+    /// and the Ruleset in effect at match start. Names and rules are copied by
+    /// value, so a later Settings or Regras rename never rewrites a match already
+    /// under way or already stored — history keeps the names and rules it was
+    /// played with.
+    ///
+    /// `ruleset` accepts any valid Ruleset for `matchType`; when `nil` the
+    /// sport's active preset is stamped. For ping pong the value is the whole
+    /// resolved ruleset (target, best-of, serve mode, name) — never a later
+    /// look-up of today's setting.
     static func newMatch(
         matchType: MatchType,
         initialServer: Team,
         teamAName: String = "",
-        teamBName: String = ""
+        teamBName: String = "",
+        ruleset: Ruleset? = nil
     ) -> MatchState {
         var s = MatchState()
         s.matchType = matchType
@@ -157,14 +220,104 @@ struct MatchState: Codable, Sendable {
         s.tiebreakFirstServer = initialServer
         s.teamAName = teamAName
         s.teamBName = teamBName
+        // A supplied ruleset that doesn't belong to this sport (or whose ping
+        // knobs aren't playable) would make the new match unscorable — fall
+        // back to the sport's preset instead of starting broken.
+        if let supplied = ruleset, supplied.sport == matchType,
+           matchType != .pingPong || supplied.pingPong?.isValid == true,
+           matchType != .truco || supplied.truco?.isValid == true {
+            s.ruleset = supplied
+        } else {
+            s.ruleset = Ruleset.preset(for: matchType)
+        }
+        s.pingPongScore = PingPongState(initialServer: initialServer)
+        if matchType == .pingPong {
+            s.servingTeam = initialServer
+        }
         return s
     }
 
+    private enum CodingKeys: String, CodingKey {
+        case matchType, setScoreA, setScoreB, setsWonA, setsWonB, setHistory
+        case pointA, pointB, isGoldenPoint, advantageTeam
+        case isTiebreak, tiebreakA, tiebreakB, tiebreakPointsPlayed, tiebreakFirstServer
+        case servingTeam, initialServer, isMatchOver, winner, matchStartDate, gameHistory
+        case teamAName, teamBName, ruleset, pingPongScore
+    }
+
+    init() {}
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        matchType = try container.decodeIfPresent(MatchType.self, forKey: .matchType) ?? .beachTennis
+        setScoreA = try container.decodeIfPresent(Int.self, forKey: .setScoreA) ?? 0
+        setScoreB = try container.decodeIfPresent(Int.self, forKey: .setScoreB) ?? 0
+        setsWonA = try container.decodeIfPresent(Int.self, forKey: .setsWonA) ?? 0
+        setsWonB = try container.decodeIfPresent(Int.self, forKey: .setsWonB) ?? 0
+        setHistory = try container.decodeIfPresent([SetRecord].self, forKey: .setHistory) ?? []
+        pointA = try container.decodeIfPresent(PointScore.self, forKey: .pointA) ?? .zero
+        pointB = try container.decodeIfPresent(PointScore.self, forKey: .pointB) ?? .zero
+        isGoldenPoint = try container.decodeIfPresent(Bool.self, forKey: .isGoldenPoint) ?? false
+        advantageTeam = try container.decodeIfPresent(Team.self, forKey: .advantageTeam)
+        isTiebreak = try container.decodeIfPresent(Bool.self, forKey: .isTiebreak) ?? false
+        tiebreakA = try container.decodeIfPresent(Int.self, forKey: .tiebreakA) ?? 0
+        tiebreakB = try container.decodeIfPresent(Int.self, forKey: .tiebreakB) ?? 0
+        tiebreakPointsPlayed = try container.decodeIfPresent(Int.self, forKey: .tiebreakPointsPlayed) ?? 0
+        tiebreakFirstServer = try container.decodeIfPresent(Team.self, forKey: .tiebreakFirstServer) ?? .a
+        servingTeam = try container.decodeIfPresent(Team.self, forKey: .servingTeam) ?? .a
+        initialServer = try container.decodeIfPresent(Team.self, forKey: .initialServer) ?? .a
+        isMatchOver = try container.decodeIfPresent(Bool.self, forKey: .isMatchOver) ?? false
+        winner = try container.decodeIfPresent(Team.self, forKey: .winner)
+        matchStartDate = try container.decodeIfPresent(Date.self, forKey: .matchStartDate) ?? Date()
+        gameHistory = try container.decodeIfPresent([GameRecord].self, forKey: .gameHistory) ?? []
+        teamAName = try container.decodeIfPresent(String.self, forKey: .teamAName) ?? ""
+        teamBName = try container.decodeIfPresent(String.self, forKey: .teamBName) ?? ""
+        // A ping match must carry its stored ruleset — it is the whole resolved
+        // rules (target, best-of, serve, name) and cannot be defaulted. Legacy
+        // beach/tennis blobs may predate the field and default to the preset.
+        if matchType == .pingPong || matchType == .truco {
+            guard let stored = try container.decodeIfPresent(Ruleset.self, forKey: .ruleset) else {
+                throw RulesetCodecError.malformed
+            }
+            ruleset = stored
+        } else {
+            ruleset = try container.decodeIfPresent(Ruleset.self, forKey: .ruleset) ?? Ruleset.preset(for: matchType)
+        }
+        // A stored ruleset must belong to the match it is stored with.
+        guard ruleset.sport == matchType else {
+            throw RulesetCodecError.malformed
+        }
+        if matchType == .pingPong {
+            // A ping match needs its live integer board — a payload without it
+            // is malformed, never a silent blank match.
+            pingPongScore = try container.decode(PingPongState.self, forKey: .pingPongScore)
+        } else {
+            pingPongScore = try container.decodeIfPresent(PingPongState.self, forKey: .pingPongScore) ?? PingPongState(initialServer: .a)
+        }
+        // Truco's Game Log is its record of hands; totals and the end are
+        // rebuilt from it rather than trusted, and a log that is not a valid
+        // sequence of hands is malformed.
+        if matchType == .truco {
+            guard ScoreEngine.rederiveTruco(state: &self) else {
+                throw RulesetCodecError.malformed
+            }
+        }
+        // Scored counters are nonnegative, and serve rotation sums A+B — reject
+        // values that would overflow that sum.
+        guard pingPongScore.pointsA >= 0, pingPongScore.pointsB >= 0,
+              pingPongScore.gamesWonA >= 0, pingPongScore.gamesWonB >= 0,
+              !pingPongScore.pointsA.addingReportingOverflow(pingPongScore.pointsB).overflow,
+              !pingPongScore.gamesWonA.addingReportingOverflow(pingPongScore.gamesWonB).overflow
+        else {
+            throw RulesetCodecError.malformed
+        }
+    }
+
     /// The label to show for `team`: its Team Name when set, otherwise the
-    /// localized `Team.displayName` fallback.
+    /// localized `Team.displayName` fallback. Forwards to `TeamName`, which
+    /// states the rule for every display site.
     func teamName(for team: Team) -> String {
-        let name = team == .a ? teamAName : teamBName
-        return name.isEmpty ? team.displayName : name
+        TeamName.resolved(team == .a ? teamAName : teamBName, for: team)
     }
 
     func setScore(for team: Team) -> Int {
@@ -181,5 +334,21 @@ struct MatchState: Codable, Sendable {
 
     func tiebreakScore(for team: Team) -> Int {
         team == .a ? tiebreakA : tiebreakB
+    }
+
+    /// Ping pong's live integer points for `team`. Meaningless for any other
+    /// sport — display sites branch on `matchType` before reading it.
+    func pingPoints(for team: Team) -> Int {
+        team == .a ? pingPongScore.pointsA : pingPongScore.pointsB
+    }
+
+    /// The Valor a truco Mão credited, read off its Game Log record.
+    static func trucoHandValue(_ record: GameRecord) -> Int? {
+        record.winner == .a ? record.pointsA : record.pointsB
+    }
+
+    /// Ping pong's games won for `team`.
+    func pingGamesWon(for team: Team) -> Int {
+        team == .a ? pingPongScore.gamesWonA : pingPongScore.gamesWonB
     }
 }

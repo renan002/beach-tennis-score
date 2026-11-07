@@ -8,10 +8,20 @@ final class WatchSessionManager: NSObject, ObservableObject {
 
     @Published var teamAColor: Color = .red
     @Published var teamBColor: Color = .blue
-    @Published var sportSetting: String = "beachTennis"
+    @Published var sportSetting: SportSetting = WatchSettings.defaultSportSetting
     @Published var teamAName: String = WatchSettings.defaultTeamAName
     @Published var teamBName: String = WatchSettings.defaultTeamBName
     @Published var healthMonitoringEnabled: Bool = WatchSettings.defaultHealthMonitoringEnabled
+    /// The active Ruleset per sport, resolved from the shared application
+    /// context's rules blob. The watch scores, it does not configure (ADR 0006):
+    /// there is no Ruleset editor here, the value is whatever the phone sent.
+    private var resolvedRulesets: [String: Ruleset] = [:]
+
+    /// The Ruleset to stamp onto a new match of `sport`. Falls back to the
+    /// sport's preset when the context never shipped a value.
+    func ruleset(for sport: MatchType) -> Ruleset {
+        resolvedRulesets[sport.rawValue] ?? Ruleset.preset(for: sport)
+    }
 
     private nonisolated static let pendingResultKey = "pendingMatchResult"
     private nonisolated static let lastReportedAuthKey = "lastReportedHealthAuthStatus"
@@ -30,25 +40,12 @@ final class WatchSessionManager: NSObject, ObservableObject {
         activeCalories: Double? = nil,
         avgHeartRate: Double? = nil
     ) {
-        guard let winner = state.winner else { return }
-
-        let payload = MatchResultPayload(
-            matchId: UUID(),
-            setScoreA: state.setScoreA,
-            setScoreB: state.setScoreB,
-            setsWonA: state.setsWonA,
-            setsWonB: state.setsWonB,
-            winner: winner,
+        guard let payload = MatchResultPayload(
+            finished: state,
             duration: duration,
-            date: Date(),
-            gameHistory: state.gameHistory,
-            setHistory: state.setHistory,
-            matchType: state.matchType,
-            teamAName: state.teamAName,
-            teamBName: state.teamBName,
             activeCalories: activeCalories,
             avgHeartRate: avgHeartRate
-        )
+        ) else { return }
 
         guard WCSession.default.activationState == .activated else {
             if let data = try? JSONEncoder().encode(payload) {
@@ -77,6 +74,11 @@ final class WatchSessionManager: NSObject, ObservableObject {
         teamAName = settings.teamAName
         teamBName = settings.teamBName
         healthMonitoringEnabled = settings.healthMonitoringEnabled
+        var resolved: [String: Ruleset] = [:]
+        for sport in MatchType.allCases {
+            resolved[sport.rawValue] = settings.ruleset(for: sport)
+        }
+        resolvedRulesets = resolved
     }
 
     /// Pushes the watch's HealthKit authorization status to the phone, on change
@@ -134,13 +136,11 @@ extension WatchSessionManager: WCSessionDelegate {
 // MARK: - Color hex helper (watch-side: decode only)
 
 extension Color {
+    /// Failable on purpose: these hex strings arrive from the phone over the
+    /// application context and can be garbled, and the callers above fall back
+    /// to the default red and blue. Parsing itself lives in `HexColor`.
     init?(hex: String) {
-        var hex = hex.trimmingCharacters(in: .whitespacesAndNewlines)
-        if hex.hasPrefix("#") { hex.removeFirst() }
-        guard hex.count == 6, let value = UInt64(hex, radix: 16) else { return nil }
-        let r = Double((value >> 16) & 0xFF) / 255
-        let g = Double((value >> 8) & 0xFF) / 255
-        let b = Double(value & 0xFF) / 255
-        self.init(red: r, green: g, blue: b)
+        guard let rgb = HexColor.components(hex) else { return nil }
+        self.init(red: rgb.red, green: rgb.green, blue: rgb.blue)
     }
 }
