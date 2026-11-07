@@ -8,6 +8,25 @@ struct ServeSelectionView: View {
     @State private var selectedServer: Team = .a
 
     var body: some View {
+        // A sport with no serve (truco) has nothing to ask: go straight to the
+        // Placar. `.a` is a placeholder the engine never reads for it.
+        if matchType.hasServe {
+            servePicker
+        } else {
+            scoreView(initialServer: .a)
+        }
+    }
+
+    private func scoreView(initialServer: Team) -> ScoreView {
+        ScoreView(initialServer: initialServer,
+                  matchType: matchType,
+                  teamAName: sessionManager.teamAName,
+                  teamBName: sessionManager.teamBName,
+                  isActive: $isActive,
+                  ruleset: sessionManager.ruleset(for: matchType))
+    }
+
+    private var servePicker: some View {
         ZStack {
             Color.black.ignoresSafeArea()
 
@@ -38,12 +57,7 @@ struct ServeSelectionView: View {
         }
         .navigationBarHidden(true)
         .navigationDestination(isPresented: $navigateToScore) {
-            ScoreView(initialServer: selectedServer,
-                      matchType: matchType,
-                      teamAName: sessionManager.teamAName,
-                      teamBName: sessionManager.teamBName,
-                      isActive: $isActive,
-                      ruleset: sessionManager.ruleset(for: matchType))
+            scoreView(initialServer: selectedServer)
         }
     }
 

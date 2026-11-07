@@ -26,6 +26,11 @@ struct MatchHistoryView: View {
                         Text("\(record.pointsA ?? record.setScoreA)–\(record.pointsB ?? record.setScoreB)")
                             .font(.caption2.bold())
                             .foregroundColor(.white)
+                    } else if matchType == .truco {
+                        // The Mão's Valor, in its winner's colour.
+                        Text(record.gameScoreDisplay ?? "")
+                            .font(.caption2.bold())
+                            .foregroundColor(record.winner == .a ? sessionManager.teamAColor : sessionManager.teamBColor)
                     } else if record.isTiebreak {
                         Text("TB")
                             .font(.caption2.bold())

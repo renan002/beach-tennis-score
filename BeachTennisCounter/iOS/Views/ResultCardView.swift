@@ -13,6 +13,7 @@ extension MatchType {
         case .tennis: return Color(hex: "CCFF00")
         case .beachTennis: return Color(hex: "F08A30")
         case .pingPong: return Color(hex: "2E86AB")
+        case .truco: return Color(hex: "1E8449")
         }
     }
 

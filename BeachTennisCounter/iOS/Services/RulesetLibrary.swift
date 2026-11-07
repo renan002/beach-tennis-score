@@ -25,18 +25,23 @@ struct RulesetDocument: Codable, Equatable, Sendable {
     /// Stable identity across edits — it is never silently merged into a saved
     /// custom; saving copies it under a **new** UUID.
     var pingDraft: PingPongRuleset?
+    /// Truco only: the same unsaved working value, for truco's "Personalizado".
+    /// Optional, so documents written before truco decode unchanged.
+    var trucoDraft: TrucoRuleset?
 
     init(
         sport: MatchType,
         customRulesets: [Ruleset] = [],
         activeRuleset: Ruleset? = nil,
-        pingDraft: PingPongRuleset? = nil
+        pingDraft: PingPongRuleset? = nil,
+        trucoDraft: TrucoRuleset? = nil
     ) {
         self.version = Self.currentVersion
         self.sport = sport
         self.customRulesets = customRulesets
         self.activeRuleset = activeRuleset
         self.pingDraft = pingDraft
+        self.trucoDraft = trucoDraft
     }
 }
 
@@ -198,6 +203,55 @@ enum RulesetLibrary {
         return rules
     }
 
+    // MARK: - Truco draft
+
+    /// A truco draft copy of `source` under its own identity, named "Custom".
+    static func freshDraft(from source: TrucoRuleset) -> TrucoRuleset {
+        TrucoRuleset(
+            identifier: UUID(),
+            name: String(localized: "Custom"),
+            pointsTarget: source.pointsTarget,
+            baseValue: source.baseValue,
+            raises: source.raises
+        )
+    }
+
+    /// The truco draft: the persisted working value, or a fresh one.
+    static func trucoDraft(in defaults: UserDefaults = .standard) -> TrucoRuleset {
+        let doc = document(for: .truco, in: defaults)
+        if let draft = doc.trucoDraft { return draft }
+        return freshDraft(from: doc.activeRuleset?.truco ?? .paulista)
+    }
+
+    /// Writes the truco draft and makes it the active value in one write.
+    static func updateTrucoDraftAndActive(_ draft: TrucoRuleset, in defaults: UserDefaults = .standard) {
+        guard draft.isValid else { return }
+        var doc = document(for: .truco, in: defaults)
+        doc.trucoDraft = draft
+        doc.activeRuleset = .truco(draft)
+        save(doc, in: defaults)
+    }
+
+    /// Saves the truco draft as a new Custom Ruleset under a **new** UUID and
+    /// makes it active. `nil` when the name is blank or the draft invalid.
+    static func saveTrucoDraftAsCustom(
+        draft: TrucoRuleset,
+        name: String,
+        defaults: UserDefaults = .standard
+    ) -> Ruleset? {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, draft.isValid else { return nil }
+        var custom = draft
+        custom.identifier = UUID()
+        custom.name = trimmed
+        let rules = Ruleset.truco(custom)
+        var doc = document(for: .truco, in: defaults)
+        doc.customRulesets.append(rules)
+        doc.activeRuleset = rules
+        save(doc, in: defaults)
+        return rules
+    }
+
     /// Renames a saved Custom Ruleset, preserving its UUID. When the custom is
     /// active, the active value follows the rename. Returns the renamed
     /// ruleset, or `nil` when the name is blank or no such custom exists.
@@ -217,6 +271,10 @@ enum RulesetLibrary {
             guard ping.isValid else { return nil }
             ping.name = trimmed
             renamed = Ruleset.pingPong(ping)
+        } else if var truco = existing.truco {
+            guard truco.isValid else { return nil }
+            truco.name = trimmed
+            renamed = Ruleset.truco(truco)
         } else {
             renamed = Ruleset(
                 identifier: existing.identifier,

@@ -16,7 +16,8 @@ struct HeadlineScore: Equatable, Sendable {
         /// inside a set, and ping pong games once a best-of-N match has a
         /// completed game on the board.
         case games
-        /// Ping pong best-of-1, or any ping match abandoned in its first game.
+        /// Ping pong best-of-1, any ping match abandoned in its first game, and
+        /// truco's totals.
         case points
     }
 
@@ -74,6 +75,8 @@ struct HeadlineScore: Equatable, Sendable {
                 pointsB: state.pingPoints(for: .b),
                 bestOf: state.ruleset.pingPong?.bestOf ?? 1
             )
+        case .truco:
+            return HeadlineScore(a: state.setScoreA, b: state.setScoreB, unit: .points)
         }
     }
 
@@ -115,6 +118,9 @@ struct HeadlineScore: Equatable, Sendable {
                 pointsB: pointsB,
                 bestOf: bestOf ?? 1
             )
+        case .truco:
+            // ADR 0005: the flat columns carry truco's totals.
+            return HeadlineScore(a: setScoreA, b: setScoreB, unit: .points)
         }
     }
 }

@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// The sport's Rules entry point inside Settings: a Rules row that opens a
-/// sport list — ping pong is editable, beach tennis and tennis are frozen
+/// sport list — ping pong and truco are editable, beach tennis and tennis are frozen
 /// presets shown read-only.
 struct RulesSettingsView: View {
     var body: some View {
@@ -21,6 +21,21 @@ struct RulesSettingsView: View {
                 }
             }
 
+            NavigationLink {
+                TrucoRulesView()
+            } label: {
+                Label {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Truco")
+                        Text(activeTrucoSummary)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                } icon: {
+                    Image(systemName: MatchType.truco.icon)
+                }
+            }
+
             Section("Fixed rules") {
                 FrozenSportRow(sport: .beachTennis)
                 FrozenSportRow(sport: .tennis)
@@ -28,6 +43,11 @@ struct RulesSettingsView: View {
         }
         .navigationTitle("Rules")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var activeTrucoSummary: String {
+        let truco = RulesetLibrary.activeRuleset(for: .truco).truco ?? .paulista
+        return truco.isPreset ? truco.name : TrucoRulesView.summary(truco)
     }
 
     private var activePingSummary: String {

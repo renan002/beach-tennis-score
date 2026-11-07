@@ -60,12 +60,16 @@ struct MatchInProgress {
         [.persist, .startWorkout]
     }
 
-    /// A point went to `team`.
-    mutating func awardPoint(to team: Team, now: Date = Date()) -> [Effect] {
+    /// A point went to `team` — for truco, a Mão worth `value` (`nil` = base).
+    mutating func awardPoint(to team: Team, value: Int? = nil, now: Date = Date()) -> [Effect] {
         guard !state.isMatchOver else { return [] }
 
-        undoStack.append(state)
-        ScoreEngine.awardPoint(to: team, state: &state)
+        let before = state
+        ScoreEngine.awardPoint(to: team, value: value, state: &state)
+        // A refused award (a Valor the Ruleset doesn't offer) changes nothing
+        // and leaves no Undo Stack entry behind.
+        guard state != before else { return [] }
+        undoStack.append(before)
 
         var effects: [Effect] = [.persist, .haptic]
         guard state.isMatchOver else { return effects }

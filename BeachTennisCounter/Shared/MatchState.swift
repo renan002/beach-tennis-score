@@ -15,12 +15,14 @@ enum MatchType: String, Codable, Sendable, CaseIterable {
     case beachTennis = "beachTennis"
     case tennis = "tennis"
     case pingPong = "pingPong"
+    case truco = "truco"
 
     var displayName: String {
         switch self {
         case .beachTennis: return String(localized: "Beach Tennis")
         case .tennis: return String(localized: "Tennis")
         case .pingPong: return String(localized: "Ping pong")
+        case .truco: return String(localized: "Truco")
         }
     }
 
@@ -29,17 +31,22 @@ enum MatchType: String, Codable, Sendable, CaseIterable {
         case .beachTennis: return "beach.umbrella"
         case .tennis: return "tennis.racket"
         case .pingPong: return "figure.table.tennis"
+        case .truco: return "suit.club.fill"
         }
     }
 
     /// Whether a match under this type is physical (a workout is started).
-    /// Every sport shipped today is physical; a future non-physical sport adds
-    /// its case here and returns false.
+    /// Truco is played sitting at a table: no workout, no HealthKit prompt.
     var isPhysicalSport: Bool {
         switch self {
         case .beachTennis, .tennis, .pingPong: return true
+        case .truco: return false
         }
     }
+
+    /// Whether the sport has a serve — the watch asks who serves first and
+    /// shows the serve indicator only when it does.
+    var hasServe: Bool { self != .truco }
 
     // Beach tennis displays each game as a "Set" in every language, never by
     // locale — see CONTEXT.md "Scoring units". Ping pong does the same.
@@ -47,6 +54,7 @@ enum MatchType: String, Codable, Sendable, CaseIterable {
         switch self {
         case .beachTennis, .pingPong: return String(localized: "Set \(number)")
         case .tennis: return String(localized: "Game \(number)")
+        case .truco: return String(localized: "Hand \(number)")
         }
     }
 
@@ -54,6 +62,7 @@ enum MatchType: String, Codable, Sendable, CaseIterable {
         switch self {
         case .beachTennis, .pingPong: return String(localized: "Sets")
         case .tennis: return String(localized: "Games")
+        case .truco: return String(localized: "Hands")
         }
     }
 
@@ -215,7 +224,8 @@ struct MatchState: Codable, Sendable, Equatable {
         // knobs aren't playable) would make the new match unscorable — fall
         // back to the sport's preset instead of starting broken.
         if let supplied = ruleset, supplied.sport == matchType,
-           matchType != .pingPong || supplied.pingPong?.isValid == true {
+           matchType != .pingPong || supplied.pingPong?.isValid == true,
+           matchType != .truco || supplied.truco?.isValid == true {
             s.ruleset = supplied
         } else {
             s.ruleset = Ruleset.preset(for: matchType)
@@ -265,7 +275,7 @@ struct MatchState: Codable, Sendable, Equatable {
         // A ping match must carry its stored ruleset — it is the whole resolved
         // rules (target, best-of, serve, name) and cannot be defaulted. Legacy
         // beach/tennis blobs may predate the field and default to the preset.
-        if matchType == .pingPong {
+        if matchType == .pingPong || matchType == .truco {
             guard let stored = try container.decodeIfPresent(Ruleset.self, forKey: .ruleset) else {
                 throw RulesetCodecError.malformed
             }
@@ -283,6 +293,14 @@ struct MatchState: Codable, Sendable, Equatable {
             pingPongScore = try container.decode(PingPongState.self, forKey: .pingPongScore)
         } else {
             pingPongScore = try container.decodeIfPresent(PingPongState.self, forKey: .pingPongScore) ?? PingPongState(initialServer: .a)
+        }
+        // Truco's Game Log is its record of hands; totals and the end are
+        // rebuilt from it rather than trusted, and a log that is not a valid
+        // sequence of hands is malformed.
+        if matchType == .truco {
+            guard ScoreEngine.rederiveTruco(state: &self) else {
+                throw RulesetCodecError.malformed
+            }
         }
         // Scored counters are nonnegative, and serve rotation sums A+B — reject
         // values that would overflow that sum.
@@ -322,6 +340,11 @@ struct MatchState: Codable, Sendable, Equatable {
     /// sport — display sites branch on `matchType` before reading it.
     func pingPoints(for team: Team) -> Int {
         team == .a ? pingPongScore.pointsA : pingPongScore.pointsB
+    }
+
+    /// The Valor a truco Mão credited, read off its Game Log record.
+    static func trucoHandValue(_ record: GameRecord) -> Int? {
+        record.winner == .a ? record.pointsA : record.pointsB
     }
 
     /// Ping pong's games won for `team`.
