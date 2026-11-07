@@ -231,6 +231,14 @@ enum ScoreEngine {
     }
 
     private static func awardBeachTennisGamePoint(to team: Team, state: inout MatchState) {
+        // Vantagem: the tennis deuce cycle, ending in a *beach* game win.
+        if state.ruleset.beachRules.deuceRule == .advantage {
+            if advanceDeuceCycle(to: team, state: &state) {
+                winBeachTennisGame(team: team, state: &state)
+            }
+            return
+        }
+
         let opponentPoint = state.point(for: team.other)
         let myPoint = state.point(for: team)
 
@@ -259,15 +267,21 @@ enum ScoreEngine {
     }
 
     private static func winBeachTennisGame(team: Team, state: inout MatchState) {
-        let scoreDisplay = state.isGoldenPoint
-            ? GameRecord.goldenPointDisplay
-            : "\(state.pointA.display)–\(state.pointB.display)"
+        let scoreDisplay: String
+        if state.isGoldenPoint {
+            scoreDisplay = GameRecord.goldenPointDisplay
+        } else if state.advantageTeam != nil {
+            scoreDisplay = GameRecord.advantageDisplay
+        } else {
+            scoreDisplay = "\(state.pointA.display)–\(state.pointB.display)"
+        }
 
         if team == .a { state.setScoreA += 1 } else { state.setScoreB += 1 }
 
         state.pointA = .zero
         state.pointB = .zero
         state.isGoldenPoint = false
+        state.advantageTeam = nil
         state.servingTeam = state.servingTeam.other
 
         state.gameHistory.append(GameRecord(
@@ -282,35 +296,42 @@ enum ScoreEngine {
         checkBeachTennisMatchProgress(state: &state)
     }
 
+    /// The Match Format decides the end. Primeiro a N: N Sets (with a two-Set
+    /// lead when win-by-two), Tiebreak at N–N. Sempre N: all N Sets, Tiebreak
+    /// on an even N's tie (validity guarantees it is on).
     private static func checkBeachTennisMatchProgress(state: inout MatchState) {
+        let rules = state.ruleset.beachRules
+        let n = rules.sets
         let a = state.setScoreA
         let b = state.setScoreB
 
-        if a == 7 || b == 7 {
+        let won: Bool
+        let level: Bool
+        switch rules.format {
+        case .firstTo:
+            won = max(a, b) >= n && (!rules.winByTwoSets || abs(a - b) >= 2)
+            level = rules.tiebreakCanTrigger && rules.tiebreak && a == n && b == n
+        case .always:
+            won = a + b >= n && a != b
+            level = a + b >= n && a == b
+        }
+
+        if won {
             endMatch(winner: a > b ? .a : .b, state: &state)
-            return
-        }
-        if a >= 6 && b <= 4 {
-            endMatch(winner: .a, state: &state)
-            return
-        }
-        if b >= 6 && a <= 4 {
-            endMatch(winner: .b, state: &state)
-            return
-        }
-        if a == 6 && b == 6 {
+        } else if level {
             state.isTiebreak = true
             state.tiebreakFirstServer = state.servingTeam
         }
     }
 
     private static func awardBeachTennisTiebreakPoint(to team: Team, state: inout MatchState) {
+        let rules = state.ruleset.beachRules
         if team == .a { state.tiebreakA += 1 } else { state.tiebreakB += 1 }
         state.tiebreakPointsPlayed += 1
 
         let a = state.tiebreakA
         let b = state.tiebreakB
-        if max(a, b) >= 7 && abs(a - b) >= 2 {
+        if max(a, b) >= rules.tiebreakPoints && (!rules.tiebreakWinByTwo || abs(a - b) >= 2) {
             let winner: Team = a > b ? .a : .b
             if winner == .a { state.setScoreA += 1 } else { state.setScoreB += 1 }
             state.gameHistory.append(GameRecord(
@@ -342,32 +363,35 @@ enum ScoreEngine {
     }
 
     private static func awardTennisGamePoint(to team: Team, state: inout MatchState) {
+        if advanceDeuceCycle(to: team, state: &state) {
+            winTennisGame(team: team, state: &state)
+        }
+    }
+
+    /// One point of a game played with advantage — tennis, and beach under
+    /// Vantagem. Moves the points and the advantage; returns true when the
+    /// point wins the game, leaving the win itself to the sport.
+    private static func advanceDeuceCycle(to team: Team, state: inout MatchState) -> Bool {
         let myPoint = state.point(for: team)
         let opponentPoint = state.point(for: team.other)
 
         // Has advantage → wins game
-        if state.advantageTeam == team {
-            winTennisGame(team: team, state: &state)
-            return
-        }
+        if state.advantageTeam == team { return true }
 
         // Opponent has advantage → back to deuce
         if state.advantageTeam == team.other {
             state.advantageTeam = nil
-            return
+            return false
         }
 
         // At 40-40 → award advantage
         if myPoint == .forty && opponentPoint == .forty {
             state.advantageTeam = team
-            return
+            return false
         }
 
         // At 40 (opponent not at 40) → win game
-        if myPoint == .forty {
-            winTennisGame(team: team, state: &state)
-            return
-        }
+        if myPoint == .forty { return true }
 
         // Advance point
         if let next = myPoint.next {
@@ -376,12 +400,13 @@ enum ScoreEngine {
 
         // Reached 40-40 through normal advancement → no advantage yet, just deuce
         // (advantage is only awarded when a point is played AT deuce)
+        return false
     }
 
     private static func winTennisGame(team: Team, state: inout MatchState) {
         let scoreDisplay: String
         if state.advantageTeam != nil {
-            scoreDisplay = "Ad"
+            scoreDisplay = GameRecord.advantageDisplay
         } else {
             scoreDisplay = "\(state.pointA.display)–\(state.pointB.display)"
         }

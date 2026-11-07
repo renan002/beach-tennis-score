@@ -13,6 +13,7 @@ struct Ruleset: Codable, Equatable, Sendable {
     enum StoredPayload: String, Codable {
         case pingPong
         case truco
+        case beachTennis
     }
 
     /// Coding keys, private so neither legacy fields nor the ping payload can be
@@ -22,7 +23,7 @@ struct Ruleset: Codable, Equatable, Sendable {
     private enum CodingKeys: String, CodingKey {
         case codingVersion, identifier, name, sport, hasSets
         case gamesToWinMatch, tiebreakAtGames, tiebreakPointsToWin, tiebreakWinByTwo, setsToWinMatch
-        case payloadType, pingPong, truco
+        case payloadType, pingPong, truco, beachTennis
     }
 
     private let codingVersion: CodingVersion
@@ -43,6 +44,10 @@ struct Ruleset: Codable, Equatable, Sendable {
     /// Truco's own rules, `nil` for every other sport. Stamped by value like
     /// `pingPong`.
     let truco: TrucoRuleset?
+    /// Beach tennis's own rules. `nil` for every other sport — and for a beach
+    /// Ruleset stamped before beach rules were editable, which scores as
+    /// Padrão (see `beachRules`).
+    let beachTennis: BeachTennisRuleset?
 
     init(
         codingVersion: CodingVersion = .v1,
@@ -56,7 +61,8 @@ struct Ruleset: Codable, Equatable, Sendable {
         tiebreakWinByTwo: Bool,
         setsToWinMatch: Int?,
         pingPong: PingPongRuleset? = nil,
-        truco: TrucoRuleset? = nil
+        truco: TrucoRuleset? = nil,
+        beachTennis: BeachTennisRuleset? = nil
     ) {
         self.codingVersion = codingVersion
         self.identifier = identifier
@@ -70,7 +76,12 @@ struct Ruleset: Codable, Equatable, Sendable {
         self.setsToWinMatch = setsToWinMatch
         self.pingPong = pingPong
         self.truco = truco
+        self.beachTennis = beachTennis
     }
+
+    /// The beach rules to score under: the payload, or Padrão for a legacy
+    /// beach Ruleset that predates it — which is exactly what it was played as.
+    var beachRules: BeachTennisRuleset { beachTennis ?? .padrao }
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -93,18 +104,28 @@ struct Ruleset: Codable, Equatable, Sendable {
             else { throw RulesetCodecError.malformed }
             pingPong = ping
             truco = nil
+            beachTennis = nil
         case .truco:
             guard sport == .truco,
                   let rules = try c.decodeIfPresent(TrucoRuleset.self, forKey: .truco)
             else { throw RulesetCodecError.malformed }
             pingPong = nil
             truco = rules
+            beachTennis = nil
+        case .beachTennis:
+            guard sport == .beachTennis,
+                  let rules = try c.decodeIfPresent(BeachTennisRuleset.self, forKey: .beachTennis)
+            else { throw RulesetCodecError.malformed }
+            pingPong = nil
+            truco = nil
+            beachTennis = rules
         case .none:
             // A legacy encoded blob — a preset/custom for beach or tennis — has
             // no payload key. It must still decode (ADR 0006), materializing
             // `nil` sport rules.
             pingPong = nil
             truco = nil
+            beachTennis = nil
             // A ping or truco ruleset encoded without a payload is malformed —
             // reject rather than silently interpreting it as legacy.
             if sport == .pingPong || sport == .truco {
@@ -133,6 +154,27 @@ struct Ruleset: Codable, Equatable, Sendable {
             try c.encode(StoredPayload.truco, forKey: .payloadType)
             try c.encode(truco, forKey: .truco)
         }
+        if let beachTennis {
+            try c.encode(StoredPayload.beachTennis, forKey: .payloadType)
+            try c.encode(beachTennis, forKey: .beachTennis)
+        }
+    }
+
+    /// Builds the beach tennis Ruleset wrapping `rules`. The legacy fields
+    /// mirror the knobs so flat views that read them still agree.
+    static func beachTennis(_ rules: BeachTennisRuleset) -> Ruleset {
+        Ruleset(
+            identifier: rules.identifier,
+            name: rules.name,
+            sport: .beachTennis,
+            hasSets: false,
+            gamesToWinMatch: rules.sets,
+            tiebreakAtGames: rules.format == .firstTo && rules.tiebreakCanTrigger && rules.tiebreak ? rules.sets : nil,
+            tiebreakPointsToWin: rules.tiebreakPoints,
+            tiebreakWinByTwo: rules.tiebreakWinByTwo,
+            setsToWinMatch: nil,
+            beachTennis: rules
+        )
     }
 
     /// Builds the truco Ruleset wrapping `rules`. The legacy fields carry the
@@ -173,17 +215,7 @@ struct Ruleset: Codable, Equatable, Sendable {
     static func preset(for sport: MatchType) -> Ruleset {
         switch sport {
         case .beachTennis:
-            Ruleset(
-                identifier: UUID(uuidString: "E621E1F8-C36C-495A-93FC-0C247A3E6E5F")!,
-                name: "Beach Tennis",
-                sport: .beachTennis,
-                hasSets: false,
-                gamesToWinMatch: 6,
-                tiebreakAtGames: 6,
-                tiebreakPointsToWin: 7,
-                tiebreakWinByTwo: true,
-                setsToWinMatch: nil
-            )
+            .beachTennis(.padrao)
         case .tennis:
             Ruleset(
                 identifier: UUID(uuidString: "F721E1F8-C36C-495A-93FC-0C247A3E6E5F")!,

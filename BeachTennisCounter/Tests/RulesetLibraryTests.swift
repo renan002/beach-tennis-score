@@ -337,4 +337,51 @@ final class RulesetLibraryTests: XCTestCase {
         XCTAssertEqual(RulesetLibrary.activeRuleset(for: .beachTennis, in: defaults).identifier,
                        Ruleset.preset(for: .beachTennis).identifier)
     }
+
+    // MARK: - Beach tennis
+
+    func test_beach_freshLibrary_activeIsPadrao_draftHasOwnIdentity() {
+        XCTAssertEqual(RulesetLibrary.activeRuleset(for: .beachTennis, in: defaults).beachTennis, .padrao)
+        let draft = RulesetLibrary.beachDraft(in: defaults)
+        XCTAssertNotEqual(draft.identifier, BeachTennisRuleset.padraoID)
+        XCTAssertEqual(draft.sets, BeachTennisRuleset.padrao.sets)
+        XCTAssertNil(RulesetLibrary.document(for: .beachTennis, in: defaults).beachDraft)
+    }
+
+    func test_beach_updateDraftAndActive_persistsBoth() {
+        let draft = RulesetLibrary.beachDraft(in: defaults).with(format: .always, sets: 3)
+        RulesetLibrary.updateBeachDraftAndActive(draft, in: defaults)
+        let doc = RulesetLibrary.document(for: .beachTennis, in: defaults)
+        XCTAssertEqual(doc.beachDraft, draft)
+        XCTAssertEqual(doc.activeRuleset?.beachTennis, draft)
+    }
+
+    func test_beach_updateDraftAndActive_rejectsInvalid() {
+        let bad = RulesetLibrary.beachDraft(in: defaults).with(format: .always, sets: 4, tiebreak: false)
+        RulesetLibrary.updateBeachDraftAndActive(bad, in: defaults)
+        XCTAssertNil(RulesetLibrary.document(for: .beachTennis, in: defaults).activeRuleset)
+    }
+
+    func test_beach_saveDraftAsCustom_newUUID_activeAndListed_thenRenameAndDelete() throws {
+        let draft = RulesetLibrary.beachDraft(in: defaults).with(deuceRule: .advantage)
+        let saved = try XCTUnwrap(RulesetLibrary.saveBeachDraftAsCustom(draft: draft, name: " Clube ", defaults: defaults))
+        XCTAssertNotEqual(saved.identifier, draft.identifier)
+        XCTAssertEqual(saved.name, "Clube")
+        XCTAssertEqual(customIdentifiers(.beachTennis), [saved.identifier])
+        XCTAssertEqual(RulesetLibrary.activeRuleset(for: .beachTennis, in: defaults), saved)
+
+        let renamed = try XCTUnwrap(RulesetLibrary.renameCustom(id: saved.identifier, to: "Arena", for: .beachTennis, in: defaults))
+        XCTAssertEqual(renamed.beachTennis?.name, "Arena")
+        XCTAssertEqual(renamed.beachTennis?.deuceRule, .advantage)
+        XCTAssertEqual(RulesetLibrary.activeRuleset(for: .beachTennis, in: defaults).name, "Arena")
+
+        let after = RulesetLibrary.deleteCustom(id: saved.identifier, for: .beachTennis, in: defaults)
+        XCTAssertEqual(after?.beachTennis, .padrao)
+    }
+
+    func test_beach_saveDraftAsCustom_blankName_returnsNil() {
+        XCTAssertNil(RulesetLibrary.saveBeachDraftAsCustom(
+            draft: RulesetLibrary.beachDraft(in: defaults), name: "  ", defaults: defaults))
+        XCTAssertTrue(customIdentifiers(.beachTennis).isEmpty)
+    }
 }

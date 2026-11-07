@@ -28,13 +28,17 @@ struct RulesetDocument: Codable, Equatable, Sendable {
     /// Truco only: the same unsaved working value, for truco's "Personalizado".
     /// Optional, so documents written before truco decode unchanged.
     var trucoDraft: TrucoRuleset?
+    /// Beach tennis only: the same unsaved working value, for beach's
+    /// "Personalizado". Optional, so older documents decode unchanged.
+    var beachDraft: BeachTennisRuleset?
 
     init(
         sport: MatchType,
         customRulesets: [Ruleset] = [],
         activeRuleset: Ruleset? = nil,
         pingDraft: PingPongRuleset? = nil,
-        trucoDraft: TrucoRuleset? = nil
+        trucoDraft: TrucoRuleset? = nil,
+        beachDraft: BeachTennisRuleset? = nil
     ) {
         self.version = Self.currentVersion
         self.sport = sport
@@ -42,6 +46,7 @@ struct RulesetDocument: Codable, Equatable, Sendable {
         self.activeRuleset = activeRuleset
         self.pingDraft = pingDraft
         self.trucoDraft = trucoDraft
+        self.beachDraft = beachDraft
     }
 }
 
@@ -252,6 +257,52 @@ enum RulesetLibrary {
         return rules
     }
 
+    // MARK: - Beach tennis draft
+
+    /// A beach draft copy of `source` under its own identity, named "Custom".
+    static func freshDraft(from source: BeachTennisRuleset) -> BeachTennisRuleset {
+        var draft = source
+        draft.identifier = UUID()
+        draft.name = String(localized: "Custom")
+        return draft
+    }
+
+    /// The beach draft: the persisted working value, or a fresh one.
+    static func beachDraft(in defaults: UserDefaults = .standard) -> BeachTennisRuleset {
+        let doc = document(for: .beachTennis, in: defaults)
+        if let draft = doc.beachDraft { return draft }
+        return freshDraft(from: doc.activeRuleset?.beachRules ?? .padrao)
+    }
+
+    /// Writes the beach draft and makes it the active value in one write.
+    static func updateBeachDraftAndActive(_ draft: BeachTennisRuleset, in defaults: UserDefaults = .standard) {
+        guard draft.isValid else { return }
+        var doc = document(for: .beachTennis, in: defaults)
+        doc.beachDraft = draft
+        doc.activeRuleset = .beachTennis(draft)
+        save(doc, in: defaults)
+    }
+
+    /// Saves the beach draft as a new Custom Ruleset under a **new** UUID and
+    /// makes it active. `nil` when the name is blank or the draft invalid.
+    static func saveBeachDraftAsCustom(
+        draft: BeachTennisRuleset,
+        name: String,
+        defaults: UserDefaults = .standard
+    ) -> Ruleset? {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, draft.isValid else { return nil }
+        var custom = draft
+        custom.identifier = UUID()
+        custom.name = trimmed
+        let rules = Ruleset.beachTennis(custom)
+        var doc = document(for: .beachTennis, in: defaults)
+        doc.customRulesets.append(rules)
+        doc.activeRuleset = rules
+        save(doc, in: defaults)
+        return rules
+    }
+
     /// Renames a saved Custom Ruleset, preserving its UUID. When the custom is
     /// active, the active value follows the rename. Returns the renamed
     /// ruleset, or `nil` when the name is blank or no such custom exists.
@@ -275,6 +326,10 @@ enum RulesetLibrary {
             guard truco.isValid else { return nil }
             truco.name = trimmed
             renamed = Ruleset.truco(truco)
+        } else if var beach = existing.beachTennis {
+            guard beach.isValid else { return nil }
+            beach.name = trimmed
+            renamed = Ruleset.beachTennis(beach)
         } else {
             renamed = Ruleset(
                 identifier: existing.identifier,

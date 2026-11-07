@@ -98,7 +98,7 @@ watchOS/         ← Apple Watch app (primary runtime UI)
 iOS/             ← iPhone companion (history + settings)
   BeachTennisApp.swift
   Models/StoredMatch.swift             — @Model (SwiftData)
-  Views/          RootView (TabView: Placar / Histórico / Estatísticas) → TrucoPlacarView,
+  Views/          RootView (TabView: Placar — only for truco/Vários — / Histórico / Estatísticas) → TrucoPlacarView,
                   MatchListView → MatchDetailView, StatisticsView; SettingsView is a sheet from every tab's gear
   Services/PhoneSessionManager.swift   — @MainActor singleton, WCSession delegate
   Services/ProEntitlement.swift        — @MainActor singleton, StoreKit 2 (iOS only)
@@ -128,12 +128,9 @@ the simulator with no App Store Connect record. It only applies to runs launched
 from Xcode — an app installed with `simctl` sees no products, and the purchase
 sheet correctly reports Pro as unavailable.
 
-### Beach Tennis scoring rules (encoded in ScoreEngine)
+### Scoring rules
 
-- Match = first to 6 games (the UI calls them "sets")
-- Points per game: 0 → 15 → 30 → 40 → win; at 40-40 → golden point (sudden death)
-- At 5-5 games: first to 7 wins (no tiebreak, normal scoring continues)
-- At 6-6 games: super tiebreak to 7 points, win by 2; serve rotation `block = (pointsPlayed-1)/2; block%2==0 → other team serves`
+Per-sport scoring rules live in `docs/rules/`. Beach tennis: [docs/rules/beach-tennis.md](docs/rules/beach-tennis.md) — the Padrão preset and every knob of its Ruleset.
 
 ### Swift 6 concurrency notes
 

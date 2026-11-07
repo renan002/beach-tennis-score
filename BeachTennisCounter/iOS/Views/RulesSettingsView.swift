@@ -1,11 +1,31 @@
 import SwiftUI
 
 /// The sport's Rules entry point inside Settings: a Rules row that opens a
-/// sport list — ping pong and truco are editable, beach tennis and tennis are frozen
-/// presets shown read-only.
+/// sport list — beach tennis, ping pong and truco are editable, tennis is a
+/// frozen preset shown read-only.
 struct RulesSettingsView: View {
+    /// Bumped on every library save: the row summaries read the library, which
+    /// SwiftUI cannot observe, so an edit made one screen deeper re-renders them.
+    @State private var libraryVersion = 0
+
     var body: some View {
+        let _ = libraryVersion
         List {
+            NavigationLink {
+                BeachTennisRulesView()
+            } label: {
+                Label {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Beach Tennis")
+                        Text(activeBeachSummary)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                } icon: {
+                    Image(systemName: MatchType.beachTennis.icon)
+                }
+            }
+
             NavigationLink {
                 PingPongRulesView()
             } label: {
@@ -17,7 +37,7 @@ struct RulesSettingsView: View {
                             .foregroundStyle(.secondary)
                     }
                 } icon: {
-                    Image(systemName: "tabletennis")
+                    Image(systemName: MatchType.pingPong.icon)
                 }
             }
 
@@ -37,12 +57,19 @@ struct RulesSettingsView: View {
             }
 
             Section("Fixed rules") {
-                FrozenSportRow(sport: .beachTennis)
                 FrozenSportRow(sport: .tennis)
             }
         }
         .navigationTitle("Rules")
         .navigationBarTitleDisplayMode(.inline)
+        .onReceive(NotificationCenter.default.publisher(for: RulesetLibrary.didChangeNotification)) { _ in
+            libraryVersion += 1
+        }
+    }
+
+    private var activeBeachSummary: String {
+        let beach = RulesetLibrary.activeRuleset(for: .beachTennis).beachRules
+        return beach.isPreset ? beach.name : BeachTennisRulesView.summary(beach)
     }
 
     private var activeTrucoSummary: String {
@@ -61,7 +88,7 @@ struct RulesSettingsView: View {
     }
 }
 
-/// Beach tennis and tennis have no Rules editor: the active value is always the
+/// Tennis has no Rules editor: the active value is always the
 /// sport's built-in preset, shown read-only with a summary of what it is.
 private struct FrozenSportRow: View {
     let sport: MatchType
