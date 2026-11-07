@@ -119,7 +119,9 @@ games in beach tennis, games in a best-of-5 ping pong match, but *points* in a
 best-of-1 ping pong match or a match abandoned in its first game, and points in
 truco. Always derived, never a stored field of its own. The best-of-1 case is
 not a corner: the **Rápido** Preset ships it, so the fallback to points is a
-normal path and not something only Personalizado can reach.
+normal path and not something only Personalizado can reach. Beach tennis is the
+exception: a match played to one Set still reads in Sets (1–0), because a beach
+game has no numeric points to fall back to.
 _Avoid_: final score, score (unqualified)
 
 ### Rules
@@ -159,6 +161,41 @@ turning on the rally serve makes any interval meaningless. User-facing:
 > **Clássico** (21 · Bo3 · every 5) and **Rápido** (11 · Bo1 · every 2). Win-by-2
 > is a fixed rule, not a knob. The rally serve ships in no Preset; it is reached
 > through Personalizado and kept as a Custom Ruleset.
+
+**Match Format**:
+How a beach tennis match ends. Two values: **Primeiro a N** — a race, the
+first side to N Sets wins (optionally by two Sets) — and **Sempre N** —
+exactly N Sets are always played, even after the result is decided, and the side
+with more Sets wins. A 2–0 in a "Sempre 3" match still plays the third Set.
+User-facing knob: **Formato**.
+A match never ends drawn: an even N tied at the end goes to a Tiebreak.
+_Avoid_: mode, fixed games, best of (beach has no best-of — that is ping pong's
+and tennis's word)
+
+**Tiebreak**:
+The single deciding unit played in place of another Set when the match is level
+— at N–N in Primeiro a N, or on a tie after the last Set in Sempre N. Played
+to a set number of points, optionally win by two. Recorded in the Game Log as
+one more Set. Whether there is a Tiebreak at all is part of the Ruleset.
+_Avoid_: super tiebreak (as a separate concept — see below)
+
+> "Super tie-break" is only what players call a Tiebreak played to 10 points.
+> It is the same thing with a different points value, not a different rule.
+
+**Deuce Rule**:
+What happens at 40–40 in a beach game: **Ponto de ouro** (golden point — the
+next point wins the game, the ITF beach rule) or **Vantagem** (advantage — a
+side must win two points in a row, as in tennis). One knob, two values.
+_Avoid_: no-ad, sudden death (in user-facing copy)
+
+> Beach tennis's Ruleset is settled: knobs are Match Format and N (1–15), win
+> by two Sets (Primeiro a N only), Tiebreak on/off, Tiebreak points (5–21) and
+> its own win by two, and Deuce Rule. The serve is not a knob. One Preset,
+> **Padrão** — Primeiro a 6, win by two, Tiebreak at 6–6 to 7 win by two, Ponto
+> de ouro — which is exactly how every beach match before configurable rules
+> was played. Everything else is reached through Personalizado. *Padrão* is the
+one Preset named for being the standard rather than for a variant: beach has
+no named variants, and "padrão" is what players call these rules.
 
 **Custom Ruleset**:
 A Ruleset the player built and named themselves. Saved on the phone, listed

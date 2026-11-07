@@ -100,6 +100,7 @@ struct GameRecord: Codable, Sendable, Equatable {
     /// point, so `ScoreEngine` writes it and Estatísticas reads it — one literal
     /// keeps the two from drifting apart.
     static let goldenPointDisplay = "GP"
+    static let advantageDisplay = "Ad"
 
     let gameNumber: Int
     let setScoreA: Int
@@ -225,7 +226,8 @@ struct MatchState: Codable, Sendable, Equatable {
         // back to the sport's preset instead of starting broken.
         if let supplied = ruleset, supplied.sport == matchType,
            matchType != .pingPong || supplied.pingPong?.isValid == true,
-           matchType != .truco || supplied.truco?.isValid == true {
+           matchType != .truco || supplied.truco?.isValid == true,
+           matchType != .beachTennis || supplied.beachTennis?.isValid ?? true {
             s.ruleset = supplied
         } else {
             s.ruleset = Ruleset.preset(for: matchType)

@@ -325,7 +325,7 @@ struct ScoreView: View {
             if state.isTiebreak {
                 return "\(state.tiebreakScore(for: team))"
             }
-            if matchType == .tennis, let advTeam = state.advantageTeam {
+            if let advTeam = state.advantageTeam {
                 return advTeam == team ? "Ad" : "40"
             }
             return state.point(for: team).display
