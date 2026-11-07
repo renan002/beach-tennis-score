@@ -10,7 +10,8 @@ import SwiftData
 /// so the whole screen is open exactly as it shipped in 1.4.
 struct StatisticsView: View {
     @EnvironmentObject private var pro: ProEntitlement
-    @Environment(\.dismiss) private var dismiss
+    /// Owned by `RootView`, which presents the Settings sheet.
+    @Binding var showSettings: Bool
     @Query(sort: \StoredMatch.date, order: .reverse) private var matches: [StoredMatch]
     @State private var showProSheet = false
 
@@ -33,11 +34,7 @@ struct StatisticsView: View {
             }
             .navigationTitle("Statistics")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }
-                }
-            }
+            .settingsGear($showSettings)
             .sheet(isPresented: $showProSheet) {
                 ProPurchaseSheet()
                     .environmentObject(pro)

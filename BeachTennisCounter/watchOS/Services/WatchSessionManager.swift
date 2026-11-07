@@ -40,39 +40,12 @@ final class WatchSessionManager: NSObject, ObservableObject {
         activeCalories: Double? = nil,
         avgHeartRate: Double? = nil
     ) {
-        guard let winner = state.winner else { return }
-
-        let rulesetData = (try? JSONEncoder().encode(state.ruleset)) ?? Data()
-        // ADR 0005: the flat columns carry what the headline needs. Ping pong
-        // maps games won into setScoreA/B; no ping counters are mirrored into
-        // the legacy fields, so a ping match's points ride in their own keys.
-        let flatA = state.matchType == .pingPong ? state.pingGamesWon(for: .a) : state.setScoreA
-        let flatB = state.matchType == .pingPong ? state.pingGamesWon(for: .b) : state.setScoreB
-        // Second-tier ping transport: the terminal pair in `PingPongState`. On
-        // the winning point the ScoreEngine leaves the final counts in the
-        // payload, so these are the points a finished best-of-1 match shows.
-        let pingPointsA = state.matchType == .pingPong ? state.pingPoints(for: .a) : nil
-        let pingPointsB = state.matchType == .pingPong ? state.pingPoints(for: .b) : nil
-        let payload = MatchResultPayload(
-            matchId: UUID(),
-            setScoreA: flatA,
-            setScoreB: flatB,
-            setsWonA: state.setsWonA,
-            setsWonB: state.setsWonB,
-            winner: winner,
+        guard let payload = MatchResultPayload(
+            finished: state,
             duration: duration,
-            date: Date(),
-            gameHistory: state.gameHistory,
-            setHistory: state.setHistory,
-            matchType: state.matchType,
-            teamAName: state.teamAName,
-            teamBName: state.teamBName,
             activeCalories: activeCalories,
-            avgHeartRate: avgHeartRate,
-            rulesetData: rulesetData,
-            pingPointsA: pingPointsA,
-            pingPointsB: pingPointsB
-        )
+            avgHeartRate: avgHeartRate
+        ) else { return }
 
         guard WCSession.default.activationState == .activated else {
             if let data = try? JSONEncoder().encode(payload) {

@@ -98,7 +98,8 @@ watchOS/         ← Apple Watch app (primary runtime UI)
 iOS/             ← iPhone companion (history + settings)
   BeachTennisApp.swift
   Models/StoredMatch.swift             — @Model (SwiftData)
-  Views/          MatchListView → MatchDetailView, SettingsView
+  Views/          RootView (TabView: Placar / Histórico / Estatísticas) → TrucoPlacarView,
+                  MatchListView → MatchDetailView, StatisticsView; SettingsView is a sheet from every tab's gear
   Services/PhoneSessionManager.swift   — @MainActor singleton, WCSession delegate
   Services/ProEntitlement.swift        — @MainActor singleton, StoreKit 2 (iOS only)
 ```
@@ -107,6 +108,7 @@ iOS/             ← iPhone companion (history + settings)
 
 - **Scoring:** `ScoreView` holds a `MatchInProgress`, which owns the `MatchState` and the Undo Stack and is the only caller of `ScoreEngine` — no mutation outside `ScoreEngine`. Every interaction (`start`, `awardPoint`, `undo`, `cancel`) returns an ordered `[MatchInProgress.Effect]`; the screen's `perform(_:)` carries them out synchronously and decides nothing. That is what makes the ordering testable: the watch target is reachable by no test in this project, so anything sequenced inline in the screen is untestable by construction. Ordering that matters lives in the module and is pinned by `MatchInProgressTests` — above all the terminal one, where `.sendResult` precedes `.endWorkout` because the screen snapshots the workout stats as it performs the send.
 - **Watch → iPhone:** At match end `WatchSessionManager.sendMatchResult(_:duration:)` calls `WCSession.transferUserInfo`. `PhoneSessionManager.session(_:didReceiveUserInfo:)` decodes via `MatchResultPayload.from(_:)` and inserts a `StoredMatch` into SwiftData.
+- **Phone-scored truco:** `TrucoPlacarView` (the iPhone's Placar tab) holds its own `MatchInProgress`, like `ScoreView`, and carries out the same effects — minus the workout ones, truco is not physical. At the terminal effect it builds the result with `MatchResultPayload(finished:duration:)` — the same initializer the watch's `sendMatchResult` uses — and files it with `PhoneSessionManager.record`, which ends in `StoredMatch.insert`, the one insert the watch's results also take. Don't construct a `StoredMatch` anywhere else: a second path means the Cartão, Estatísticas and Restore see two shapes. Watch and phone never coordinate; each has its own live match with its own `matchId`.
 - **iPhone → Watch (settings):** `PhoneSessionManager.pushSettingsToWatch()` builds a `WatchSettings` and calls `WCSession.updateApplicationContext(settings.toApplicationContext())`. Both watch receive paths (`activationDidCompleteWith` reading `receivedApplicationContext`, and `didReceiveApplicationContext`) decode via `WatchSettings.from(_:)` and apply the value. `WatchSettings` is the settings-path counterpart to `MatchResultPayload`: it owns the dictionary encode/decode, so a new watch-consumed setting is added in one place. The context is a full replacement — a missing key decodes to the type's default rather than leaving a stale value applied. Decode the `Sendable` `WatchSettings` in the `nonisolated` callback *before* any `Task { @MainActor in }`, per the Swift 6 `Sendable` rules.
 
 ### Pro unlock (StoreKit)

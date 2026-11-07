@@ -126,6 +126,43 @@ struct MatchResultPayload: Codable, Sendable {
         self.pingPointsB = pingPointsB
     }
 
+    /// The result of a finished match — the one place a `MatchState` becomes a
+    /// payload, shared by the watch's send and the phone's own truco Placar so
+    /// both land in Match History identically. `nil` while there is no winner.
+    init?(
+        finished state: MatchState,
+        duration: TimeInterval,
+        matchId: UUID = UUID(),
+        date: Date = Date(),
+        activeCalories: Double? = nil,
+        avgHeartRate: Double? = nil
+    ) {
+        guard let winner = state.winner else { return nil }
+        let isPing = state.matchType == .pingPong
+        // ADR 0005: the flat columns carry what the headline needs. Ping pong
+        // maps games won into setScoreA/B; its points ride in their own keys.
+        self.init(
+            matchId: matchId,
+            setScoreA: isPing ? state.pingGamesWon(for: .a) : state.setScoreA,
+            setScoreB: isPing ? state.pingGamesWon(for: .b) : state.setScoreB,
+            setsWonA: state.setsWonA,
+            setsWonB: state.setsWonB,
+            winner: winner,
+            duration: duration,
+            date: date,
+            gameHistory: state.gameHistory,
+            setHistory: state.setHistory,
+            matchType: state.matchType,
+            teamAName: state.teamAName,
+            teamBName: state.teamBName,
+            activeCalories: activeCalories,
+            avgHeartRate: avgHeartRate,
+            rulesetData: (try? JSONEncoder().encode(state.ruleset)) ?? Data(),
+            pingPointsA: isPing ? state.pingPoints(for: .a) : nil,
+            pingPointsB: isPing ? state.pingPoints(for: .b) : nil
+        )
+    }
+
     func toDictionary() -> [String: Any] {
         var dict: [String: Any] = [
             WatchMessageKey.type: WatchMessageType.matchResult,

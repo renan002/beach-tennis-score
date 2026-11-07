@@ -3,11 +3,10 @@ import SwiftData
 
 struct MatchListView: View {
     @EnvironmentObject private var phoneSession: PhoneSessionManager
-    @EnvironmentObject private var pro: ProEntitlement
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \StoredMatch.date, order: .reverse) private var allMatches: [StoredMatch]
-    @State private var showSettings = false
-    @State private var showStatistics = false
+    /// Owned by `RootView`, which presents the Settings sheet.
+    @Binding var showSettings: Bool
     /// The sport filter — `nil` is All.
     @State private var filter: MatchType?
     @State private var quarantines: [QuarantinedStore] = []
@@ -39,29 +38,11 @@ struct MatchListView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     filterPicker
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showStatistics = true
-                    } label: {
-                        Image(systemName: "chart.bar.xaxis")
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showSettings = true
-                    } label: {
-                        Image(systemName: "gearshape")
-                    }
-                }
             }
-            .sheet(isPresented: $showSettings, onDismiss: reloadQuarantines) {
-                SettingsView()
-                    .environmentObject(phoneSession)
-                    .environmentObject(pro)
-            }
-            .sheet(isPresented: $showStatistics) {
-                StatisticsView()
-                    .environmentObject(pro)
+            .settingsGear($showSettings)
+            // A restore done inside Settings empties the notice on close.
+            .onChange(of: showSettings) { _, shown in
+                if !shown { reloadQuarantines() }
             }
             .task { reloadQuarantines() }
         }
